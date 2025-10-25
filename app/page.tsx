@@ -82,19 +82,26 @@ export default function Home() {
   };
 
   const handleGenerate = async () => {
-    if (!jobDescription.trim() || !fileId) {
-      setGenerationStatus('Please upload a resume and paste a job description.');
+    if (!jobDescription.trim()) {
+      setGenerationStatus('Please paste a job description.');
       return;
     }
+    if (!fileId) {
+        setGenerationStatus('Please upload and process a master resume first.');
+        return;
+    }
 
-    setGenerationStatus('Submitting generation job... Your PDF will be ready shortly.');
-    
+    setGenerationStatus('Generating tailored documents... This can take up to a minute.');
+    setGeneratedDocs(null);
+
     try {
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_GENERATE_DOCS_API_URL}`,
+            `${process.env.NEXT_PUBLIC_GENERATE_DOCS_API_URL}`, // The new endpoint
             {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                },
                 body: JSON.stringify({
                     fileId: fileId,
                     jobDescription: jobDescription,
@@ -103,39 +110,12 @@ export default function Home() {
         );
 
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || `Server responded with status: ${response.status}`);
+            throw new Error(`Server responded with status: ${response.status}`);
         }
 
-        setGenerationStatus('Job submitted! Please wait while we generate your PDF...');
-
-        // --- NEW LOGIC: POLL FOR DOWNLOAD URL ---
-        const pollForDownloadLink = async () => {
-            try {
-                const statusResponse = await fetch(
-                    `${process.env.NEXT_PUBLIC_GET_SUMMARY_API_URL}?fileId=${fileId}`
-                );
-                if (!statusResponse.ok) throw new Error('Failed to fetch job status.');
-
-                const result = await statusResponse.json();
-
-                if (result.processingStatus === 'COMPLETED' && result.downloadUrl) {
-                    setGenerationStatus('✅ PDF is ready! Starting download...');
-                    // Redirect the browser to the secure download link
-                    window.location.href = result.downloadUrl;
-                } else if (result.processingStatus === 'FAILED') {
-                    setGenerationStatus('❌ Processing failed. Please try again.');
-                } else {
-                    // If still processing, wait and poll again
-                    setTimeout(pollForDownloadLink, 5000);
-                }
-            } catch (pollError) {
-                setGenerationStatus('Error fetching status. Please try again.');
-            }
-        };
-
-        // Start polling for the result
-        setTimeout(pollForDownloadLink, 5000);
+        const data: AIGeneratedDocs = await response.json();
+        setGeneratedDocs(data);
+        setGenerationStatus('✅ Documents generated successfully!');
 
     } catch (error) {
         setGenerationStatus(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
