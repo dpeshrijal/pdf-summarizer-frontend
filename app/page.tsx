@@ -87,7 +87,7 @@ export default function Home() {
       return;
     }
 
-    setGenerationStatus('Generating tailored PDF... This can take up to a minute.');
+    setGenerationStatus('Submitting generation job... Your PDF will be ready shortly.');
     
     try {
         const response = await fetch(
@@ -103,33 +103,39 @@ export default function Home() {
         );
 
         if (!response.ok) {
-            // If the server returns an error, it will be in JSON format
             const errorData = await response.json();
             throw new Error(errorData.error || `Server responded with status: ${response.status}`);
         }
 
-        // --- NEW LOGIC FOR HANDLING PDF DOWNLOAD ---
+        setGenerationStatus('Job submitted! Please wait while we generate your PDF...');
 
-        // 1. Get the binary data of the PDF from the response
-        const blob = await response.blob();
-        
-        // 2. Create a temporary URL for this binary data
-        const url = window.URL.createObjectURL(blob);
-        
-        // 3. Create a temporary, invisible link element
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = "tailored-documents.pdf"; // The default filename for the download
-        
-        // 4. Programmatically "click" the link to trigger the browser's download dialog
-        document.body.appendChild(a);
-        a.click();
-        
-        // 5. Clean up by revoking the temporary URL and removing the link
-        window.URL.revokeObjectURL(url);
-        a.remove();
-        
-        setGenerationStatus('✅ PDF download started!');
+        // --- NEW LOGIC: POLL FOR DOWNLOAD URL ---
+        const pollForDownloadLink = async () => {
+            try {
+                const statusResponse = await fetch(
+                    `${process.env.NEXT_PUBLIC_GET_SUMMARY_API_URL}?fileId=${fileId}`
+                );
+                if (!statusResponse.ok) throw new Error('Failed to fetch job status.');
+
+                const result = await statusResponse.json();
+
+                if (result.processingStatus === 'COMPLETED' && result.downloadUrl) {
+                    setGenerationStatus('✅ PDF is ready! Starting download...');
+                    // Redirect the browser to the secure download link
+                    window.location.href = result.downloadUrl;
+                } else if (result.processingStatus === 'FAILED') {
+                    setGenerationStatus('❌ Processing failed. Please try again.');
+                } else {
+                    // If still processing, wait and poll again
+                    setTimeout(pollForDownloadLink, 5000);
+                }
+            } catch (pollError) {
+                setGenerationStatus('Error fetching status. Please try again.');
+            }
+        };
+
+        // Start polling for the result
+        setTimeout(pollForDownloadLink, 5000);
 
     } catch (error) {
         setGenerationStatus(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
