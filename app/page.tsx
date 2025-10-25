@@ -82,26 +82,19 @@ export default function Home() {
   };
 
   const handleGenerate = async () => {
-    if (!jobDescription.trim()) {
-      setGenerationStatus('Please paste a job description.');
+    if (!jobDescription.trim() || !fileId) {
+      setGenerationStatus('Please upload a resume and paste a job description.');
       return;
     }
-    if (!fileId) {
-        setGenerationStatus('Please upload and process a master resume first.');
-        return;
-    }
 
-    setGenerationStatus('Generating tailored documents... This can take up to a minute.');
-    setGeneratedDocs(null);
-
+    setGenerationStatus('Generating tailored PDF... This can take up to a minute.');
+    
     try {
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_GENERATE_DOCS_API_URL}`, // The new endpoint
+            `${process.env.NEXT_PUBLIC_GENERATE_DOCS_API_URL}`,
             {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     fileId: fileId,
                     jobDescription: jobDescription,
@@ -110,12 +103,33 @@ export default function Home() {
         );
 
         if (!response.ok) {
-            throw new Error(`Server responded with status: ${response.status}`);
+            // If the server returns an error, it will be in JSON format
+            const errorData = await response.json();
+            throw new Error(errorData.error || `Server responded with status: ${response.status}`);
         }
 
-        const data: AIGeneratedDocs = await response.json();
-        setGeneratedDocs(data);
-        setGenerationStatus('✅ Documents generated successfully!');
+        // --- NEW LOGIC FOR HANDLING PDF DOWNLOAD ---
+
+        // 1. Get the binary data of the PDF from the response
+        const blob = await response.blob();
+        
+        // 2. Create a temporary URL for this binary data
+        const url = window.URL.createObjectURL(blob);
+        
+        // 3. Create a temporary, invisible link element
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = "tailored-documents.pdf"; // The default filename for the download
+        
+        // 4. Programmatically "click" the link to trigger the browser's download dialog
+        document.body.appendChild(a);
+        a.click();
+        
+        // 5. Clean up by revoking the temporary URL and removing the link
+        window.URL.revokeObjectURL(url);
+        a.remove();
+        
+        setGenerationStatus('✅ PDF download started!');
 
     } catch (error) {
         setGenerationStatus(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
