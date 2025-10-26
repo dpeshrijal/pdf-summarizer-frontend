@@ -6,8 +6,6 @@ import { useState } from 'react';
 interface AIGeneratedDocs {
   tailoredResume: string;
   coverLetter: string;
-  resumePdfUrl?: string;
-  coverLetterPdfUrl?: string;
 }
 
 export default function Home() {
@@ -124,6 +122,20 @@ export default function Home() {
     }
   };
 
+  const downloadAsPDF = (text: string, filename: string) => {
+    // Create a simple text-based PDF by converting to a downloadable text file
+    // For a proper PDF, we'd need a library like jsPDF, but this works for now
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
 
   return (
     <main className="flex min-h-screen flex-col items-center p-8 sm:p-12 md:p-24 bg-gray-900 text-white">
@@ -189,30 +201,24 @@ export default function Home() {
                     <div>
                         <div className="flex justify-between items-center mb-2">
                             <h3 className="text-xl font-bold text-pink-500">Tailored Resume</h3>
-                            {generatedDocs.resumePdfUrl && (
-                                <a
-                                    href={generatedDocs.resumePdfUrl}
-                                    download="tailored-resume.pdf"
-                                    className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-md font-semibold text-sm transition-colors"
-                                >
-                                    Download PDF
-                                </a>
-                            )}
+                            <button
+                                onClick={() => downloadAsPDF(generatedDocs.tailoredResume, 'tailored-resume.txt')}
+                                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-md font-semibold text-sm transition-colors"
+                            >
+                                Download as Text
+                            </button>
                         </div>
                         <pre className="p-4 bg-gray-900 border border-gray-600 rounded-md whitespace-pre-wrap font-sans text-sm">{generatedDocs.tailoredResume}</pre>
                     </div>
                     <div>
                         <div className="flex justify-between items-center mb-2">
                             <h3 className="text-xl font-bold text-pink-500">Cover Letter</h3>
-                            {generatedDocs.coverLetterPdfUrl && (
-                                <a
-                                    href={generatedDocs.coverLetterPdfUrl}
-                                    download="cover-letter.pdf"
-                                    className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-md font-semibold text-sm transition-colors"
-                                >
-                                    Download PDF
-                                </a>
-                            )}
+                            <button
+                                onClick={() => downloadAsPDF(generatedDocs.coverLetter, 'cover-letter.txt')}
+                                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-md font-semibold text-sm transition-colors"
+                            >
+                                Download as Text
+                            </button>
                         </div>
                         <pre className="p-4 bg-gray-900 border border-gray-600 rounded-md whitespace-pre-wrap font-sans text-sm">{generatedDocs.coverLetter}</pre>
                     </div>
