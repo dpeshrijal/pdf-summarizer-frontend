@@ -91,12 +91,13 @@ export default function Home() {
         return;
     }
 
-    setGenerationStatus('Generating tailored documents... This can take up to a minute.');
+    setGenerationStatus('Starting document generation...');
     setGeneratedDocs(null);
 
     try {
-        const response = await fetch(
-            `${process.env.NEXT_PUBLIC_GENERATE_DOCS_API_URL}`, // The new endpoint
+        // Step 1: Start generation (returns immediately with jobId)
+        const startResponse = await fetch(
+            `${process.env.NEXT_PUBLIC_START_GENERATION_API_URL}`,
             {
                 method: 'POST',
                 headers: {
@@ -109,13 +110,57 @@ export default function Home() {
             }
         );
 
-        if (!response.ok) {
-            throw new Error(`Server responded with status: ${response.status}`);
+        if (!startResponse.ok) {
+            throw new Error(`Server responded with status: ${startResponse.status}`);
         }
 
-        const data: AIGeneratedDocs = await response.json();
-        setGeneratedDocs(data);
-        setGenerationStatus('✅ Documents generated successfully!');
+        const { jobId } = await startResponse.json();
+        console.log(`Generation started with jobId: ${jobId}`);
+
+        setGenerationStatus('Processing... This may take 1-2 minutes. Using AI to tailor your resume...');
+
+        // Step 2: Poll for completion
+        const pollInterval = setInterval(async () => {
+            try {
+                const statusResponse = await fetch(
+                    `${process.env.NEXT_PUBLIC_GET_GENERATION_STATUS_API_URL}?jobId=${jobId}`
+                );
+
+                if (!statusResponse.ok) {
+                    throw new Error(`Status check failed: ${statusResponse.status}`);
+                }
+
+                const statusData = await statusResponse.json();
+                console.log('Status:', statusData.status);
+
+                if (statusData.status === 'COMPLETED') {
+                    clearInterval(pollInterval);
+                    setGeneratedDocs({
+                        tailoredResume: statusData.tailoredResume,
+                        coverLetter: statusData.coverLetter
+                    });
+                    setGenerationStatus('✅ Documents generated successfully!');
+                } else if (statusData.status === 'FAILED') {
+                    clearInterval(pollInterval);
+                    setGenerationStatus(`❌ Generation failed: ${statusData.errorMessage || 'Unknown error'}`);
+                } else {
+                    // Still processing
+                    setGenerationStatus('⏳ Still processing... AI is analyzing your resume and the job description...');
+                }
+            } catch (pollError) {
+                console.error('Polling error:', pollError);
+                clearInterval(pollInterval);
+                setGenerationStatus(`Error checking status: ${pollError instanceof Error ? pollError.message : 'Unknown error'}`);
+            }
+        }, 5000); // Poll every 5 seconds
+
+        // Safety timeout: stop polling after 5 minutes
+        setTimeout(() => {
+            clearInterval(pollInterval);
+            if (!generatedDocs) {
+                setGenerationStatus('⏰ Generation is taking longer than expected. Please try again.');
+            }
+        }, 300000); // 5 minutes
 
     } catch (error) {
         setGenerationStatus(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
