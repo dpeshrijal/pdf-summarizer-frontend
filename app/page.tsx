@@ -6,6 +6,8 @@ import { useState } from 'react';
 interface AIGeneratedDocs {
   tailoredResume: string;
   coverLetter: string;
+  resumePdfUrl?: string;
+  coverLetterPdfUrl?: string;
 }
 
 export default function Home() {
@@ -185,11 +187,33 @@ export default function Home() {
                  <h2 className="text-2xl font-semibold mb-6 text-center text-purple-400">Your Generated Documents</h2>
                  <div className="space-y-8">
                     <div>
-                        <h3 className="text-xl font-bold mb-2 text-pink-500">Tailored Resume</h3>
+                        <div className="flex justify-between items-center mb-2">
+                            <h3 className="text-xl font-bold text-pink-500">Tailored Resume</h3>
+                            {generatedDocs.resumePdfUrl && (
+                                <a
+                                    href={generatedDocs.resumePdfUrl}
+                                    download="tailored-resume.pdf"
+                                    className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-md font-semibold text-sm transition-colors"
+                                >
+                                    Download PDF
+                                </a>
+                            )}
+                        </div>
                         <pre className="p-4 bg-gray-900 border border-gray-600 rounded-md whitespace-pre-wrap font-sans text-sm">{generatedDocs.tailoredResume}</pre>
                     </div>
                     <div>
-                        <h3 className="text-xl font-bold mb-2 text-pink-500">Cover Letter</h3>
+                        <div className="flex justify-between items-center mb-2">
+                            <h3 className="text-xl font-bold text-pink-500">Cover Letter</h3>
+                            {generatedDocs.coverLetterPdfUrl && (
+                                <a
+                                    href={generatedDocs.coverLetterPdfUrl}
+                                    download="cover-letter.pdf"
+                                    className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-md font-semibold text-sm transition-colors"
+                                >
+                                    Download PDF
+                                </a>
+                            )}
+                        </div>
                         <pre className="p-4 bg-gray-900 border border-gray-600 rounded-md whitespace-pre-wrap font-sans text-sm">{generatedDocs.coverLetter}</pre>
                     </div>
                  </div>
