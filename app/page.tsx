@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { UserButton } from '@clerk/nextjs';
 
 // Define the structure of the AI's response
 interface AIGeneratedDocs {
@@ -454,6 +455,11 @@ export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center p-8 sm:p-12 md:p-24 bg-gray-900 text-white">
       <div className="w-full max-w-4xl space-y-12">
+        {/* User Profile Button */}
+        <div className="flex justify-end">
+          <UserButton afterSignOutUrl="/sign-in" />
+        </div>
+
         <header className="text-center">
           <h1 className="text-4xl sm:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">
             AI-Powered Resume Tailor
