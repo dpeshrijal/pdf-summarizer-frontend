@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { UserButton, useUser } from "@clerk/nextjs";
+import { UserButton, useUser, useAuth } from "@clerk/nextjs";
 
 // Define the structure of the AI's response
 interface AIGeneratedDocs {
@@ -13,6 +13,9 @@ export default function Home() {
   // Get the logged-in user's ID from Clerk
   const { user } = useUser();
   const userId = user?.id;
+
+  // Get auth token for API calls
+  const { getToken } = useAuth();
 
   // State for Step 1: Master Resume Upload
   const [masterResumeFile, setMasterResumeFile] = useState<File | null>(null);
@@ -43,9 +46,26 @@ export default function Home() {
 
     setUploadStatus("Getting upload URL...");
     try {
+      // Get Clerk session token
+      const token = await getToken();
+      if (!token) {
+        setUploadStatus("Authentication error. Please sign in again.");
+        return;
+      }
+
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_GATEWAY_URL}?fileName=${masterResumeFile.name}`
+        `${process.env.NEXT_PUBLIC_API_GATEWAY_URL}?fileName=${masterResumeFile.name}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
       );
+
+      if (response.status === 401) {
+        setUploadStatus("Authentication failed. Please sign in again.");
+        return;
+      }
       if (!response.ok) throw new Error("Failed to get upload URL.");
 
       const { uploadUrl, fileId: newFileId } = await response.json();
@@ -66,9 +86,26 @@ export default function Home() {
 
       // Poll to see when the resume is finished processing (status becomes READY_FOR_QUERY)
       const pollForReadyStatus = async () => {
+        const token = await getToken();
+        if (!token) {
+          setUploadStatus("Authentication error during polling.");
+          return;
+        }
+
         const statusResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_GET_SUMMARY_API_URL}?fileId=${newFileId}`
+          `${process.env.NEXT_PUBLIC_GET_SUMMARY_API_URL}?fileId=${newFileId}`,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          }
         );
+
+        if (statusResponse.status === 401) {
+          setUploadStatus("Authentication expired. Please sign in again.");
+          return;
+        }
+
         const result = await statusResponse.json();
 
         if (result.processingStatus === "READY_FOR_QUERY") {
@@ -104,6 +141,13 @@ export default function Home() {
     setGeneratedDocs(null);
 
     try {
+      // Get Clerk session token
+      const token = await getToken();
+      if (!token) {
+        setGenerationStatus("Authentication error. Please sign in again.");
+        return;
+      }
+
       // Step 1: Start generation (returns immediately with jobId)
       const startResponse = await fetch(
         `${process.env.NEXT_PUBLIC_START_GENERATION_API_URL}`,
@@ -111,6 +155,7 @@ export default function Home() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify({
             fileId: fileId,
@@ -119,6 +164,14 @@ export default function Home() {
         }
       );
 
+      if (startResponse.status === 401) {
+        setGenerationStatus("Authentication failed. Please sign in again.");
+        return;
+      }
+      if (startResponse.status === 403) {
+        setGenerationStatus("You don't have permission to access this file.");
+        return;
+      }
       if (!startResponse.ok) {
         throw new Error(
           `Server responded with status: ${startResponse.status}`
@@ -135,10 +188,32 @@ export default function Home() {
       // Step 2: Poll for completion
       const pollInterval = setInterval(async () => {
         try {
+          const token = await getToken();
+          if (!token) {
+            clearInterval(pollInterval);
+            setGenerationStatus("Authentication error during polling.");
+            return;
+          }
+
           const statusResponse = await fetch(
-            `${process.env.NEXT_PUBLIC_GET_GENERATION_STATUS_API_URL}?jobId=${jobId}`
+            `${process.env.NEXT_PUBLIC_GET_GENERATION_STATUS_API_URL}?jobId=${jobId}`,
+            {
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
+            }
           );
 
+          if (statusResponse.status === 401) {
+            clearInterval(pollInterval);
+            setGenerationStatus("Authentication expired. Please sign in again.");
+            return;
+          }
+          if (statusResponse.status === 403) {
+            clearInterval(pollInterval);
+            setGenerationStatus("You don't have permission to access this job.");
+            return;
+          }
           if (!statusResponse.ok) {
             throw new Error(`Status check failed: ${statusResponse.status}`);
           }
