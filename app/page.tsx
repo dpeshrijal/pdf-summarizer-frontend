@@ -299,7 +299,6 @@ export default function Home() {
 
     // Parse the resume into structured sections
     const lines = text.split("\n");
-    let currentSection = "";
 
     // ============================================
     // HEADER SECTION - Name and Contact
@@ -442,7 +441,6 @@ export default function Home() {
         );
 
         yPosition += 8;
-        currentSection = displayText;
         continue;
       }
 
@@ -739,10 +737,15 @@ export default function Home() {
             </CardHeader>
             <CardContent className="space-y-4 flex-1 flex flex-col">
               <Textarea
-                placeholder="Paste the job description here...&#10;&#10;Example:&#10;Software Engineer at Google&#10;Requirements:&#10;- 3+ years of experience&#10;- Proficiency in Python, Java..."
+                placeholder={
+                  !uploadStatus.includes("successfully")
+                    ? "Upload and process your resume first..."
+                    : "Paste the job description here...&#10;&#10;Example:&#10;Software Engineer at Google&#10;Requirements:&#10;- 3+ years of experience&#10;- Proficiency in Python, Java..."
+                }
                 value={jobDescription}
                 onChange={(e) => setJobDescription(e.target.value)}
                 className="min-h-[140px] resize-none"
+                disabled={!uploadStatus.includes("successfully")}
               />
 
               <Button
