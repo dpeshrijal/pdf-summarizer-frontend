@@ -2,12 +2,6 @@
 
 import { useState } from "react";
 import { UserButton, useUser, useAuth } from "@clerk/nextjs";
-import { Upload, FileText, Sparkles, Download, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 
 // Define the structure of the AI's response
 interface AIGeneratedDocs {
@@ -27,37 +21,35 @@ export default function Home() {
   const [masterResumeFile, setMasterResumeFile] = useState<File | null>(null);
   const [uploadStatus, setUploadStatus] = useState<string>("");
   const [fileId, setFileId] = useState<string | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
 
   // State for Step 2: Job Description and Generation
   const [jobDescription, setJobDescription] = useState<string>("");
   const [generationStatus, setGenerationStatus] = useState<string>("");
-  const [generatedDocs, setGeneratedDocs] = useState<AIGeneratedDocs | null>(null);
-  const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedDocs, setGeneratedDocs] = useState<AIGeneratedDocs | null>(
+    null
+  );
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0]) {
+    if (event.target.files) {
       setMasterResumeFile(event.target.files[0]);
       setUploadStatus("");
       setFileId(null);
-      setGeneratedDocs(null);
+      setGeneratedDocs(null); // Clear previous results
     }
   };
 
   const handleMasterResumeUpload = async () => {
     if (!masterResumeFile) {
-      setUploadStatus("Please select your resume first.");
+      setUploadStatus("Please select your Master Resume first.");
       return;
     }
 
-    setIsUploading(true);
-    setUploadStatus("Preparing upload...");
-
+    setUploadStatus("Getting upload URL...");
     try {
+      // Get Clerk session token
       const token = await getToken();
       if (!token) {
         setUploadStatus("Authentication error. Please sign in again.");
-        setIsUploading(false);
         return;
       }
 
@@ -65,40 +57,38 @@ export default function Home() {
         `${process.env.NEXT_PUBLIC_API_GATEWAY_URL}?fileName=${masterResumeFile.name}`,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
-          },
+            'Authorization': `Bearer ${token}`
+          }
         }
       );
 
       if (response.status === 401) {
         setUploadStatus("Authentication failed. Please sign in again.");
-        setIsUploading(false);
         return;
       }
       if (!response.ok) throw new Error("Failed to get upload URL.");
 
       const { uploadUrl, fileId: newFileId } = await response.json();
-      setUploadStatus("Uploading resume...");
+      setUploadStatus("Uploading Master Resume...");
 
       const uploadResponse = await fetch(uploadUrl, {
         method: "PUT",
         body: masterResumeFile,
         headers: {
           "Content-Type": "application/pdf",
-          "x-amz-meta-fileid": newFileId,
+          "x-amz-meta-fileid": newFileId, // Pass the fileId to S3
         },
       });
-      if (!uploadResponse.ok) throw new Error("Upload failed.");
+      if (!uploadResponse.ok) throw new Error("S3 upload failed.");
 
-      setUploadStatus("Processing your resume...");
+      setUploadStatus(`Processing resume... This may take a minute.`);
       setFileId(newFileId);
 
-      // Poll for processing status
+      // Poll to see when the resume is finished processing (status becomes READY_FOR_QUERY)
       const pollForReadyStatus = async () => {
         const token = await getToken();
         if (!token) {
-          setUploadStatus("Authentication error during processing.");
-          setIsUploading(false);
+          setUploadStatus("Authentication error during polling.");
           return;
         }
 
@@ -106,27 +96,26 @@ export default function Home() {
           `${process.env.NEXT_PUBLIC_GET_SUMMARY_API_URL}?fileId=${newFileId}`,
           {
             headers: {
-              Authorization: `Bearer ${token}`,
-            },
+              'Authorization': `Bearer ${token}`
+            }
           }
         );
 
         if (statusResponse.status === 401) {
           setUploadStatus("Authentication expired. Please sign in again.");
-          setIsUploading(false);
           return;
         }
 
         const result = await statusResponse.json();
 
         if (result.processingStatus === "READY_FOR_QUERY") {
-          setUploadStatus("Resume processed successfully!");
-          setIsUploading(false);
+          setUploadStatus("✅ Master Resume is processed and ready!");
         } else if (result.processingStatus === "FAILED") {
-          setUploadStatus("Processing failed. Please try another file.");
-          setIsUploading(false);
+          setUploadStatus(
+            "❌ Error processing resume. Please try a different file."
+          );
         } else {
-          setTimeout(pollForReadyStatus, 5000);
+          setTimeout(pollForReadyStatus, 5000); // Check again in 5 seconds
         }
       };
 
@@ -135,7 +124,6 @@ export default function Home() {
       setUploadStatus(
         `Error: ${error instanceof Error ? error.message : "Unknown error"}`
       );
-      setIsUploading(false);
     }
   };
 
@@ -145,29 +133,29 @@ export default function Home() {
       return;
     }
     if (!fileId) {
-      setGenerationStatus("Please upload your resume first.");
+      setGenerationStatus("Please upload and process a master resume first.");
       return;
     }
 
-    setIsGenerating(true);
-    setGenerationStatus("Starting generation...");
+    setGenerationStatus("Starting document generation...");
     setGeneratedDocs(null);
 
     try {
+      // Get Clerk session token
       const token = await getToken();
       if (!token) {
         setGenerationStatus("Authentication error. Please sign in again.");
-        setIsGenerating(false);
         return;
       }
 
+      // Step 1: Start generation (returns immediately with jobId)
       const startResponse = await fetch(
         `${process.env.NEXT_PUBLIC_START_GENERATION_API_URL}`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+            'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify({
             fileId: fileId,
@@ -178,29 +166,32 @@ export default function Home() {
 
       if (startResponse.status === 401) {
         setGenerationStatus("Authentication failed. Please sign in again.");
-        setIsGenerating(false);
         return;
       }
       if (startResponse.status === 403) {
         setGenerationStatus("You don't have permission to access this file.");
-        setIsGenerating(false);
         return;
       }
       if (!startResponse.ok) {
-        throw new Error(`Server error: ${startResponse.status}`);
+        throw new Error(
+          `Server responded with status: ${startResponse.status}`
+        );
       }
 
       const { jobId } = await startResponse.json();
-      setGenerationStatus("AI is tailoring your resume...");
+      console.log(`Generation started with jobId: ${jobId}`);
 
-      // Poll for completion
+      setGenerationStatus(
+        "Processing... This may take 1-2 minutes. Using AI to tailor your resume..."
+      );
+
+      // Step 2: Poll for completion
       const pollInterval = setInterval(async () => {
         try {
           const token = await getToken();
           if (!token) {
             clearInterval(pollInterval);
-            setGenerationStatus("Authentication error.");
-            setIsGenerating(false);
+            setGenerationStatus("Authentication error during polling.");
             return;
           }
 
@@ -208,28 +199,27 @@ export default function Home() {
             `${process.env.NEXT_PUBLIC_GET_GENERATION_STATUS_API_URL}?jobId=${jobId}`,
             {
               headers: {
-                Authorization: `Bearer ${token}`,
-              },
+                'Authorization': `Bearer ${token}`
+              }
             }
           );
 
           if (statusResponse.status === 401) {
             clearInterval(pollInterval);
-            setGenerationStatus("Authentication expired.");
-            setIsGenerating(false);
+            setGenerationStatus("Authentication expired. Please sign in again.");
             return;
           }
           if (statusResponse.status === 403) {
             clearInterval(pollInterval);
-            setGenerationStatus("Permission denied.");
-            setIsGenerating(false);
+            setGenerationStatus("You don't have permission to access this job.");
             return;
           }
           if (!statusResponse.ok) {
-            throw new Error(`Status check failed`);
+            throw new Error(`Status check failed: ${statusResponse.status}`);
           }
 
           const statusData = await statusResponse.json();
+          console.log("Status:", statusData.status);
 
           if (statusData.status === "COMPLETED") {
             clearInterval(pollInterval);
@@ -237,26 +227,44 @@ export default function Home() {
               tailoredResume: statusData.tailoredResume,
               coverLetter: statusData.coverLetter,
             });
-            setGenerationStatus("Documents generated successfully!");
-            setIsGenerating(false);
+            setGenerationStatus("✅ Documents generated successfully!");
           } else if (statusData.status === "FAILED") {
             clearInterval(pollInterval);
             setGenerationStatus(
-              `Generation failed: ${statusData.errorMessage || "Unknown error"}`
+              `❌ Generation failed: ${
+                statusData.errorMessage || "Unknown error"
+              }`
             );
-            setIsGenerating(false);
+          } else {
+            // Still processing
+            setGenerationStatus(
+              "⏳ Still processing... AI is analyzing your resume and the job description..."
+            );
           }
-        } catch (error) {
+        } catch (pollError) {
+          console.error("Polling error:", pollError);
           clearInterval(pollInterval);
-          setGenerationStatus("Error checking status");
-          setIsGenerating(false);
+          setGenerationStatus(
+            `Error checking status: ${
+              pollError instanceof Error ? pollError.message : "Unknown error"
+            }`
+          );
         }
-      }, 5000);
+      }, 5000); // Poll every 5 seconds
+
+      // Safety timeout: stop polling after 5 minutes
+      setTimeout(() => {
+        clearInterval(pollInterval);
+        if (!generatedDocs) {
+          setGenerationStatus(
+            "⏰ Generation is taking longer than expected. Please try again."
+          );
+        }
+      }, 300000); // 5 minutes
     } catch (error) {
       setGenerationStatus(
         `Error: ${error instanceof Error ? error.message : "Unknown error"}`
       );
-      setIsGenerating(false);
     }
   };
 
@@ -590,290 +598,138 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
-      {/* Header */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between max-w-6xl">
-          <div className="flex items-center gap-2">
-            <Sparkles className="h-6 w-6" />
-            <span className="font-semibold text-xl">AI Resume Tailor</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <Badge variant="secondary">Beta</Badge>
-            <UserButton />
-          </div>
+    <main className="flex min-h-screen flex-col items-center p-8 sm:p-12 md:p-24 bg-gray-900 text-white">
+      <div className="w-full max-w-4xl space-y-12">
+        {/* User Profile Button */}
+        <div className="flex justify-end">
+          <UserButton afterSignOutUrl="/sign-in" />
         </div>
-      </header>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-12 max-w-6xl">
-        {/* Hero Section */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
-            Get Hired Faster with AI
+        <header className="text-center">
+          <h1 className="text-4xl sm:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">
+            AI-Powered Resume Tailor
           </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Tailor your resume to any job description in 90 seconds. ATS-optimized, professional, and proven to increase interview rates.
+          <p className="mt-4 text-lg text-gray-400">
+            Never manually tailor your resume again. Let AI do the hard work.
           </p>
-          <div className="flex items-center justify-center gap-6 mt-6 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-green-600" />
-              <span>ATS-Optimized</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-green-600" />
-              <span>90 Second Turnaround</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-green-600" />
-              <span>Free & Secure</span>
-            </div>
+        </header>
+
+        {/* Step 1: Master Resume */}
+        <div className="p-8 bg-gray-800 rounded-xl shadow-lg border border-gray-700">
+          <h2 className="text-2xl font-semibold mb-4 text-purple-400">
+            Step 1: Upload Your Master Resume
+          </h2>
+          <p className="mb-6 text-gray-400">
+            Upload a PDF containing all your skills and experiences. This will
+            become your personal knowledge base.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 items-center">
+            <input
+              id="file-upload"
+              type="file"
+              accept="application/pdf"
+              onChange={handleFileChange}
+              className="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-700 file:text-purple-400 hover:file:bg-gray-600 cursor-pointer"
+            />
+            <button
+              onClick={handleMasterResumeUpload}
+              disabled={
+                !masterResumeFile || uploadStatus.includes("Processing")
+              }
+              className="w-full sm:w-auto px-6 py-2 font-semibold bg-purple-600 rounded-md hover:bg-purple-700 disabled:bg-gray-500 disabled:cursor-not-allowed transition-colors"
+            >
+              Upload & Process
+            </button>
           </div>
+          {uploadStatus && (
+            <p className="mt-4 text-center text-sm text-gray-400">
+              {uploadStatus}
+            </p>
+          )}
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 mb-12">
-          {/* Step 1: Upload Resume */}
-          <Card className="flex flex-col">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-semibold">
-                  1
-                </div>
-                <CardTitle>Upload Your Resume</CardTitle>
-              </div>
-              <CardDescription>
-                Upload your master resume (PDF only, max 5MB)
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4 flex-1 flex flex-col">
-              <label
-                htmlFor="file-upload"
-                className={`flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${
-                  masterResumeFile
-                    ? "border-primary bg-primary/5"
-                    : "border-muted-foreground/25 hover:border-primary/50 hover:bg-accent/50"
-                }`}
-              >
-                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                  {masterResumeFile ? (
-                    <>
-                      <FileText className="h-10 w-10 text-primary mb-2" />
-                      <p className="text-sm font-medium">{masterResumeFile.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {(masterResumeFile.size / 1024 / 1024).toFixed(2)} MB
-                      </p>
-                    </>
-                  ) : (
-                    <>
-                      <Upload className="h-10 w-10 text-muted-foreground mb-2" />
-                      <p className="text-sm text-muted-foreground">
-                        Click to upload or drag and drop
-                      </p>
-                      <p className="text-xs text-muted-foreground">PDF (max. 5MB)</p>
-                    </>
-                  )}
-                </div>
-                <input
-                  id="file-upload"
-                  type="file"
-                  accept="application/pdf"
-                  onChange={handleFileChange}
-                  className="hidden"
-                />
-              </label>
-
-              <Button
-                onClick={handleMasterResumeUpload}
-                disabled={!masterResumeFile || isUploading}
-                className="w-full mt-auto"
-                size="lg"
-              >
-                {isUploading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Processing...
-                  </>
-                ) : (
-                  <>
-                    <Upload className="mr-2 h-4 w-4" />
-                    Upload & Process
-                  </>
-                )}
-              </Button>
-
-              {uploadStatus && (
-                <div
-                  className={`flex items-start gap-2 p-3 rounded-lg text-sm ${
-                    uploadStatus.includes("successfully")
-                      ? "bg-green-50 text-green-900 border border-green-200"
-                      : uploadStatus.includes("Error") || uploadStatus.includes("failed")
-                      ? "bg-red-50 text-red-900 border border-red-200"
-                      : "bg-blue-50 text-blue-900 border border-blue-200"
-                  }`}
-                >
-                  {uploadStatus.includes("successfully") ? (
-                    <CheckCircle2 className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                  ) : uploadStatus.includes("Error") || uploadStatus.includes("failed") ? (
-                    <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                  ) : (
-                    <Loader2 className="h-4 w-4 mt-0.5 flex-shrink-0 animate-spin" />
-                  )}
-                  <span>{uploadStatus}</span>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Step 2: Job Description */}
-          <Card className="flex flex-col">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-semibold">
-                  2
-                </div>
-                <CardTitle>Paste Job Description</CardTitle>
-              </div>
-              <CardDescription>
-                Copy and paste the full job posting you're applying to
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4 flex-1 flex flex-col">
-              <Textarea
-                placeholder="Paste the job description here...&#10;&#10;Example:&#10;Software Engineer at Google&#10;Requirements:&#10;- 3+ years of experience&#10;- Proficiency in Python, Java..."
-                value={jobDescription}
-                onChange={(e) => setJobDescription(e.target.value)}
-                className="min-h-[140px] resize-none"
-              />
-
-              <Button
-                onClick={handleGenerate}
-                disabled={!fileId || !jobDescription.trim() || isGenerating}
-                className="w-full mt-auto"
-                size="lg"
-              >
-                {isGenerating ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Generating...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="mr-2 h-4 w-4" />
-                    Generate Tailored Resume
-                  </>
-                )}
-              </Button>
-
-              {generationStatus && (
-                <div
-                  className={`flex items-start gap-2 p-3 rounded-lg text-sm ${
-                    generationStatus.includes("successfully")
-                      ? "bg-green-50 text-green-900 border border-green-200"
-                      : generationStatus.includes("Error") || generationStatus.includes("failed")
-                      ? "bg-red-50 text-red-900 border border-red-200"
-                      : "bg-blue-50 text-blue-900 border border-blue-200"
-                  }`}
-                >
-                  {generationStatus.includes("successfully") ? (
-                    <CheckCircle2 className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                  ) : generationStatus.includes("Error") || generationStatus.includes("failed") ? (
-                    <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                  ) : (
-                    <Loader2 className="h-4 w-4 mt-0.5 flex-shrink-0 animate-spin" />
-                  )}
-                  <span>{generationStatus}</span>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Results Section */}
-        {generatedDocs && (
-          <Card className="border-2">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CheckCircle2 className="h-5 w-5 text-green-600" />
-                Your Tailored Documents Are Ready!
-              </CardTitle>
-              <CardDescription>
-                Download your personalized resume and cover letter below
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid md:grid-cols-2 gap-4">
-                <Button
-                  onClick={() =>
-                    downloadAsPDF(
-                      generatedDocs.tailoredResume,
-                      "Tailored_Resume.pdf"
-                    )
-                  }
-                  variant="default"
-                  size="lg"
-                  className="w-full"
-                >
-                  <Download className="mr-2 h-4 w-4" />
-                  Download Resume
-                </Button>
-                <Button
-                  onClick={() =>
-                    downloadAsPDF(
-                      generatedDocs.coverLetter,
-                      "Cover_Letter.pdf"
-                    )
-                  }
-                  variant="outline"
-                  size="lg"
-                  className="w-full"
-                >
-                  <Download className="mr-2 h-4 w-4" />
-                  Download Cover Letter
-                </Button>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-4 pt-4">
-                <div>
-                  <h4 className="font-semibold mb-2">Tailored Resume Preview:</h4>
-                  <div className="p-4 bg-muted rounded-lg max-h-96 overflow-y-auto text-sm border">
-                    <pre className="whitespace-pre-wrap font-sans">
-                      {generatedDocs.tailoredResume}
-                    </pre>
-                  </div>
-                </div>
-                <div>
-                  <h4 className="font-semibold mb-2">Cover Letter Preview:</h4>
-                  <div className="p-4 bg-muted rounded-lg max-h-96 overflow-y-auto text-sm border">
-                    <pre className="whitespace-pre-wrap font-sans">
-                      {generatedDocs.coverLetter}
-                    </pre>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        {/* Step 2: Job Description & Generation */}
+        {fileId && uploadStatus.includes("✅") && (
+          <div className="p-8 bg-gray-800 rounded-xl shadow-lg border border-gray-700">
+            <h2 className="text-2xl font-semibold mb-4 text-pink-500">
+              Step 2: Paste Job Description
+            </h2>
+            <textarea
+              value={jobDescription}
+              onChange={(e) => setJobDescription(e.target.value)}
+              placeholder="Paste the full job description here..."
+              className="w-full h-40 p-4 bg-gray-900 border border-gray-600 rounded-md focus:ring-2 focus:ring-pink-500 focus:outline-none"
+            />
+            <button
+              onClick={handleGenerate}
+              disabled={
+                !jobDescription || generationStatus.includes("Generating")
+              }
+              className="w-full mt-4 px-6 py-3 font-semibold bg-pink-600 rounded-md hover:bg-pink-700 disabled:bg-gray-500 disabled:cursor-not-allowed transition-colors"
+            >
+              Generate Tailored Documents
+            </button>
+            {generationStatus && (
+              <p className="mt-4 text-center text-sm text-gray-400">
+                {generationStatus}
+              </p>
+            )}
+          </div>
         )}
-      </main>
 
-      {/* Footer */}
-      <footer className="border-t mt-20">
-        <div className="container mx-auto px-4 py-8 max-w-6xl">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
-            <p>© 2025 AI Resume Tailor. All rights reserved.</p>
-            <div className="flex gap-6">
-              <a href="#" className="hover:text-foreground transition-colors">
-                Privacy
-              </a>
-              <a href="#" className="hover:text-foreground transition-colors">
-                Terms
-              </a>
-              <a href="#" className="hover:text-foreground transition-colors">
-                Support
-              </a>
+        {/* Results */}
+        {generatedDocs && (
+          <div className="p-8 bg-gray-800 rounded-xl shadow-lg border border-gray-700">
+            <h2 className="text-2xl font-semibold mb-6 text-center text-purple-400">
+              Your Generated Documents
+            </h2>
+            <div className="space-y-8">
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <h3 className="text-xl font-bold text-pink-500">
+                    Tailored Resume
+                  </h3>
+                  <button
+                    onClick={() =>
+                      downloadAsPDF(
+                        generatedDocs.tailoredResume,
+                        "tailored-resume.pdf"
+                      )
+                    }
+                    className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-md font-semibold text-sm transition-colors"
+                  >
+                    Download PDF
+                  </button>
+                </div>
+                <pre className="p-4 bg-gray-900 border border-gray-600 rounded-md whitespace-pre-wrap font-sans text-sm">
+                  {generatedDocs.tailoredResume}
+                </pre>
+              </div>
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <h3 className="text-xl font-bold text-pink-500">
+                    Cover Letter
+                  </h3>
+                  <button
+                    onClick={() =>
+                      downloadAsPDF(
+                        generatedDocs.coverLetter,
+                        "cover-letter.pdf"
+                      )
+                    }
+                    className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-md font-semibold text-sm transition-colors"
+                  >
+                    Download PDF
+                  </button>
+                </div>
+                <pre className="p-4 bg-gray-900 border border-gray-600 rounded-md whitespace-pre-wrap font-sans text-sm">
+                  {generatedDocs.coverLetter}
+                </pre>
+              </div>
             </div>
           </div>
-        </div>
-      </footer>
-    </div>
+        )}
+      </div>
+    </main>
   );
 }
