@@ -601,14 +601,14 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
       {/* Header */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+      <header className="border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80 sticky top-0 z-50 shadow-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between max-w-6xl">
           <div className="flex items-center gap-2">
-            <Sparkles className="h-6 w-6" />
+            <Sparkles className="h-6 w-6 text-primary" />
             <span className="font-semibold text-xl">AI Resume Tailor</span>
           </div>
           <div className="flex items-center gap-4">
-            <Badge variant="secondary">Beta</Badge>
+            <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">Beta</Badge>
             <UserButton />
           </div>
         </div>
@@ -618,7 +618,7 @@ export default function Home() {
       <main className="container mx-auto px-4 py-12 max-w-6xl">
         {/* Hero Section */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 bg-gradient-to-r from-foreground via-primary to-foreground bg-clip-text text-transparent">
             Get Hired Faster with AI
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -626,15 +626,15 @@ export default function Home() {
           </p>
           <div className="flex items-center justify-center gap-6 mt-6 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-green-600" />
+              <CheckCircle2 className="h-4 w-4 text-primary" />
               <span>ATS-Optimized</span>
             </div>
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-green-600" />
+              <CheckCircle2 className="h-4 w-4 text-primary" />
               <span>90 Second Turnaround</span>
             </div>
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-green-600" />
+              <CheckCircle2 className="h-4 w-4 text-primary" />
               <span>Free & Secure</span>
             </div>
           </div>
@@ -642,7 +642,7 @@ export default function Home() {
 
         <div className="grid md:grid-cols-2 gap-8 mb-12">
           {/* Step 1: Upload Resume */}
-          <Card className="flex flex-col">
+          <Card className="flex flex-col hover:shadow-lg transition-shadow duration-300">
             <CardHeader>
               <div className="flex items-center gap-2">
                 <div className="h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-semibold">
@@ -734,7 +734,7 @@ export default function Home() {
           </Card>
 
           {/* Step 2: Job Description */}
-          <Card className="flex flex-col">
+          <Card className="flex flex-col hover:shadow-lg transition-shadow duration-300">
             <CardHeader>
               <div className="flex items-center gap-2">
                 <div className="h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-semibold">
@@ -804,7 +804,7 @@ export default function Home() {
 
         {/* Results Section */}
         {generatedDocs && (
-          <Card className="border-2">
+          <Card className="border-2 border-primary/20 shadow-lg bg-gradient-to-br from-card to-primary/5">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <CheckCircle2 className="h-5 w-5 text-green-600" />
