@@ -37,7 +37,18 @@ export default function Home() {
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
-      setMasterResumeFile(event.target.files[0]);
+      const file = event.target.files[0];
+      const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+
+      if (file.size > maxSize) {
+        setUploadStatus(`File too large. Maximum size is 5MB. Your file is ${(file.size / 1024 / 1024).toFixed(2)}MB.`);
+        setMasterResumeFile(null);
+        // Reset the input
+        event.target.value = "";
+        return;
+      }
+
+      setMasterResumeFile(file);
       setUploadStatus("");
       setFileId(null);
       setGeneratedDocs(null);
