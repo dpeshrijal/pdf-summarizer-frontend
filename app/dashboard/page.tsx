@@ -68,35 +68,36 @@ export default function Dashboard() {
     fetchPreviousResumes();
   }, [isSignedIn, isLoaded, getToken]);
 
+  // Function to fetch generation history (reusable)
+  const fetchGenerationHistory = async () => {
+    if (!isSignedIn || !isLoaded) return;
+
+    try {
+      const token = await getToken();
+      if (!token) return;
+
+      const response = await fetch(
+        process.env.NEXT_PUBLIC_LIST_USER_GENERATIONS_API_URL!,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setGenerationHistory(data.generations);
+      }
+    } catch (error) {
+      console.error("Error fetching generation history:", error);
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  };
+
   // Fetch generation history on mount
   useEffect(() => {
-    const fetchGenerationHistory = async () => {
-      if (!isSignedIn || !isLoaded) return;
-
-      try {
-        const token = await getToken();
-        if (!token) return;
-
-        const response = await fetch(
-          process.env.NEXT_PUBLIC_LIST_USER_GENERATIONS_API_URL!,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        if (response.ok) {
-          const data = await response.json();
-          setGenerationHistory(data.generations);
-        }
-      } catch (error) {
-        console.error("Error fetching generation history:", error);
-      } finally {
-        setIsLoadingHistory(false);
-      }
-    };
-
     fetchGenerationHistory();
   }, [isSignedIn, isLoaded, getToken]);
 
@@ -353,6 +354,9 @@ export default function Dashboard() {
             });
             setGenerationStatus("Documents generated successfully!");
             setIsGenerating(false);
+
+            // Refresh generation history to show the new entry
+            fetchGenerationHistory();
           } else if (statusData.status === "FAILED") {
             clearInterval(pollInterval);
             setGenerationStatus(
@@ -1121,7 +1125,7 @@ export default function Dashboard() {
 
         {/* Generation History Section - Modern List View */}
         {generationHistory.length > 0 && (
-          <section className="container mx-auto px-4 pb-12 md:pb-16 max-w-7xl">
+          <section className="container mx-auto px-4 pb-12 md:pb-16 max-w-7xl mt-12 md:mt-16">
             <div className="mb-6">
               <div className="flex items-center gap-3 mb-2">
                 <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-purple-500/20 to-blue-500/20 flex items-center justify-center">
