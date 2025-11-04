@@ -50,7 +50,7 @@ export function ResultsDisplay({
         {
           name: structured.resume.contact.name,
           email: structured.resume.contact.email,
-          phone: structured.resume.contact.phone,
+          phone: structured.resume.contact.phone || "", // Default to empty string if not provided
         },
         "Cover_Letter.pdf"
       );
@@ -71,9 +71,11 @@ export function ResultsDisplay({
         <div>
           <div className="font-bold text-lg">{resume.contact.name}</div>
           <div className="text-muted-foreground text-xs">
-            {resume.contact.email} | {resume.contact.phone}
+            {resume.contact.email}
+            {resume.contact.phone && ` | ${resume.contact.phone}`}
             {resume.contact.linkedin && ` | ${resume.contact.linkedin}`}
             {resume.contact.github && ` | ${resume.contact.github}`}
+            {resume.contact.location && ` | ${resume.contact.location}`}
           </div>
         </div>
 

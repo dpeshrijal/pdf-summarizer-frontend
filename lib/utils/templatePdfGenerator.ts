@@ -116,16 +116,20 @@ export const generateResumePDF = async (
   doc.setFontSize(FONT_SIZES.small);
   doc.setFont("helvetica", "normal");
 
-  const contactParts = [
-    `Email: ${resume.contact.email}`,
-    `Phone: ${resume.contact.phone}`,
-  ];
+  const contactParts = [`Email: ${resume.contact.email}`];
 
+  // Add optional contact fields only if they exist
+  if (resume.contact.phone) {
+    contactParts.push(`Phone: ${resume.contact.phone}`);
+  }
   if (resume.contact.linkedin) {
     contactParts.push(`LinkedIn: ${resume.contact.linkedin}`);
   }
   if (resume.contact.github) {
     contactParts.push(`GitHub: ${resume.contact.github}`);
+  }
+  if (resume.contact.location) {
+    contactParts.push(`Location: ${resume.contact.location}`);
   }
 
   const contactLine = contactParts.join(" | ");

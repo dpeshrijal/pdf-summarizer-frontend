@@ -6,7 +6,7 @@
 export interface ContactInfo {
   name: string;
   email: string;
-  phone: string;
+  phone?: string;  // Optional - not all resumes have phone
   linkedin?: string;
   github?: string;
   location?: string;
