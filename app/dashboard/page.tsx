@@ -748,8 +748,25 @@ export default function Dashboard() {
           </div>
         </header>
 
-        {/* Main Content */}
-        <main className="container mx-auto px-4 py-8 md:py-12 max-w-7xl">
+        {/* Page Loader - Shows while data is loading */}
+        {(isLoadingResumes || isLoadingHistory) ? (
+          <main className="container mx-auto px-4 py-8 md:py-12 max-w-7xl">
+            <div className="flex flex-col items-center justify-center min-h-[70vh] space-y-6">
+              <div className="relative">
+                {/* Animated glow effect */}
+                <div className="absolute inset-0 bg-gradient-to-r from-primary via-purple-500 to-primary rounded-full blur-2xl opacity-20 animate-pulse" />
+                <Loader2 className="relative h-16 w-16 animate-spin text-primary" />
+              </div>
+              <div className="text-center space-y-2">
+                <h2 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-primary via-purple-500 to-primary bg-clip-text text-transparent animate-gradient">
+                  Preparing Your Workspace
+                </h2>
+                <p className="text-sm text-muted-foreground">Setting up your personalized resume experience...</p>
+              </div>
+            </div>
+          </main>
+        ) : (
+          <main className="container mx-auto px-4 py-8 md:py-12 max-w-7xl">
           {/* Hero Section - Simplified for dashboard */}
           <div className="text-center mb-8 md:mb-12">
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-3 md:mb-4">
@@ -795,7 +812,7 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent className="space-y-4 flex-1 flex flex-col">
               {/* Show previously uploaded resumes if available */}
-              {!showUploadNew && previousResumes.length > 0 && !isLoadingResumes ? (
+              {!showUploadNew && previousResumes.length > 0 ? (
                 <>
                   <div className="space-y-3">
                     <p className="text-sm text-muted-foreground">Select a previously uploaded resume:</p>
@@ -1103,7 +1120,7 @@ export default function Dashboard() {
         )}
 
         {/* Generation History Section - Modern List View */}
-        {!isLoadingHistory && generationHistory.length > 0 && (
+        {generationHistory.length > 0 && (
           <section className="container mx-auto px-4 pb-12 md:pb-16 max-w-7xl">
             <div className="mb-6">
               <div className="flex items-center gap-3 mb-2">
@@ -1188,6 +1205,7 @@ export default function Dashboard() {
           </section>
         )}
         </main>
+        )}
 
         {/* Footer */}
         <footer className="border-t mt-12 md:mt-20 bg-card/50">
