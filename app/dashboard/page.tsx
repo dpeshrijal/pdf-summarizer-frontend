@@ -24,10 +24,14 @@ import {
   type Resume,
   type Generation,
 } from "@/lib/utils/dashboardApi";
+import type { GenerationOutput } from "@/lib/types/resumeSchema";
 
 interface AIGeneratedDocs {
-  tailoredResume: string;
-  coverLetter: string;
+  // Can be either structured or old format
+  structured?: GenerationOutput;
+  // Old format (backward compatibility)
+  tailoredResume?: string;
+  coverLetter?: string;
 }
 
 export default function Dashboard() {
@@ -225,10 +229,31 @@ export default function Dashboard() {
 
           if (statusData.status === "COMPLETED") {
             clearInterval(pollInterval);
-            setGeneratedDocs({
-              tailoredResume: statusData.tailoredResume!,
-              coverLetter: statusData.coverLetter!,
-            });
+
+            // Handle both new structured format and old text format
+            if (statusData.structuredData) {
+              // New format: parse JSON string
+              try {
+                const parsedData: GenerationOutput = JSON.parse(statusData.structuredData);
+                setGeneratedDocs({
+                  structured: parsedData,
+                });
+              } catch (e) {
+                console.error("Failed to parse structured data:", e);
+                // Fallback to old format if parsing fails
+                setGeneratedDocs({
+                  tailoredResume: statusData.tailoredResume,
+                  coverLetter: statusData.coverLetter,
+                });
+              }
+            } else {
+              // Old format: use text directly
+              setGeneratedDocs({
+                tailoredResume: statusData.tailoredResume,
+                coverLetter: statusData.coverLetter,
+              });
+            }
+
             setGenerationStatus("Documents generated successfully!");
             setIsGenerating(false);
 
@@ -358,6 +383,7 @@ export default function Dashboard() {
             {/* Results Section */}
             {generatedDocs && (
               <ResultsDisplay
+                structured={generatedDocs.structured}
                 tailoredResume={generatedDocs.tailoredResume}
                 coverLetter={generatedDocs.coverLetter}
               />

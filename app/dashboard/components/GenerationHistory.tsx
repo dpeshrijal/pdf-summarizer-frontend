@@ -5,7 +5,9 @@ import { History, Building2, Clock, Download, ChevronLeft, ChevronRight } from "
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { downloadAsPDF } from "@/lib/utils/pdfGenerator";
+import { generateResumePDF, generateCoverLetterPDF } from "@/lib/utils/templatePdfGenerator";
 import type { Generation } from "@/lib/utils/dashboardApi";
+import type { GenerationOutput } from "@/lib/types/resumeSchema";
 
 interface GenerationHistoryProps {
   history: Generation[];
@@ -91,12 +93,33 @@ export function GenerationHistory({ history }: GenerationHistoryProps) {
                 {/* Action Buttons */}
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <Button
-                    onClick={() =>
-                      downloadAsPDF(
-                        generation.tailoredResume,
-                        `${generation.companyName}_Resume_${formattedDate.replace(/\s/g, "_")}.pdf`
-                      )
-                    }
+                    onClick={() => {
+                      // Handle both structured and old format
+                      if (generation.structuredData) {
+                        try {
+                          const parsed: GenerationOutput = JSON.parse(generation.structuredData);
+                          generateResumePDF(
+                            parsed.resume,
+                            `${generation.companyName}_Resume_${formattedDate.replace(/\s/g, "_")}.pdf`
+                          );
+                        } catch (e) {
+                          console.error("Failed to parse structured data:", e);
+                          // Fallback to old format
+                          if (generation.tailoredResume) {
+                            downloadAsPDF(
+                              generation.tailoredResume,
+                              `${generation.companyName}_Resume_${formattedDate.replace(/\s/g, "_")}.pdf`
+                            );
+                          }
+                        }
+                      } else if (generation.tailoredResume) {
+                        // Old format
+                        downloadAsPDF(
+                          generation.tailoredResume,
+                          `${generation.companyName}_Resume_${formattedDate.replace(/\s/g, "_")}.pdf`
+                        );
+                      }
+                    }}
                     variant="outline"
                     size="sm"
                     className="group/btn hover:bg-primary/10 hover:text-primary hover:border-primary/50 whitespace-nowrap"
@@ -106,12 +129,38 @@ export function GenerationHistory({ history }: GenerationHistoryProps) {
                   </Button>
 
                   <Button
-                    onClick={() =>
-                      downloadAsPDF(
-                        generation.coverLetter,
-                        `${generation.companyName}_CoverLetter_${formattedDate.replace(/\s/g, "_")}.pdf`
-                      )
-                    }
+                    onClick={() => {
+                      // Handle both structured and old format
+                      if (generation.structuredData) {
+                        try {
+                          const parsed: GenerationOutput = JSON.parse(generation.structuredData);
+                          generateCoverLetterPDF(
+                            parsed.coverLetter,
+                            {
+                              name: parsed.resume.contact.name,
+                              email: parsed.resume.contact.email,
+                              phone: parsed.resume.contact.phone,
+                            },
+                            `${generation.companyName}_CoverLetter_${formattedDate.replace(/\s/g, "_")}.pdf`
+                          );
+                        } catch (e) {
+                          console.error("Failed to parse structured data:", e);
+                          // Fallback to old format
+                          if (generation.coverLetter) {
+                            downloadAsPDF(
+                              generation.coverLetter,
+                              `${generation.companyName}_CoverLetter_${formattedDate.replace(/\s/g, "_")}.pdf`
+                            );
+                          }
+                        }
+                      } else if (generation.coverLetter) {
+                        // Old format
+                        downloadAsPDF(
+                          generation.coverLetter,
+                          `${generation.companyName}_CoverLetter_${formattedDate.replace(/\s/g, "_")}.pdf`
+                        );
+                      }
+                    }}
                     variant="outline"
                     size="sm"
                     className="group/btn hover:bg-blue-500/10 hover:text-blue-600 hover:border-blue-500/50 whitespace-nowrap"

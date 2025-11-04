@@ -3,13 +3,18 @@
  * Handles all API calls for the dashboard
  */
 
+import type { GenerationOutput } from "@/lib/types/resumeSchema";
+
 export interface Generation {
   jobId: string;
   companyName: string;
   jobTitle: string;
   completedAt: number;
-  tailoredResume: string;
-  coverLetter: string;
+  // New structured format
+  structuredData?: string; // JSON string from DynamoDB
+  // Old text format (for backward compatibility)
+  tailoredResume?: string;
+  coverLetter?: string;
 }
 
 export interface Resume {
@@ -20,6 +25,9 @@ export interface Resume {
 
 export interface GenerationStatusResponse {
   status: "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED";
+  // New structured format
+  structuredData?: string; // JSON string from DynamoDB
+  // Old text format (for backward compatibility)
   tailoredResume?: string;
   coverLetter?: string;
   errorMessage?: string;
