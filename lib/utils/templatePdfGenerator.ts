@@ -18,10 +18,10 @@ const FONT_SIZES = {
 // Spacing constants - more natural spacing
 const SPACING = {
   afterName: 6,           // Space after name
-  afterContactInfo: 4,    // Space after contact line
-  beforeSection: 5,       // Space before section header
-  afterSectionHeader: 4,  // Space after section header
-  betweenJobs: 3.5,       // Space between job entries
+  afterContactInfo: 2,    // Space after contact line (reduced)
+  beforeSection: 4.5,     // Space before section header
+  afterSectionHeader: 6,  // Space after section header (increased to prevent overlap)
+  betweenJobs: 4,         // Space between job entries
   betweenEducation: 3,    // Space between education entries
   bulletIndent: 5,        // Indent for bullet points
   lineHeight: 4.5,        // Normal line height
@@ -96,11 +96,12 @@ export const generateResumePDF = async (
     doc.setFont("helvetica", "bold");
     doc.text(title.toUpperCase(), PAGE.marginLeft, yPos);
 
-    // Underline
+    // Underline - positioned below the text
     const textWidth = doc.getTextWidth(title.toUpperCase());
     doc.setLineWidth(0.5);
-    doc.line(PAGE.marginLeft, yPos + 1, PAGE.marginLeft + textWidth, yPos + 1);
+    doc.line(PAGE.marginLeft, yPos + 1.5, PAGE.marginLeft + textWidth, yPos + 1.5);
 
+    // Move yPos down to account for section header height + underline + spacing
     yPos += SPACING.afterSectionHeader;
     return true;
   };
