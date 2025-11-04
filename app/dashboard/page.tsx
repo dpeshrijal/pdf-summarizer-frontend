@@ -6,7 +6,6 @@ import { Upload, FileText, Sparkles, Download, CheckCircle2, AlertCircle, Loader
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { Progress } from "@/components/ui/progress";
 import { useRouter } from "next/navigation";
 
 // Define the structure of the AI's response
@@ -757,20 +756,20 @@ export default function Dashboard() {
 
               {uploadStatus && (
                 <div
-                  className={`flex items-start gap-2 md:gap-3 p-3 md:p-4 rounded-xl text-xs md:text-sm border-2 ${
+                  className={`flex items-start gap-2 md:gap-3 p-3 md:p-4 rounded-xl text-xs md:text-sm font-medium border-2 ${
                     uploadStatus.includes("successfully")
-                      ? "bg-green-50 dark:bg-green-950/20 text-green-900 dark:text-green-100 border-green-200 dark:border-green-800"
+                      ? "bg-green-100 text-green-800 border-green-300"
                       : uploadStatus.includes("Error") || uploadStatus.includes("failed")
-                      ? "bg-red-50 dark:bg-red-950/20 text-red-900 dark:text-red-100 border-red-200 dark:border-red-800"
-                      : "bg-blue-50 dark:bg-blue-950/20 text-blue-900 dark:text-blue-100 border-blue-200 dark:border-blue-800"
+                      ? "bg-red-100 text-red-800 border-red-300"
+                      : "bg-blue-100 text-blue-800 border-blue-300"
                   }`}
                 >
                   {uploadStatus.includes("successfully") ? (
-                    <CheckCircle2 className="h-4 w-4 md:h-5 md:w-5 mt-0.5 flex-shrink-0" />
+                    <CheckCircle2 className="h-4 w-4 md:h-5 md:w-5 mt-0.5 flex-shrink-0 text-green-600" />
                   ) : uploadStatus.includes("Error") || uploadStatus.includes("failed") ? (
-                    <AlertCircle className="h-4 w-4 md:h-5 md:w-5 mt-0.5 flex-shrink-0" />
+                    <AlertCircle className="h-4 w-4 md:h-5 md:w-5 mt-0.5 flex-shrink-0 text-red-600" />
                   ) : (
-                    <Loader2 className="h-4 w-4 md:h-5 md:w-5 mt-0.5 flex-shrink-0 animate-spin" />
+                    <Loader2 className="h-4 w-4 md:h-5 md:w-5 mt-0.5 flex-shrink-0 animate-spin text-blue-600" />
                   )}
                   <span className="leading-relaxed">{uploadStatus}</span>
                 </div>
@@ -827,20 +826,20 @@ export default function Dashboard() {
 
               {generationStatus && (
                 <div
-                  className={`flex items-start gap-2 md:gap-3 p-3 md:p-4 rounded-xl text-xs md:text-sm border-2 ${
+                  className={`flex items-start gap-2 md:gap-3 p-3 md:p-4 rounded-xl text-xs md:text-sm font-medium border-2 ${
                     generationStatus.includes("successfully")
-                      ? "bg-green-50 dark:bg-green-950/20 text-green-900 dark:text-green-100 border-green-200 dark:border-green-800"
+                      ? "bg-green-100 text-green-800 border-green-300"
                       : generationStatus.includes("Error") || generationStatus.includes("failed")
-                      ? "bg-red-50 dark:bg-red-950/20 text-red-900 dark:text-red-100 border-red-200 dark:border-red-800"
-                      : "bg-blue-50 dark:bg-blue-950/20 text-blue-900 dark:text-blue-100 border-blue-200 dark:border-blue-800"
+                      ? "bg-red-100 text-red-800 border-red-300"
+                      : "bg-blue-100 text-blue-800 border-blue-300"
                   }`}
                 >
                   {generationStatus.includes("successfully") ? (
-                    <CheckCircle2 className="h-4 w-4 md:h-5 md:w-5 mt-0.5 flex-shrink-0" />
+                    <CheckCircle2 className="h-4 w-4 md:h-5 md:w-5 mt-0.5 flex-shrink-0 text-green-600" />
                   ) : generationStatus.includes("Error") || generationStatus.includes("failed") ? (
-                    <AlertCircle className="h-4 w-4 md:h-5 md:w-5 mt-0.5 flex-shrink-0" />
+                    <AlertCircle className="h-4 w-4 md:h-5 md:w-5 mt-0.5 flex-shrink-0 text-red-600" />
                   ) : (
-                    <Loader2 className="h-4 w-4 md:h-5 md:w-5 mt-0.5 flex-shrink-0 animate-spin" />
+                    <Loader2 className="h-4 w-4 md:h-5 md:w-5 mt-0.5 flex-shrink-0 animate-spin text-blue-600" />
                   )}
                   <span className="leading-relaxed">{generationStatus}</span>
                 </div>
