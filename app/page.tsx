@@ -6,7 +6,6 @@ import { Upload, FileText, Sparkles, Download, CheckCircle2, AlertCircle, Loader
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 
 // Define the structure of the AI's response
