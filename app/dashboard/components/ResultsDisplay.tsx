@@ -2,9 +2,18 @@
 
 import { Download, CheckCircle2, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { downloadAsPDF } from "@/lib/utils/pdfGenerator";
-import { generateResumePDF, generateCoverLetterPDF } from "@/lib/utils/templatePdfGenerator";
+import {
+  generateResumePDF,
+  generateCoverLetterPDF,
+} from "@/lib/utils/templatePdfGenerator";
 import type { GenerationOutput } from "@/lib/types/resumeSchema";
 
 interface ResultsDisplayProps {
@@ -15,7 +24,11 @@ interface ResultsDisplayProps {
   coverLetter?: string;
 }
 
-export function ResultsDisplay({ structured, tailoredResume, coverLetter }: ResultsDisplayProps) {
+export function ResultsDisplay({
+  structured,
+  tailoredResume,
+  coverLetter,
+}: ResultsDisplayProps) {
   // Determine which format we're working with
   const isStructured = !!structured;
 
@@ -88,7 +101,9 @@ export function ResultsDisplay({ structured, tailoredResume, coverLetter }: Resu
         {/* Experience */}
         {resume.experience.length > 0 && (
           <div>
-            <div className="font-bold text-sm uppercase mb-1">Work Experience</div>
+            <div className="font-bold text-sm uppercase mb-1">
+              Work Experience
+            </div>
             {resume.experience.map((exp, idx) => (
               <div key={idx} className="mb-2">
                 <div className="font-semibold">
@@ -99,7 +114,9 @@ export function ResultsDisplay({ structured, tailoredResume, coverLetter }: Resu
                 </div>
                 <ul className="list-disc list-inside space-y-0.5">
                   {exp.achievements.map((achievement, i) => (
-                    <li key={i} className="text-xs">{achievement}</li>
+                    <li key={i} className="text-xs">
+                      {achievement}
+                    </li>
                   ))}
                 </ul>
               </div>
@@ -134,8 +151,12 @@ export function ResultsDisplay({ structured, tailoredResume, coverLetter }: Resu
         {/* Header */}
         <div>
           <div className="font-bold">{resume.contact.name}</div>
-          <div className="text-xs text-muted-foreground">{resume.contact.email}</div>
-          <div className="text-xs text-muted-foreground">{resume.contact.phone}</div>
+          <div className="text-xs text-muted-foreground">
+            {resume.contact.email}
+          </div>
+          <div className="text-xs text-muted-foreground">
+            {resume.contact.phone}
+          </div>
         </div>
 
         {/* Date */}
@@ -152,7 +173,9 @@ export function ResultsDisplay({ structured, tailoredResume, coverLetter }: Resu
 
         {/* Paragraphs */}
         {cl.paragraphs.map((para, idx) => (
-          <div key={idx} className="text-justify">{para}</div>
+          <div key={idx} className="text-justify">
+            {para}
+          </div>
         ))}
 
         {/* Closing */}
@@ -181,11 +204,6 @@ export function ResultsDisplay({ structured, tailoredResume, coverLetter }: Resu
               </CardTitle>
               <CardDescription className="text-sm md:text-base mt-2">
                 Download your personalized resume and cover letter below
-                {isStructured && (
-                  <span className="block text-xs text-green-600 mt-1">
-                    ✓ New format with perfect formatting guaranteed
-                  </span>
-                )}
               </CardDescription>
             </div>
           </div>
@@ -219,7 +237,9 @@ export function ResultsDisplay({ structured, tailoredResume, coverLetter }: Resu
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <FileText className="h-5 w-5 text-primary" />
-                <h4 className="font-semibold text-base md:text-lg">Tailored Resume</h4>
+                <h4 className="font-semibold text-base md:text-lg">
+                  Tailored Resume
+                </h4>
               </div>
               <div className="p-4 md:p-6 bg-background/50 rounded-xl max-h-96 overflow-y-auto text-xs md:text-sm border-2 shadow-inner">
                 {isStructured ? (
@@ -236,7 +256,9 @@ export function ResultsDisplay({ structured, tailoredResume, coverLetter }: Resu
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <FileText className="h-5 w-5 text-primary" />
-                <h4 className="font-semibold text-base md:text-lg">Cover Letter</h4>
+                <h4 className="font-semibold text-base md:text-lg">
+                  Cover Letter
+                </h4>
               </div>
               <div className="p-4 md:p-6 bg-background/50 rounded-xl max-h-96 overflow-y-auto text-xs md:text-sm border-2 shadow-inner">
                 {isStructured ? (
