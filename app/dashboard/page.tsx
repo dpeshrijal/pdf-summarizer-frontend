@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { UserButton, useUser, useAuth } from "@clerk/nextjs";
-import { Upload, FileText, Sparkles, Download, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import { Upload, FileText, Sparkles, Download, CheckCircle2, AlertCircle, Loader2, Clock, Building2, Briefcase, History } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -68,6 +68,38 @@ export default function Dashboard() {
     fetchPreviousResumes();
   }, [isSignedIn, isLoaded, getToken]);
 
+  // Fetch generation history on mount
+  useEffect(() => {
+    const fetchGenerationHistory = async () => {
+      if (!isSignedIn || !isLoaded) return;
+
+      try {
+        const token = await getToken();
+        if (!token) return;
+
+        const response = await fetch(
+          process.env.NEXT_PUBLIC_LIST_USER_GENERATIONS_API_URL!,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          setGenerationHistory(data.generations);
+        }
+      } catch (error) {
+        console.error("Error fetching generation history:", error);
+      } finally {
+        setIsLoadingHistory(false);
+      }
+    };
+
+    fetchGenerationHistory();
+  }, [isSignedIn, isLoaded, getToken]);
+
   // State for Step 1: Master Resume Upload
   const [masterResumeFile, setMasterResumeFile] = useState<File | null>(null);
   const [uploadStatus, setUploadStatus] = useState<string>("");
@@ -85,6 +117,17 @@ export default function Dashboard() {
   const [generationStatus, setGenerationStatus] = useState<string>("");
   const [generatedDocs, setGeneratedDocs] = useState<AIGeneratedDocs | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+
+  // State for generation history
+  const [generationHistory, setGenerationHistory] = useState<Array<{
+    jobId: string,
+    companyName: string,
+    jobTitle: string,
+    completedAt: number,
+    tailoredResume: string,
+    coverLetter: string
+  }>>([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
 
   const handleSelectPreviousResume = (resumeFileId: string) => {
     setSelectedResumeId(resumeFileId);
@@ -1057,6 +1100,144 @@ export default function Dashboard() {
             </CardContent>
           </Card>
           </div>
+        )}
+
+        {/* Generation History Section */}
+        {!isLoadingHistory && generationHistory.length > 0 && (
+          <section className="container mx-auto px-4 pb-12 md:pb-16 max-w-7xl">
+            <div className="mb-8">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-purple-500/20 to-blue-500/20 flex items-center justify-center">
+                  <History className="h-5 w-5 text-purple-500" />
+                </div>
+                <h2 className="text-2xl md:text-3xl font-bold">Generation History</h2>
+              </div>
+              <p className="text-muted-foreground">Access your previously generated resumes and cover letters</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+              {generationHistory.map((generation) => {
+                const date = new Date(generation.completedAt * 1000);
+                const formattedDate = date.toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric'
+                });
+
+                return (
+                  <Card key={generation.jobId} className="group hover:shadow-xl transition-all duration-300 border-2 hover:border-primary/30 bg-card/50 backdrop-blur-sm overflow-hidden">
+                    <CardHeader className="pb-4">
+                      <div className="flex items-start gap-3 mb-3">
+                        <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-primary/10 to-blue-500/10 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                          <Building2 className="h-6 w-6 text-primary" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-bold text-base md:text-lg truncate group-hover:text-primary transition-colors">
+                            {generation.companyName}
+                          </h3>
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                            <Briefcase className="h-3.5 w-3.5" />
+                            <span className="truncate">{generation.jobTitle}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <Clock className="h-3.5 w-3.5" />
+                        <span>{formattedDate}</span>
+                      </div>
+                    </CardHeader>
+
+                    <CardContent className="pt-0 space-y-2">
+                      <Button
+                        onClick={async () => {
+                          const { jsPDF } = await import("jspdf");
+                          const resume = generation.tailoredResume;
+                          const doc = new jsPDF();
+                          const pageWidth = doc.internal.pageSize.getWidth();
+                          const pageHeight = doc.internal.pageSize.getHeight();
+                          const margin = 15;
+                          const maxWidth = pageWidth - 2 * margin;
+                          let yPosition = margin;
+
+                          doc.setFont("helvetica");
+                          doc.setFontSize(10);
+
+                          const lines = resume.split('\n');
+                          lines.forEach((line) => {
+                            if (yPosition > pageHeight - margin) {
+                              doc.addPage();
+                              yPosition = margin;
+                            }
+
+                            const wrappedLines = doc.splitTextToSize(line || ' ', maxWidth);
+                            wrappedLines.forEach((wrappedLine: string) => {
+                              if (yPosition > pageHeight - margin) {
+                                doc.addPage();
+                                yPosition = margin;
+                              }
+                              doc.text(wrappedLine, margin, yPosition);
+                              yPosition += 5;
+                            });
+                          });
+
+                          doc.save(`${generation.companyName}_Resume_${formattedDate.replace(/\s/g, '_')}.pdf`);
+                        }}
+                        variant="outline"
+                        size="sm"
+                        className="w-full group/btn hover:bg-primary/10 hover:text-primary hover:border-primary/50"
+                      >
+                        <Download className="mr-2 h-4 w-4 group-hover/btn:animate-bounce" />
+                        Download Resume
+                      </Button>
+
+                      <Button
+                        onClick={async () => {
+                          const { jsPDF } = await import("jspdf");
+                          const coverLetter = generation.coverLetter;
+                          const doc = new jsPDF();
+                          const pageWidth = doc.internal.pageSize.getWidth();
+                          const pageHeight = doc.internal.pageSize.getHeight();
+                          const margin = 15;
+                          const maxWidth = pageWidth - 2 * margin;
+                          let yPosition = margin;
+
+                          doc.setFont("helvetica");
+                          doc.setFontSize(10);
+
+                          const lines = coverLetter.split('\n');
+                          lines.forEach((line) => {
+                            if (yPosition > pageHeight - margin) {
+                              doc.addPage();
+                              yPosition = margin;
+                            }
+
+                            const wrappedLines = doc.splitTextToSize(line || ' ', maxWidth);
+                            wrappedLines.forEach((wrappedLine: string) => {
+                              if (yPosition > pageHeight - margin) {
+                                doc.addPage();
+                                yPosition = margin;
+                              }
+                              doc.text(wrappedLine, margin, yPosition);
+                              yPosition += 5;
+                            });
+                          });
+
+                          doc.save(`${generation.companyName}_CoverLetter_${formattedDate.replace(/\s/g, '_')}.pdf`);
+                        }}
+                        variant="outline"
+                        size="sm"
+                        className="w-full group/btn hover:bg-blue-500/10 hover:text-blue-600 hover:border-blue-500/50"
+                      >
+                        <Download className="mr-2 h-4 w-4 group-hover/btn:animate-bounce" />
+                        Download Cover Letter
+                      </Button>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </section>
         )}
         </main>
 
