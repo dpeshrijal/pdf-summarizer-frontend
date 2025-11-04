@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { UserButton, useUser, useAuth } from "@clerk/nextjs";
 import { Upload, FileText, Sparkles, Download, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -643,7 +644,12 @@ export default function Dashboard() {
               </div>
               <span className="text-xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">Resumi</span>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 md:gap-4">
+              <Link href="/pricing">
+                <Button variant="ghost" size="sm" className="cursor-pointer text-xs md:text-sm">
+                  Pricing
+                </Button>
+              </Link>
               <UserButton />
             </div>
           </div>
