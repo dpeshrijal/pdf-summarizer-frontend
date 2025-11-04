@@ -26,6 +26,7 @@ export interface Education {
   institution: string;
   location?: string;
   graduationYear: string;
+  coursework?: string[]; // Relevant courses taken
 }
 
 export interface Certification {

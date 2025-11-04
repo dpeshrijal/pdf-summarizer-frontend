@@ -136,6 +136,11 @@ export function ResultsDisplay({
                 <div className="text-xs text-muted-foreground">
                   {edu.institution} ({edu.graduationYear})
                 </div>
+                {edu.coursework && edu.coursework.length > 0 && (
+                  <div className="text-xs text-muted-foreground italic">
+                    Relevant Coursework: {edu.coursework.join(", ")}
+                  </div>
+                )}
               </div>
             ))}
           </div>

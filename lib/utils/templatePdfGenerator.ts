@@ -28,14 +28,14 @@ const SPACING = {
   tightLineHeight: 4,     // Tighter line height for sub-info
 };
 
-// Page constraints
+// Page constraints - optimized margins to maximize content space
 const PAGE = {
   width: 210, // A4 width in mm
   height: 297, // A4 height in mm
-  marginLeft: 15,
-  marginRight: 15,
-  marginTop: 15,
-  marginBottom: 15,
+  marginLeft: 12,    // Reduced from 15mm to fit more content
+  marginRight: 12,
+  marginTop: 12,     // Reduced from 15mm
+  marginBottom: 12,
 };
 
 const MAX_CONTENT_WIDTH = PAGE.width - PAGE.marginLeft - PAGE.marginRight;
@@ -367,6 +367,13 @@ export const generateResumePDF = async (
       doc.setFont("helvetica", "normal");
       const eduDetails = `${edu.institution}${edu.location ? ", " + edu.location : ""} (${edu.graduationYear})`;
       addText(eduDetails, PAGE.marginLeft, FONT_SIZES.normal);
+
+      // Coursework (if present)
+      if (edu.coursework && edu.coursework.length > 0) {
+        doc.setFont("helvetica", "italic");
+        const courseworkText = `Relevant Coursework: ${edu.coursework.join(", ")}`;
+        addText(courseworkText, PAGE.marginLeft, FONT_SIZES.small);
+      }
 
       // Add space between education entries (but not after the last one)
       if (i < resume.education.length - 1) {
