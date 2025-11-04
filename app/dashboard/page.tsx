@@ -1150,39 +1150,10 @@ export default function Dashboard() {
 
                     <CardContent className="pt-0 space-y-2">
                       <Button
-                        onClick={async () => {
-                          const { jsPDF } = await import("jspdf");
-                          const resume = generation.tailoredResume;
-                          const doc = new jsPDF();
-                          const pageWidth = doc.internal.pageSize.getWidth();
-                          const pageHeight = doc.internal.pageSize.getHeight();
-                          const margin = 15;
-                          const maxWidth = pageWidth - 2 * margin;
-                          let yPosition = margin;
-
-                          doc.setFont("helvetica");
-                          doc.setFontSize(10);
-
-                          const lines = resume.split('\n');
-                          lines.forEach((line) => {
-                            if (yPosition > pageHeight - margin) {
-                              doc.addPage();
-                              yPosition = margin;
-                            }
-
-                            const wrappedLines = doc.splitTextToSize(line || ' ', maxWidth);
-                            wrappedLines.forEach((wrappedLine: string) => {
-                              if (yPosition > pageHeight - margin) {
-                                doc.addPage();
-                                yPosition = margin;
-                              }
-                              doc.text(wrappedLine, margin, yPosition);
-                              yPosition += 5;
-                            });
-                          });
-
-                          doc.save(`${generation.companyName}_Resume_${formattedDate.replace(/\s/g, '_')}.pdf`);
-                        }}
+                        onClick={() => downloadAsPDF(
+                          generation.tailoredResume,
+                          `${generation.companyName}_Resume_${formattedDate.replace(/\s/g, '_')}.pdf`
+                        )}
                         variant="outline"
                         size="sm"
                         className="w-full group/btn hover:bg-primary/10 hover:text-primary hover:border-primary/50"
@@ -1192,39 +1163,10 @@ export default function Dashboard() {
                       </Button>
 
                       <Button
-                        onClick={async () => {
-                          const { jsPDF } = await import("jspdf");
-                          const coverLetter = generation.coverLetter;
-                          const doc = new jsPDF();
-                          const pageWidth = doc.internal.pageSize.getWidth();
-                          const pageHeight = doc.internal.pageSize.getHeight();
-                          const margin = 15;
-                          const maxWidth = pageWidth - 2 * margin;
-                          let yPosition = margin;
-
-                          doc.setFont("helvetica");
-                          doc.setFontSize(10);
-
-                          const lines = coverLetter.split('\n');
-                          lines.forEach((line) => {
-                            if (yPosition > pageHeight - margin) {
-                              doc.addPage();
-                              yPosition = margin;
-                            }
-
-                            const wrappedLines = doc.splitTextToSize(line || ' ', maxWidth);
-                            wrappedLines.forEach((wrappedLine: string) => {
-                              if (yPosition > pageHeight - margin) {
-                                doc.addPage();
-                                yPosition = margin;
-                              }
-                              doc.text(wrappedLine, margin, yPosition);
-                              yPosition += 5;
-                            });
-                          });
-
-                          doc.save(`${generation.companyName}_CoverLetter_${formattedDate.replace(/\s/g, '_')}.pdf`);
-                        }}
+                        onClick={() => downloadAsPDF(
+                          generation.coverLetter,
+                          `${generation.companyName}_CoverLetter_${formattedDate.replace(/\s/g, '_')}.pdf`
+                        )}
                         variant="outline"
                         size="sm"
                         className="w-full group/btn hover:bg-blue-500/10 hover:text-blue-600 hover:border-blue-500/50"
