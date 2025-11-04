@@ -1,0 +1,24 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle with gradient -->
+  <circle cx="16" cy="16" r="16" fill="url(#gradient)"/>
+
+  <!-- Document/Resume icon -->
+  <path d="M10 6C9.44772 6 9 6.44772 9 7V25C9 25.5523 9.44772 26 10 26H22C22.5523 26 23 25.5523 23 25V11L18 6H10Z" fill="white"/>
+
+  <!-- Page fold -->
+  <path d="M18 6V10C18 10.5523 18.4477 11 19 11H23L18 6Z" fill="#E5E7EB"/>
+
+  <!-- Text lines (representing resume content) -->
+  <rect x="11.5" y="13" width="9" height="1" rx="0.5" fill="#3B82F6"/>
+  <rect x="11.5" y="16" width="7" height="0.8" rx="0.4" fill="#6B7280"/>
+  <rect x="11.5" y="18.5" width="7" height="0.8" rx="0.4" fill="#6B7280"/>
+  <rect x="11.5" y="21" width="5" height="0.8" rx="0.4" fill="#6B7280"/>
+
+  <!-- Gradient definition -->
+  <defs>
+    <linearGradient id="gradient" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#3B82F6"/>
+      <stop offset="100%" stop-color="#1D4ED8"/>
+    </linearGradient>
+  </defs>
+</svg>
