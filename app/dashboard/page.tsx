@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { UserButton, useUser, useAuth } from "@clerk/nextjs";
-import { Upload, FileText, Sparkles, Download, CheckCircle2, AlertCircle, Loader2, Clock, Building2, History } from "lucide-react";
+import { Upload, FileText, Sparkles, Download, CheckCircle2, AlertCircle, Loader2, Clock, Building2, History, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -129,6 +129,21 @@ export default function Dashboard() {
     coverLetter: string
   }>>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  // Calculate pagination
+  const totalPages = Math.ceil(generationHistory.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedHistory = generationHistory.slice(startIndex, endIndex);
+
+  // Reset to page 1 when history updates
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [generationHistory.length]);
 
   const handleSelectPreviousResume = (resumeFileId: string) => {
     setSelectedResumeId(resumeFileId);
@@ -1138,7 +1153,7 @@ export default function Dashboard() {
 
             <Card className="border-2 bg-card/50 backdrop-blur-sm overflow-hidden">
               <div className="divide-y divide-border/50">
-                {generationHistory.map((generation) => {
+                {paginatedHistory.map((generation) => {
                   const date = new Date(generation.completedAt * 1000);
                   const formattedDate = date.toLocaleDateString('en-US', {
                     month: 'short',
@@ -1206,6 +1221,74 @@ export default function Dashboard() {
                 })}
               </div>
             </Card>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <p className="text-sm text-muted-foreground">
+                  Showing {startIndex + 1}-{Math.min(endIndex, generationHistory.length)} of {generationHistory.length} generations
+                </p>
+
+                <div className="flex items-center gap-2">
+                  <Button
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
+                    variant="outline"
+                    size="sm"
+                    className="gap-1"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    <span className="hidden sm:inline">Previous</span>
+                  </Button>
+
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                      // Show first page, last page, current page, and pages around current
+                      const showPage = page === 1 ||
+                                      page === totalPages ||
+                                      Math.abs(page - currentPage) <= 1;
+
+                      // Show ellipsis
+                      const showEllipsisBefore = page === currentPage - 2 && currentPage > 3;
+                      const showEllipsisAfter = page === currentPage + 2 && currentPage < totalPages - 2;
+
+                      if (showEllipsisBefore || showEllipsisAfter) {
+                        return (
+                          <span key={page} className="px-2 text-muted-foreground">
+                            ...
+                          </span>
+                        );
+                      }
+
+                      if (!showPage) return null;
+
+                      return (
+                        <Button
+                          key={page}
+                          onClick={() => setCurrentPage(page)}
+                          variant={currentPage === page ? "default" : "outline"}
+                          size="sm"
+                          className="w-9 h-9 p-0"
+                        >
+                          {page}
+                        </Button>
+                      );
+                    })}
+                  </div>
+
+                  <Button
+                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                    disabled={currentPage === totalPages}
+                    variant="outline"
+                    size="sm"
+                    className="gap-1"
+                  >
+                    <span className="hidden sm:inline">Next</span>
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
           </section>
         )}
         </main>
