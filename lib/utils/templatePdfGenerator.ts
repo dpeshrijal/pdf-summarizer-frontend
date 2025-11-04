@@ -227,7 +227,131 @@ export const generateResumePDF = async (
     }
   }
 
-  // 5. EDUCATION
+  // 5. PROJECTS (if present)
+  if (resume.projects && resume.projects.length > 0 && addSectionHeader("PROJECTS")) {
+    for (let i = 0; i < resume.projects.length; i++) {
+      const proj = resume.projects[i];
+      if (!fitsOnPage(10)) break;
+
+      // Project name (bold) and date (normal, right-aligned) on same line
+      doc.setFontSize(FONT_SIZES.jobTitle);
+      doc.setFont("helvetica", "bold");
+      doc.text(proj.name, PAGE.marginLeft, yPos);
+
+      if (proj.date) {
+        doc.setFontSize(FONT_SIZES.normal);
+        doc.setFont("helvetica", "normal");
+        const dateWidth = doc.getTextWidth(proj.date);
+        doc.text(proj.date, PAGE.width - PAGE.marginRight - dateWidth, yPos);
+      }
+
+      yPos += SPACING.tightLineHeight;
+
+      // Description
+      doc.setFontSize(FONT_SIZES.normal);
+      doc.setFont("helvetica", "normal");
+      addText(proj.description, PAGE.marginLeft, FONT_SIZES.normal);
+
+      // Technologies (if present)
+      if (proj.technologies && proj.technologies.length > 0) {
+        doc.setFont("helvetica", "italic");
+        const techText = `Technologies: ${proj.technologies.join(", ")}`;
+        addText(techText, PAGE.marginLeft, FONT_SIZES.small);
+      }
+
+      // URL (if present)
+      if (proj.url) {
+        doc.setFont("helvetica", "normal");
+        addText(proj.url, PAGE.marginLeft, FONT_SIZES.small);
+      }
+
+      if (i < resume.projects.length - 1) {
+        yPos += SPACING.betweenEducation;
+      }
+    }
+  }
+
+  // 6. PUBLICATIONS (if present)
+  if (resume.publications && resume.publications.length > 0 && addSectionHeader("PUBLICATIONS")) {
+    for (let i = 0; i < resume.publications.length; i++) {
+      const pub = resume.publications[i];
+      if (!fitsOnPage(8)) break;
+
+      // Title (bold)
+      doc.setFontSize(FONT_SIZES.normal);
+      doc.setFont("helvetica", "bold");
+      addText(pub.title, PAGE.marginLeft, FONT_SIZES.normal);
+
+      // Authors, venue, date (normal)
+      doc.setFont("helvetica", "normal");
+      const pubDetails = `${pub.authors}. ${pub.venue}, ${pub.date}`;
+      addText(pubDetails, PAGE.marginLeft, FONT_SIZES.small);
+
+      if (i < resume.publications.length - 1) {
+        yPos += SPACING.betweenEducation;
+      }
+    }
+  }
+
+  // 7. CERTIFICATIONS (if present)
+  if (resume.certifications && resume.certifications.length > 0 && addSectionHeader("CERTIFICATIONS")) {
+    for (let i = 0; i < resume.certifications.length; i++) {
+      const cert = resume.certifications[i];
+      if (!fitsOnPage(8)) break;
+
+      // Certification name (bold)
+      doc.setFontSize(FONT_SIZES.normal);
+      doc.setFont("helvetica", "bold");
+      doc.text(cert.name, PAGE.marginLeft, yPos);
+      yPos += SPACING.tightLineHeight;
+
+      // Issuer and date (normal weight)
+      doc.setFont("helvetica", "normal");
+      let certDetails = cert.issuer;
+      if (cert.date) {
+        certDetails += ` | ${cert.date}`;
+      }
+      if (cert.expiryDate) {
+        certDetails += ` - ${cert.expiryDate}`;
+      }
+      if (cert.credentialId) {
+        certDetails += ` | ID: ${cert.credentialId}`;
+      }
+      addText(certDetails, PAGE.marginLeft, FONT_SIZES.normal);
+
+      if (i < resume.certifications.length - 1) {
+        yPos += SPACING.betweenEducation;
+      }
+    }
+  }
+
+  // 8. AWARDS (if present)
+  if (resume.awards && resume.awards.length > 0 && addSectionHeader("AWARDS & HONORS")) {
+    for (let i = 0; i < resume.awards.length; i++) {
+      const award = resume.awards[i];
+      if (!fitsOnPage(8)) break;
+
+      // Award title (bold)
+      doc.setFontSize(FONT_SIZES.normal);
+      doc.setFont("helvetica", "bold");
+      doc.text(award.title, PAGE.marginLeft, yPos);
+      yPos += SPACING.tightLineHeight;
+
+      // Issuer and date
+      doc.setFont("helvetica", "normal");
+      let awardDetails = `${award.issuer} | ${award.date}`;
+      if (award.description) {
+        awardDetails += ` - ${award.description}`;
+      }
+      addText(awardDetails, PAGE.marginLeft, FONT_SIZES.normal);
+
+      if (i < resume.awards.length - 1) {
+        yPos += SPACING.betweenEducation;
+      }
+    }
+  }
+
+  // 9. EDUCATION
   if (resume.education.length > 0 && addSectionHeader("EDUCATION")) {
     for (let i = 0; i < resume.education.length; i++) {
       const edu = resume.education[i];
@@ -249,6 +373,95 @@ export const generateResumePDF = async (
         yPos += SPACING.betweenEducation;
       }
     }
+  }
+
+  // 10. VOLUNTEER EXPERIENCE (if present)
+  if (resume.volunteerExperience && resume.volunteerExperience.length > 0 && addSectionHeader("VOLUNTEER EXPERIENCE")) {
+    for (let i = 0; i < resume.volunteerExperience.length; i++) {
+      const vol = resume.volunteerExperience[i];
+      if (!fitsOnPage(12)) break;
+
+      // Role (bold) and date (normal, right-aligned) on same line
+      doc.setFontSize(FONT_SIZES.jobTitle);
+      doc.setFont("helvetica", "bold");
+      doc.text(vol.role, PAGE.marginLeft, yPos);
+
+      doc.setFontSize(FONT_SIZES.normal);
+      doc.setFont("helvetica", "normal");
+      const dateText = `${vol.startDate} - ${vol.endDate}`;
+      const dateWidth = doc.getTextWidth(dateText);
+      doc.text(dateText, PAGE.width - PAGE.marginRight - dateWidth, yPos);
+
+      yPos += SPACING.tightLineHeight;
+
+      // Organization (normal)
+      doc.setFontSize(FONT_SIZES.company);
+      doc.setFont("helvetica", "normal");
+      doc.text(vol.organization, PAGE.marginLeft, yPos);
+      yPos += SPACING.lineHeight;
+
+      // Description bullets
+      doc.setFontSize(FONT_SIZES.normal);
+      for (const desc of vol.description) {
+        if (!fitsOnPage(6)) break;
+        doc.text("•", PAGE.marginLeft, yPos);
+        const descLines = doc.splitTextToSize(desc, MAX_CONTENT_WIDTH - SPACING.bulletIndent);
+        for (let j = 0; j < descLines.length; j++) {
+          if (!fitsOnPage(5)) break;
+          doc.text(descLines[j], PAGE.marginLeft + SPACING.bulletIndent, yPos);
+          yPos += SPACING.lineHeight;
+        }
+      }
+
+      if (i < resume.volunteerExperience.length - 1) {
+        yPos += SPACING.betweenJobs;
+      }
+    }
+  }
+
+  // 11. PROFESSIONAL MEMBERSHIPS (if present)
+  if (resume.professionalMemberships && resume.professionalMemberships.length > 0 && addSectionHeader("PROFESSIONAL MEMBERSHIPS")) {
+    for (let i = 0; i < resume.professionalMemberships.length; i++) {
+      const memb = resume.professionalMemberships[i];
+      if (!fitsOnPage(6)) break;
+
+      // Organization (bold)
+      doc.setFontSize(FONT_SIZES.normal);
+      doc.setFont("helvetica", "bold");
+      doc.text(memb.organization, PAGE.marginLeft, yPos);
+      yPos += SPACING.tightLineHeight;
+
+      // Role and dates (normal)
+      doc.setFont("helvetica", "normal");
+      let membDetails = "";
+      if (memb.role) {
+        membDetails = memb.role;
+      }
+      if (memb.startDate) {
+        membDetails += membDetails ? ` | ${memb.startDate}` : memb.startDate;
+        if (memb.endDate) {
+          membDetails += ` - ${memb.endDate}`;
+        }
+      }
+      if (membDetails) {
+        addText(membDetails, PAGE.marginLeft, FONT_SIZES.normal);
+      }
+
+      if (i < resume.professionalMemberships.length - 1) {
+        yPos += SPACING.betweenEducation;
+      }
+    }
+  }
+
+  // 12. LANGUAGES (if present)
+  if (resume.languages && resume.languages.length > 0 && addSectionHeader("LANGUAGES")) {
+    doc.setFontSize(FONT_SIZES.normal);
+    doc.setFont("helvetica", "normal");
+
+    // Display languages in a compact format
+    const langTexts = resume.languages.map(lang => `${lang.language} (${lang.proficiency})`);
+    const langLine = langTexts.join(" | ");
+    addText(langLine, PAGE.marginLeft, FONT_SIZES.normal);
   }
 
   // Save

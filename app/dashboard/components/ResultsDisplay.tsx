@@ -140,6 +140,129 @@ export function ResultsDisplay({
             ))}
           </div>
         )}
+
+        {/* Projects */}
+        {resume.projects && resume.projects.length > 0 && (
+          <div>
+            <div className="font-bold text-sm uppercase mb-1">Projects</div>
+            {resume.projects.map((proj, idx) => (
+              <div key={idx} className="mb-2">
+                <div className="font-semibold">{proj.name}</div>
+                <div className="text-xs">{proj.description}</div>
+                {proj.technologies && (
+                  <div className="text-xs text-muted-foreground italic">
+                    Technologies: {proj.technologies.join(", ")}
+                  </div>
+                )}
+                {proj.url && (
+                  <div className="text-xs text-muted-foreground">{proj.url}</div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Publications */}
+        {resume.publications && resume.publications.length > 0 && (
+          <div>
+            <div className="font-bold text-sm uppercase mb-1">Publications</div>
+            {resume.publications.map((pub, idx) => (
+              <div key={idx} className="mb-1">
+                <div className="font-semibold">{pub.title}</div>
+                <div className="text-xs text-muted-foreground">
+                  {pub.authors}. {pub.venue}, {pub.date}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Certifications */}
+        {resume.certifications && resume.certifications.length > 0 && (
+          <div>
+            <div className="font-bold text-sm uppercase mb-1">Certifications</div>
+            {resume.certifications.map((cert, idx) => (
+              <div key={idx} className="mb-1">
+                <div className="font-semibold">{cert.name}</div>
+                <div className="text-xs text-muted-foreground">
+                  {cert.issuer}
+                  {cert.date && ` | ${cert.date}`}
+                  {cert.expiryDate && ` - ${cert.expiryDate}`}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Awards */}
+        {resume.awards && resume.awards.length > 0 && (
+          <div>
+            <div className="font-bold text-sm uppercase mb-1">Awards & Honors</div>
+            {resume.awards.map((award, idx) => (
+              <div key={idx} className="mb-1">
+                <div className="font-semibold">{award.title}</div>
+                <div className="text-xs text-muted-foreground">
+                  {award.issuer} | {award.date}
+                  {award.description && ` - ${award.description}`}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Volunteer Experience */}
+        {resume.volunteerExperience && resume.volunteerExperience.length > 0 && (
+          <div>
+            <div className="font-bold text-sm uppercase mb-1">Volunteer Experience</div>
+            {resume.volunteerExperience.map((vol, idx) => (
+              <div key={idx} className="mb-2">
+                <div className="font-semibold">{vol.role}, {vol.organization}</div>
+                <div className="text-xs text-muted-foreground mb-1">
+                  {vol.startDate} - {vol.endDate}
+                </div>
+                <ul className="list-disc list-inside space-y-0.5">
+                  {vol.description.map((desc, i) => (
+                    <li key={i} className="text-xs">{desc}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Professional Memberships */}
+        {resume.professionalMemberships && resume.professionalMemberships.length > 0 && (
+          <div>
+            <div className="font-bold text-sm uppercase mb-1">Professional Memberships</div>
+            {resume.professionalMemberships.map((memb, idx) => (
+              <div key={idx} className="mb-1">
+                <div className="font-semibold">{memb.organization}</div>
+                {memb.role && (
+                  <div className="text-xs text-muted-foreground">
+                    {memb.role}
+                    {memb.startDate && ` | ${memb.startDate}`}
+                    {memb.endDate && ` - ${memb.endDate}`}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Languages */}
+        {resume.languages && resume.languages.length > 0 && (
+          <div>
+            <div className="font-bold text-sm uppercase mb-1">Languages</div>
+            <div className="text-xs">
+              {resume.languages.map((lang, idx) => (
+                <span key={idx}>
+                  {lang.language} ({lang.proficiency})
+                  {idx < (resume.languages?.length || 0) - 1 && " | "}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     );
   };
