@@ -89,7 +89,7 @@ export default function Dashboard() {
   const handleSelectPreviousResume = (resumeFileId: string) => {
     setSelectedResumeId(resumeFileId);
     setFileId(resumeFileId);
-    setUploadStatus("Resume selected! You can now proceed to Step 2.");
+    setUploadStatus("Resume selected successfully! You can now proceed to Step 2.");
     setGeneratedDocs(null);
     setShowUploadNew(false);
   };
