@@ -108,7 +108,18 @@ export interface CoverLetterData {
   position: string;
 }
 
+export interface MatchScore {
+  overallScore: number; // 0-100 percentage
+  skillsMatch: number; // 0-100 percentage
+  experienceMatch: number; // 0-100 percentage
+  educationMatch: number; // 0-100 percentage
+  summary: string; // Brief explanation of the score
+  strengths: string[]; // What matches well
+  gaps: string[]; // What's missing or weak
+}
+
 export interface GenerationOutput {
   resume: StructuredResume;
   coverLetter: CoverLetterData;
+  matchScore: MatchScore; // ATS match analysis
 }

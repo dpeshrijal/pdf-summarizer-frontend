@@ -8,6 +8,7 @@ import { downloadAsPDF } from "@/lib/utils/pdfGenerator";
 import { generateResumePDF, generateCoverLetterPDF } from "@/lib/utils/templatePdfGenerator";
 import type { Generation } from "@/lib/utils/dashboardApi";
 import type { GenerationOutput } from "@/lib/types/resumeSchema";
+import { MatchScoreDisplay } from "./MatchScoreDisplay";
 
 interface GenerationHistoryProps {
   history: Generation[];
@@ -57,6 +58,17 @@ export function GenerationHistory({ history }: GenerationHistoryProps) {
               year: "numeric",
             });
 
+            // Parse structured data to get match score
+            let matchScore = null;
+            if (generation.structuredData) {
+              try {
+                const parsed: GenerationOutput = JSON.parse(generation.structuredData);
+                matchScore = parsed.matchScore;
+              } catch (e) {
+                // Ignore parsing errors
+              }
+            }
+
             return (
               <div
                 key={generation.jobId}
@@ -89,6 +101,13 @@ export function GenerationHistory({ history }: GenerationHistoryProps) {
                     </span>
                   </div>
                 </div>
+
+                {/* Match Score - Hidden on mobile */}
+                {matchScore && (
+                  <div className="hidden lg:block flex-shrink-0">
+                    <MatchScoreDisplay matchScore={matchScore} compact />
+                  </div>
+                )}
 
                 {/* Action Buttons */}
                 <div className="flex items-center gap-2 flex-shrink-0">

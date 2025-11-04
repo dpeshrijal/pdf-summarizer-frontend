@@ -15,6 +15,7 @@ import {
   generateCoverLetterPDF,
 } from "@/lib/utils/templatePdfGenerator";
 import type { GenerationOutput } from "@/lib/types/resumeSchema";
+import { MatchScoreDisplay } from "./MatchScoreDisplay";
 
 interface ResultsDisplayProps {
   // New structured format
@@ -339,6 +340,11 @@ export function ResultsDisplay({
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
+          {/* Match Score - only for structured format */}
+          {isStructured && structured?.matchScore && (
+            <MatchScoreDisplay matchScore={structured.matchScore} />
+          )}
+
           {/* Download Buttons */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
             <Button
