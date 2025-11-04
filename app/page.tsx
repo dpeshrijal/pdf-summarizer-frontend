@@ -39,6 +39,9 @@ export default function LandingPage() {
               <span className="text-xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">Resumi</span>
             </Link>
             <div className="flex items-center gap-3">
+              <Link href="/pricing" className="cursor-pointer">
+                <Button variant="ghost" className="hidden sm:inline-flex cursor-pointer">Pricing</Button>
+              </Link>
               <Link href="/sign-in" className="cursor-pointer">
                 <Button variant="ghost" className="hidden sm:inline-flex cursor-pointer">Sign In</Button>
               </Link>
