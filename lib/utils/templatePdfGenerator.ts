@@ -10,12 +10,12 @@ import type {
 
 // Font sizes (can be adjusted for space constraints)
 const FONT_SIZES = {
-  name: 18,
-  sectionHeader: 11,
-  jobTitle: 10.5,
-  company: 10,
-  normal: 10,
-  small: 9,
+  name: 20,
+  sectionHeader: 14,
+  jobTitle: 11,
+  company: 10.5,
+  normal: 10.5,
+  small: 10,
 };
 
 // Spacing constants - more natural spacing
@@ -35,10 +35,10 @@ const SPACING = {
 const PAGE = {
   width: 210, // A4 width in mm
   height: 297, // A4 height in mm
-  marginLeft: 18, // Reduced from 15mm to fit more content
-  marginRight: 18,
-  marginTop: 18, // Reduced from 15mm
-  marginBottom: 18,
+  marginLeft: 20, // Reduced from 15mm to fit more content
+  marginRight: 20,
+  marginTop: 20, // Reduced from 15mm
+  marginBottom: 20,
 };
 
 const MAX_CONTENT_WIDTH = PAGE.width - PAGE.marginLeft - PAGE.marginRight;
