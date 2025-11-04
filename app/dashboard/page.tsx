@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { UserButton, useUser, useAuth } from "@clerk/nextjs";
-import { Upload, FileText, Sparkles, Download, CheckCircle2, AlertCircle, Loader2, Clock, Building2, Briefcase, History } from "lucide-react";
+import { Upload, FileText, Sparkles, Download, CheckCircle2, AlertCircle, Loader2, Clock, Building2, History } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -1102,83 +1102,89 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Generation History Section */}
+        {/* Generation History Section - Modern List View */}
         {!isLoadingHistory && generationHistory.length > 0 && (
           <section className="container mx-auto px-4 pb-12 md:pb-16 max-w-7xl">
-            <div className="mb-8">
+            <div className="mb-6">
               <div className="flex items-center gap-3 mb-2">
                 <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-purple-500/20 to-blue-500/20 flex items-center justify-center">
                   <History className="h-5 w-5 text-purple-500" />
                 </div>
                 <h2 className="text-2xl md:text-3xl font-bold">Generation History</h2>
               </div>
-              <p className="text-muted-foreground">Access your previously generated resumes and cover letters</p>
+              <p className="text-sm text-muted-foreground">Access your previously generated resumes and cover letters</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-              {generationHistory.map((generation) => {
-                const date = new Date(generation.completedAt * 1000);
-                const formattedDate = date.toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                  year: 'numeric'
-                });
+            <Card className="border-2 bg-card/50 backdrop-blur-sm overflow-hidden">
+              <div className="divide-y divide-border/50">
+                {generationHistory.map((generation) => {
+                  const date = new Date(generation.completedAt * 1000);
+                  const formattedDate = date.toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                  });
 
-                return (
-                  <Card key={generation.jobId} className="group hover:shadow-xl transition-all duration-300 border-2 hover:border-primary/30 bg-card/50 backdrop-blur-sm overflow-hidden">
-                    <CardHeader className="pb-4">
-                      <div className="flex items-start gap-3 mb-3">
-                        <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-primary/10 to-blue-500/10 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                          <Building2 className="h-6 w-6 text-primary" />
-                        </div>
-                        <div className="flex-1 min-w-0">
+                  return (
+                    <div
+                      key={generation.jobId}
+                      className="group flex items-center gap-3 md:gap-6 p-4 md:p-5 hover:bg-primary/5 transition-all duration-200"
+                    >
+                      {/* Icon - Hidden on mobile */}
+                      <div className="hidden sm:flex h-12 w-12 rounded-xl bg-gradient-to-br from-primary/10 to-blue-500/10 items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                        <Building2 className="h-6 w-6 text-primary" />
+                      </div>
+
+                      {/* Company & Position Info */}
+                      <div className="flex-1 min-w-0 space-y-1">
+                        <div className="flex items-baseline gap-2">
                           <h3 className="font-bold text-base md:text-lg truncate group-hover:text-primary transition-colors">
                             {generation.companyName}
                           </h3>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-                            <Briefcase className="h-3.5 w-3.5" />
-                            <span className="truncate">{generation.jobTitle}</span>
-                          </div>
+                          <span className="hidden md:inline text-xs text-muted-foreground">•</span>
+                          <span className="hidden md:inline text-sm text-muted-foreground truncate">{generation.jobTitle}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
+                          <Clock className="h-3 w-3 md:h-3.5 md:w-3.5" />
+                          <span>{formattedDate}</span>
+                          <span className="md:hidden">•</span>
+                          <span className="md:hidden truncate text-xs">{generation.jobTitle}</span>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <Clock className="h-3.5 w-3.5" />
-                        <span>{formattedDate}</span>
+                      {/* Action Buttons */}
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <Button
+                          onClick={() => downloadAsPDF(
+                            generation.tailoredResume,
+                            `${generation.companyName}_Resume_${formattedDate.replace(/\s/g, '_')}.pdf`
+                          )}
+                          variant="outline"
+                          size="sm"
+                          className="group/btn hover:bg-primary/10 hover:text-primary hover:border-primary/50 whitespace-nowrap"
+                        >
+                          <Download className="h-4 w-4 md:mr-2 group-hover/btn:animate-bounce" />
+                          <span className="hidden md:inline">Resume</span>
+                        </Button>
+
+                        <Button
+                          onClick={() => downloadAsPDF(
+                            generation.coverLetter,
+                            `${generation.companyName}_CoverLetter_${formattedDate.replace(/\s/g, '_')}.pdf`
+                          )}
+                          variant="outline"
+                          size="sm"
+                          className="group/btn hover:bg-blue-500/10 hover:text-blue-600 hover:border-blue-500/50 whitespace-nowrap"
+                        >
+                          <Download className="h-4 w-4 md:mr-2 group-hover/btn:animate-bounce" />
+                          <span className="hidden md:inline">Cover Letter</span>
+                        </Button>
                       </div>
-                    </CardHeader>
-
-                    <CardContent className="pt-0 space-y-2">
-                      <Button
-                        onClick={() => downloadAsPDF(
-                          generation.tailoredResume,
-                          `${generation.companyName}_Resume_${formattedDate.replace(/\s/g, '_')}.pdf`
-                        )}
-                        variant="outline"
-                        size="sm"
-                        className="w-full group/btn hover:bg-primary/10 hover:text-primary hover:border-primary/50"
-                      >
-                        <Download className="mr-2 h-4 w-4 group-hover/btn:animate-bounce" />
-                        Download Resume
-                      </Button>
-
-                      <Button
-                        onClick={() => downloadAsPDF(
-                          generation.coverLetter,
-                          `${generation.companyName}_CoverLetter_${formattedDate.replace(/\s/g, '_')}.pdf`
-                        )}
-                        variant="outline"
-                        size="sm"
-                        className="w-full group/btn hover:bg-blue-500/10 hover:text-blue-600 hover:border-blue-500/50"
-                      >
-                        <Download className="mr-2 h-4 w-4 group-hover/btn:animate-bounce" />
-                        Download Cover Letter
-                      </Button>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </Card>
           </section>
         )}
         </main>
