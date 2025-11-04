@@ -139,7 +139,7 @@ export function GenerationHistory({ history }: GenerationHistoryProps) {
                             {
                               name: parsed.resume.contact.name,
                               email: parsed.resume.contact.email,
-                              phone: parsed.resume.contact.phone,
+                              phone: parsed.resume.contact.phone || "", // Default to empty string if not provided
                             },
                             `${generation.companyName}_CoverLetter_${formattedDate.replace(/\s/g, "_")}.pdf`
                           );
