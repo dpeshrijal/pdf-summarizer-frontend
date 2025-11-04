@@ -523,30 +523,48 @@ export default function Home() {
           doc.setFontSize(11);
           doc.setFont("helvetica", "bold");
 
-          // Check if title+company+location fits, if not truncate
-          const maxTitleWidth = maxLineWidth - doc.getTextWidth(datePart) - 5; // Leave space for date
-          const titleLines = doc.splitTextToSize(
-            titleCompanyLocation,
-            maxTitleWidth
-          );
-
-          doc.text(titleLines[0], marginLeft, yPosition);
-
-          // Date on the right (normal weight, size 10)
+          // Calculate date width first to reserve space
           doc.setFont("helvetica", "normal");
           doc.setFontSize(10);
           const dateWidth = doc.getTextWidth(datePart);
-          doc.text(datePart, pageWidth - marginRight - dateWidth, yPosition);
 
-          // If title wrapped, add additional lines
-          if (titleLines.length > 1) {
-            yPosition += 5;
-            doc.setFontSize(11);
-            doc.setFont("helvetica", "bold");
-            for (let i = 1; i < titleLines.length; i++) {
+          // Reset to bold for title
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(11);
+
+          // Check if title+company+location fits on one line with date
+          const maxTitleWidthWithDate = maxLineWidth - dateWidth - 5; // Leave space for date
+          const testLines = doc.splitTextToSize(
+            titleCompanyLocation,
+            maxTitleWidthWithDate
+          );
+
+          if (testLines.length === 1) {
+            // Single line: print title and date on same line
+            doc.text(testLines[0], marginLeft, yPosition);
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(10);
+            doc.text(datePart, pageWidth - marginRight - dateWidth, yPosition);
+          } else {
+            // Multiple lines needed: wrap using full width for all lines, then put date on separate line
+            const titleLines = doc.splitTextToSize(
+              titleCompanyLocation,
+              maxLineWidth
+            );
+
+            // Print all title lines
+            for (let i = 0; i < titleLines.length; i++) {
+              doc.setFontSize(11);
+              doc.setFont("helvetica", "bold");
               doc.text(titleLines[i], marginLeft, yPosition);
               yPosition += 5;
             }
+
+            // Print date on a new line, right-aligned
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(10);
+            doc.text(datePart, pageWidth - marginRight - dateWidth, yPosition);
+            yPosition -= 5; // Adjust back to maintain consistent spacing
           }
         } else {
           // Fallback if pattern doesn't match
