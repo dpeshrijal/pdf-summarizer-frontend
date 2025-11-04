@@ -231,15 +231,21 @@ export default function Dashboard() {
             clearInterval(pollInterval);
 
             // Handle both new structured format and old text format
+            console.log("Status data received:", statusData);
+            console.log("Has structuredData?", !!statusData.structuredData);
+
             if (statusData.structuredData) {
               // New format: parse JSON string
               try {
+                console.log("Parsing structured data...");
                 const parsedData: GenerationOutput = JSON.parse(statusData.structuredData);
+                console.log("Parsed data:", parsedData);
                 setGeneratedDocs({
                   structured: parsedData,
                 });
               } catch (e) {
                 console.error("Failed to parse structured data:", e);
+                console.log("Raw structuredData:", statusData.structuredData);
                 // Fallback to old format if parsing fails
                 setGeneratedDocs({
                   tailoredResume: statusData.tailoredResume,
@@ -248,6 +254,7 @@ export default function Dashboard() {
               }
             } else {
               // Old format: use text directly
+              console.log("Using old text format");
               setGeneratedDocs({
                 tailoredResume: statusData.tailoredResume,
                 coverLetter: statusData.coverLetter,
