@@ -1,0 +1,204 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { History, Building2, Clock, Download, ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { downloadAsPDF } from "@/lib/utils/pdfGenerator";
+import type { Generation } from "@/lib/utils/dashboardApi";
+
+interface GenerationHistoryProps {
+  history: Generation[];
+}
+
+export function GenerationHistory({ history }: GenerationHistoryProps) {
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  // Calculate pagination
+  const totalPages = Math.ceil(history.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedHistory = history.slice(startIndex, endIndex);
+
+  // Reset to page 1 when history updates
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [history.length]);
+
+  if (history.length === 0) {
+    return null;
+  }
+
+  return (
+    <section className="container mx-auto px-4 pb-12 md:pb-16 max-w-7xl mt-12 md:mt-16">
+      <div className="mb-6">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-purple-500/20 to-blue-500/20 flex items-center justify-center">
+            <History className="h-5 w-5 text-purple-500" />
+          </div>
+          <h2 className="text-2xl md:text-3xl font-bold">Generation History</h2>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          Access your previously generated resumes and cover letters
+        </p>
+      </div>
+
+      <Card className="border-2 bg-card/50 backdrop-blur-sm overflow-hidden">
+        <div className="divide-y divide-border/50">
+          {paginatedHistory.map((generation) => {
+            const date = new Date(generation.completedAt * 1000);
+            const formattedDate = date.toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+            });
+
+            return (
+              <div
+                key={generation.jobId}
+                className="group flex items-center gap-3 md:gap-6 p-4 md:p-5 hover:bg-primary/5 transition-all duration-200"
+              >
+                {/* Icon - Hidden on mobile */}
+                <div className="hidden sm:flex h-12 w-12 rounded-xl bg-gradient-to-br from-primary/10 to-blue-500/10 items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                  <Building2 className="h-6 w-6 text-primary" />
+                </div>
+
+                {/* Company & Position Info */}
+                <div className="flex-1 min-w-0 space-y-1">
+                  <div className="flex items-baseline gap-2">
+                    <h3 className="font-bold text-base md:text-lg truncate group-hover:text-primary transition-colors">
+                      {generation.companyName}
+                    </h3>
+                    <span className="hidden md:inline text-xs text-muted-foreground">
+                      •
+                    </span>
+                    <span className="hidden md:inline text-sm text-muted-foreground truncate">
+                      {generation.jobTitle}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
+                    <Clock className="h-3 w-3 md:h-3.5 md:w-3.5" />
+                    <span>{formattedDate}</span>
+                    <span className="md:hidden">•</span>
+                    <span className="md:hidden truncate text-xs">
+                      {generation.jobTitle}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <Button
+                    onClick={() =>
+                      downloadAsPDF(
+                        generation.tailoredResume,
+                        `${generation.companyName}_Resume_${formattedDate.replace(/\s/g, "_")}.pdf`
+                      )
+                    }
+                    variant="outline"
+                    size="sm"
+                    className="group/btn hover:bg-primary/10 hover:text-primary hover:border-primary/50 whitespace-nowrap"
+                  >
+                    <Download className="h-4 w-4 md:mr-2 group-hover/btn:animate-bounce" />
+                    <span className="hidden md:inline">Resume</span>
+                  </Button>
+
+                  <Button
+                    onClick={() =>
+                      downloadAsPDF(
+                        generation.coverLetter,
+                        `${generation.companyName}_CoverLetter_${formattedDate.replace(/\s/g, "_")}.pdf`
+                      )
+                    }
+                    variant="outline"
+                    size="sm"
+                    className="group/btn hover:bg-blue-500/10 hover:text-blue-600 hover:border-blue-500/50 whitespace-nowrap"
+                  >
+                    <Download className="h-4 w-4 md:mr-2 group-hover/btn:animate-bounce" />
+                    <span className="hidden md:inline">Cover Letter</span>
+                  </Button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </Card>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-sm text-muted-foreground">
+            Showing {startIndex + 1}-{Math.min(endIndex, history.length)} of{" "}
+            {history.length} generations
+          </p>
+
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+              variant="outline"
+              size="sm"
+              className="gap-1"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              <span className="hidden sm:inline">Previous</span>
+            </Button>
+
+            <div className="flex items-center gap-1">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                // Show first page, last page, current page, and pages around current
+                const showPage =
+                  page === 1 ||
+                  page === totalPages ||
+                  Math.abs(page - currentPage) <= 1;
+
+                // Show ellipsis
+                const showEllipsisBefore =
+                  page === currentPage - 2 && currentPage > 3;
+                const showEllipsisAfter =
+                  page === currentPage + 2 && currentPage < totalPages - 2;
+
+                if (showEllipsisBefore || showEllipsisAfter) {
+                  return (
+                    <span key={page} className="px-2 text-muted-foreground">
+                      ...
+                    </span>
+                  );
+                }
+
+                if (!showPage) return null;
+
+                return (
+                  <Button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    variant={currentPage === page ? "default" : "outline"}
+                    size="sm"
+                    className="w-9 h-9 p-0"
+                  >
+                    {page}
+                  </Button>
+                );
+              })}
+            </div>
+
+            <Button
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+              }
+              disabled={currentPage === totalPages}
+              variant="outline"
+              size="sm"
+              className="gap-1"
+            >
+              <span className="hidden sm:inline">Next</span>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
