@@ -789,7 +789,12 @@ export default function Dashboard() {
                   </div>
 
                   <Button
-                    onClick={() => setShowUploadNew(true)}
+                    onClick={() => {
+                      setShowUploadNew(true);
+                      setUploadStatus("");
+                      setSelectedResumeId(null);
+                      setFileId(null);
+                    }}
                     variant="outline"
                     className="w-full"
                   >
