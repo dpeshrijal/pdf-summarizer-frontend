@@ -38,16 +38,16 @@ export default function LandingPage() {
               </div>
               <span className="text-xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">Resumi</span>
             </Link>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 md:gap-3">
               <Link href="/pricing" className="cursor-pointer">
-                <Button variant="ghost" className="hidden sm:inline-flex cursor-pointer">Pricing</Button>
+                <Button variant="ghost" size="sm" className="cursor-pointer text-xs md:text-sm">Pricing</Button>
               </Link>
               <Link href="/sign-in" className="cursor-pointer">
-                <Button variant="ghost" className="hidden sm:inline-flex cursor-pointer">Sign In</Button>
+                <Button variant="ghost" size="sm" className="hidden sm:inline-flex cursor-pointer">Sign In</Button>
               </Link>
               <Link href="/sign-up" className="cursor-pointer">
-                <Button className="shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all cursor-pointer">
-                  Get Started <ArrowRight className="ml-2 h-4 w-4" />
+                <Button size="sm" className="shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all cursor-pointer text-xs md:text-sm">
+                  Get Started <ArrowRight className="ml-2 h-3 w-3 md:h-4 md:w-4" />
                 </Button>
               </Link>
             </div>
