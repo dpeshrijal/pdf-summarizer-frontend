@@ -608,7 +608,6 @@ export default function Home() {
             <span className="font-semibold text-xl">AI Resume Tailor</span>
           </div>
           <div className="flex items-center gap-4">
-            <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">Beta</Badge>
             <UserButton />
           </div>
         </div>
