@@ -1,15 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useUser } from "@clerk/nextjs";
+import { useUser, UserButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, Save } from "lucide-react";
+import { Loader2, Save, ArrowLeft, FileText } from "lucide-react";
 import { getUserProfile, saveUserProfile } from "@/lib/api/profileApi";
 import type { UserProfileInput } from "@/lib/types/userProfile";
+import Link from "next/link";
 
 export default function SettingsPage() {
   const { user } = useUser();
@@ -90,11 +91,33 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="container max-w-4xl mx-auto p-8 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Settings</h1>
-        <p className="text-muted-foreground">Manage your professional profile</p>
-      </div>
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="border-b bg-background/80 backdrop-blur-xl sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-5 flex items-center justify-between">
+          <Link href="/dashboard" className="flex items-center gap-2 group">
+            <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg shadow-primary/20 group-hover:shadow-primary/40 transition-all">
+              <FileText className="h-5 w-5 text-primary-foreground" />
+            </div>
+            <span className="text-xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">Resumi</span>
+          </Link>
+          <div className="flex items-center gap-3">
+            <Link href="/dashboard">
+              <Button variant="ghost" size="sm" className="gap-2">
+                <ArrowLeft className="h-4 w-4" />
+                Back to Dashboard
+              </Button>
+            </Link>
+            <UserButton />
+          </div>
+        </div>
+      </header>
+
+      <div className="container max-w-4xl mx-auto p-8 space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold">Settings</h1>
+          <p className="text-muted-foreground">Manage your professional profile</p>
+        </div>
 
       <Card>
         <CardHeader>
@@ -217,6 +240,7 @@ export default function SettingsPage() {
           </form>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }
