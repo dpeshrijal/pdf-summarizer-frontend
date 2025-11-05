@@ -96,7 +96,7 @@ export default function Dashboard() {
         // User doesn't have a profile yet - show onboarding
         // This applies to both new users AND existing users without profiles
         // Gives everyone a chance to add their professional links
-        router.push("/onboarding");
+        router.replace("/onboarding"); // Use replace instead of push to avoid back navigation
       } catch (error) {
         console.error("Error checking onboarding status:", error);
         // Don't block access if check fails
@@ -339,6 +339,35 @@ export default function Dashboard() {
     }
   };
 
+  // Show loading screen while checking onboarding to prevent flash
+  if (isCheckingOnboarding) {
+    return (
+      <div className="min-h-screen bg-background relative overflow-hidden">
+        {/* Animated Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-secondary/10 pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(59,130,246,0.1),transparent_50%)] pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(139,92,246,0.08),transparent_50%)] pointer-events-none" />
+
+        <main className="container mx-auto px-4 py-8 md:py-12 max-w-7xl">
+          <div className="flex flex-col items-center justify-center min-h-screen space-y-6">
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-primary via-purple-500 to-primary rounded-full blur-2xl opacity-20 animate-pulse" />
+              <Loader2 className="relative h-16 w-16 animate-spin text-primary" />
+            </div>
+            <div className="text-center space-y-2">
+              <h2 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-primary via-purple-500 to-primary bg-clip-text text-transparent animate-gradient">
+                Preparing Your Workspace
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Setting up your personalized resume experience...
+              </p>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
       {/* Animated Background */}
@@ -375,8 +404,8 @@ export default function Dashboard() {
           </div>
         </header>
 
-        {/* Page Loader - Shows while data is loading or checking onboarding */}
-        {isCheckingOnboarding || isLoadingResumes || isLoadingHistory ? (
+        {/* Page Loader - Shows while data is loading */}
+        {isLoadingResumes || isLoadingHistory ? (
           <main className="container mx-auto px-4 py-8 md:py-12 max-w-7xl">
             <div className="flex flex-col items-center justify-center min-h-[70vh] space-y-6">
               <div className="relative">
