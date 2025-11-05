@@ -188,20 +188,12 @@ export default function Dashboard() {
                 billingCycleEnd: nextMonth.toISOString(),
               });
 
-              // Optimistically set profile with new fields (don't wait for reload to avoid 500 error)
-              setUserProfile({
-                ...profileData.profile,
-                subscriptionTier: 'free',
-                subscriptionStatus: 'active',
-                creditsRemaining: 3,
-                creditsLimit: 3,
-                billingCycleStart: now.toISOString(),
-                billingCycleEnd: nextMonth.toISOString(),
-              });
+              // Reload profile to get updated data
+              const updatedProfile = await getUserProfile(user.id);
+              setUserProfile(updatedProfile.profile);
               console.log("User migrated successfully");
             } catch (error) {
-              console.log("Migration failed - subscription API not available yet", error);
-              // Set profile anyway so UI still works
+              console.error("Migration failed:", error);
               setUserProfile(profileData.profile);
             }
           } else {
@@ -215,7 +207,7 @@ export default function Dashboard() {
                 const updatedProfile = await getUserProfile(user.id);
                 setUserProfile(updatedProfile.profile);
               } catch (error) {
-                console.log("Billing cycle reset failed");
+                console.error("Billing cycle reset failed:", error);
               }
             }
           }
@@ -349,22 +341,14 @@ export default function Dashboard() {
 
       // Deduct credit before starting generation (only if subscription system is active)
       if (user?.id && userProfile?.subscriptionTier) {
-        const currentCredits = userProfile.creditsRemaining ?? 3;
-        const newCredits = Math.max(0, currentCredits - 1);
-
-        // Optimistically update UI immediately
-        setUserProfile({
-          ...userProfile,
-          creditsRemaining: newCredits,
-        });
-
         try {
-          // Send to backend in background
           await deductCredit(user.id, userProfile);
-          console.log(`Credit deducted: ${currentCredits} → ${newCredits}`);
+          // Reload profile to show updated credits
+          const updatedProfile = await getUserProfile(user.id);
+          setUserProfile(updatedProfile.profile);
         } catch (error) {
-          // Silently fail if subscription API not ready - UI already updated
-          console.log("Credit deduction API call failed, but UI updated", error);
+          console.error("Credit deduction failed:", error);
+          // Continue with generation even if credit deduction fails
         }
       }
 
