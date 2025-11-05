@@ -463,7 +463,10 @@ export default function Dashboard() {
             <div className="flex items-center gap-3 md:gap-4">
               {/* Credits Display */}
               {userProfile && (
-                <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/20">
+                <div
+                  className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/20 hover:bg-primary/20 transition-colors cursor-pointer"
+                  onClick={() => setShowUpgradeModal(true)}
+                >
                   <span className="text-xs font-medium text-primary">
                     {userProfile.subscriptionTier === 'unlimited'
                       ? 'Unlimited'

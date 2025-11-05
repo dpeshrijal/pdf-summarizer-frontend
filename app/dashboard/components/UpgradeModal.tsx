@@ -2,8 +2,11 @@
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Check, Zap, Crown, X } from "lucide-react";
+import { Check, Zap, Crown, X, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
+import { toast } from "sonner";
+import { useState } from "react";
 
 interface UpgradeModalProps {
   open: boolean;
@@ -14,6 +17,8 @@ interface UpgradeModalProps {
 
 export function UpgradeModal({ open, onClose, currentTier = 'free', creditsRemaining = 0 }: UpgradeModalProps) {
   const router = useRouter();
+  const { user } = useUser();
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
 
   if (!open) return null;
 
@@ -33,6 +38,7 @@ export function UpgradeModal({ open, onClose, currentTier = 'free', creditsRemai
       icon: Zap,
       gradient: 'from-primary to-blue-600',
       disabled: currentTier === 'pro' || currentTier === 'unlimited',
+      productId: process.env.NEXT_PUBLIC_DODO_PRO_PRODUCT_ID,
     },
     {
       name: 'Unlimited',
@@ -51,8 +57,46 @@ export function UpgradeModal({ open, onClose, currentTier = 'free', creditsRemai
       gradient: 'from-purple-500 to-pink-500',
       popular: true,
       disabled: currentTier === 'unlimited',
+      productId: process.env.NEXT_PUBLIC_DODO_UNLIMITED_PRODUCT_ID,
     },
   ];
+
+  const handleUpgrade = async (planName: string, productId: string | undefined) => {
+    if (!productId) {
+      toast.error("Product configuration error. Please contact support.");
+      return;
+    }
+
+    try {
+      setLoadingPlan(planName);
+
+      // Call checkout API
+      const response = await fetch("/api/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          productId,
+          email: user?.emailAddresses[0]?.emailAddress,
+          name: user?.fullName || user?.firstName || "Customer",
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to create checkout session");
+      }
+
+      // Redirect to Dodo Payments checkout
+      window.location.href = data.checkoutUrl;
+    } catch (error) {
+      console.error("Checkout error:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to start checkout");
+      setLoadingPlan(null);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
@@ -133,18 +177,21 @@ export function UpgradeModal({ open, onClose, currentTier = 'free', creditsRemai
                   <Button
                     className="w-full"
                     variant={plan.popular ? "default" : "outline"}
-                    disabled={plan.disabled}
-                    onClick={() => {
-                      onClose();
-                      router.push('/pricing');
-                    }}
+                    disabled={plan.disabled || loadingPlan !== null}
+                    onClick={() => handleUpgrade(plan.name, plan.productId)}
                   >
-                    {plan.disabled
-                      ? currentTier === plan.name.toLowerCase()
+                    {loadingPlan === plan.name ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Processing...
+                      </>
+                    ) : plan.disabled ? (
+                      currentTier === plan.name.toLowerCase()
                         ? 'Current Plan'
                         : 'Not Available'
-                      : `Upgrade to ${plan.name}`
-                    }
+                    ) : (
+                      `Upgrade to ${plan.name}`
+                    )}
                   </Button>
                 </div>
               </Card>
