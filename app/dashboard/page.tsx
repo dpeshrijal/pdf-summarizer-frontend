@@ -288,8 +288,8 @@ export default function Dashboard() {
       return;
     }
 
-    // Check if user has credits available
-    if (!hasCreditsAvailable(userProfile)) {
+    // Check if user has credits available (only if subscription system is active)
+    if (userProfile?.subscriptionTier && !hasCreditsAvailable(userProfile)) {
       setShowUpgradeModal(true);
       toast.error("You've run out of credits! Please upgrade to continue.");
       return;
@@ -307,12 +307,17 @@ export default function Dashboard() {
         return;
       }
 
-      // Deduct credit before starting generation
-      if (user?.id && userProfile) {
-        await deductCredit(user.id, userProfile);
-        // Reload profile to show updated credits
-        const updatedProfile = await getUserProfile(user.id);
-        setUserProfile(updatedProfile.profile);
+      // Deduct credit before starting generation (only if subscription system is active)
+      if (user?.id && userProfile?.subscriptionTier) {
+        try {
+          await deductCredit(user.id, userProfile);
+          // Reload profile to show updated credits
+          const updatedProfile = await getUserProfile(user.id);
+          setUserProfile(updatedProfile.profile);
+        } catch (error) {
+          // Silently fail if subscription API not ready - allow generation to proceed
+          console.log("Credit deduction skipped - subscription API not available");
+        }
       }
 
       const { jobId } = await startGeneration(token, fileId, jobDescription);
