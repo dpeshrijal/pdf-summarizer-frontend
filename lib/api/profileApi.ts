@@ -10,10 +10,8 @@ import type {
   SaveUserProfileResponse,
 } from "@/lib/types/userProfile";
 
-// API base URL - fallback for development
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_GATEWAY_URL ||
-  "https://u5q8nlyqa2.execute-api.us-east-1.amazonaws.com/prod/";
+// API URLs - consistent with other API endpoints pattern
+const USER_PROFILE_API_URL = process.env.NEXT_PUBLIC_USER_PROFILE_API_URL!;
 
 /**
  * Get user profile
@@ -23,7 +21,7 @@ const API_BASE_URL =
 export async function getUserProfile(
   userId: string
 ): Promise<GetUserProfileResponse> {
-  const url = `${API_BASE_URL}user/profile?userId=${encodeURIComponent(userId)}`;
+  const url = `${USER_PROFILE_API_URL}?userId=${encodeURIComponent(userId)}`;
 
   const response = await fetch(url, {
     method: "GET",
@@ -49,7 +47,7 @@ export async function saveUserProfile(
   userId: string,
   profileData: UserProfileInput
 ): Promise<SaveUserProfileResponse> {
-  const url = `${API_BASE_URL}user/profile`;
+  const url = USER_PROFILE_API_URL;
 
   const response = await fetch(url, {
     method: "POST",
