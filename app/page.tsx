@@ -43,7 +43,7 @@ export default function LandingPage() {
                 <Button variant="ghost" size="sm" className="cursor-pointer text-xs md:text-sm">Pricing</Button>
               </Link>
               <Link href="/sign-in" className="cursor-pointer">
-                <Button variant="ghost" size="sm" className="hidden sm:inline-flex cursor-pointer">Sign In</Button>
+                <Button variant="ghost" size="sm" className="hidden sm:inline-flex cursor-pointer text-xs md:text-sm">Sign In</Button>
               </Link>
               <Link href="/sign-up" className="cursor-pointer">
                 <Button size="sm" className="shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all cursor-pointer text-xs md:text-sm">
