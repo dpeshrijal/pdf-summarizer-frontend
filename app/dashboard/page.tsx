@@ -40,6 +40,23 @@ export default function Dashboard() {
   const { isSignedIn, isLoaded, getToken } = useAuth();
   const { user } = useUser();
 
+  // State - Declare before useEffects
+  const [previousResumes, setPreviousResumes] = useState<Resume[]>([]);
+  const [isLoadingResumes, setIsLoadingResumes] = useState(true);
+  const [selectedResumeId, setSelectedResumeId] = useState<string | null>(null);
+  const [fileId, setFileId] = useState<string | null>(null);
+
+  const [uploadStatus, setUploadStatus] = useState<string>("");
+  const [isUploading, setIsUploading] = useState(false);
+
+  const [jobDescription, setJobDescription] = useState<string>("");
+  const [generationStatus, setGenerationStatus] = useState<string>("");
+  const [generatedDocs, setGeneratedDocs] = useState<AIGeneratedDocs | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const [generationHistory, setGenerationHistory] = useState<Generation[]>([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
+
   // Redirect to sign-in if not authenticated
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
@@ -84,23 +101,6 @@ export default function Dashboard() {
       checkOnboarding();
     }
   }, [isSignedIn, user?.id, router, isLoadingResumes]);
-
-  // State
-  const [previousResumes, setPreviousResumes] = useState<Resume[]>([]);
-  const [isLoadingResumes, setIsLoadingResumes] = useState(true);
-  const [selectedResumeId, setSelectedResumeId] = useState<string | null>(null);
-  const [fileId, setFileId] = useState<string | null>(null);
-
-  const [uploadStatus, setUploadStatus] = useState<string>("");
-  const [isUploading, setIsUploading] = useState(false);
-
-  const [jobDescription, setJobDescription] = useState<string>("");
-  const [generationStatus, setGenerationStatus] = useState<string>("");
-  const [generatedDocs, setGeneratedDocs] = useState<AIGeneratedDocs | null>(null);
-  const [isGenerating, setIsGenerating] = useState(false);
-
-  const [generationHistory, setGenerationHistory] = useState<Generation[]>([]);
-  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
 
   // Fetch previous resumes on mount
   useEffect(() => {
