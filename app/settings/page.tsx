@@ -145,23 +145,23 @@ export default function SettingsPage() {
 
       <div className="container max-w-4xl mx-auto p-8 space-y-6">
         <div>
-          <h1 className="text-3xl font-bold">Settings</h1>
-          <p className="text-muted-foreground">Manage your professional profile and subscription</p>
+          <h1 className="text-3xl font-bold text-foreground">Settings</h1>
+          <p className="text-base text-foreground/70 mt-1">Manage your professional profile and subscription</p>
         </div>
 
         {/* Subscription Card */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-foreground">
               <CreditCard className="h-5 w-5" />
               Subscription
             </CardTitle>
-            <CardDescription>Manage your plan and billing</CardDescription>
+            <CardDescription className="text-foreground/60">Manage your plan and billing</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Current Plan */}
             <div>
-              <p className="text-sm text-muted-foreground mb-2">Current Plan</p>
+              <p className="text-sm font-medium text-foreground/70 mb-2">Current Plan</p>
               <div className="flex items-center gap-3">
                 <Badge className={`${getTierDisplay(userProfile?.subscriptionTier).color} text-white font-semibold px-3 py-1`}>
                   {getTierDisplay(userProfile?.subscriptionTier).name}
@@ -174,12 +174,12 @@ export default function SettingsPage() {
 
             {/* Credits Remaining */}
             <div>
-              <p className="text-sm text-muted-foreground mb-2">Credits Remaining</p>
+              <p className="text-sm font-medium text-foreground/70 mb-2">Credits Remaining</p>
               <div className="flex items-center gap-2">
                 <div className="text-3xl font-bold text-primary">
                   {getRemainingCredits(userProfile) === -1 ? '∞' : getRemainingCredits(userProfile)}
                 </div>
-                <div className="text-sm text-muted-foreground">
+                <div className="text-sm text-foreground/60">
                   {getRemainingCredits(userProfile) === -1 ? 'Unlimited' : `/ ${userProfile?.creditsLimit || 3} per month`}
                 </div>
               </div>
@@ -188,11 +188,11 @@ export default function SettingsPage() {
             {/* Billing Cycle */}
             {userProfile?.billingCycleStart && userProfile?.billingCycleEnd && (
               <div>
-                <p className="text-sm text-muted-foreground mb-2 flex items-center gap-2">
+                <p className="text-sm font-medium text-foreground/70 mb-2 flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
                   Billing Cycle
                 </p>
-                <p className="text-sm">
+                <p className="text-sm text-foreground/80 font-medium">
                   {new Date(userProfile.billingCycleStart).toLocaleDateString()} -{" "}
                   {new Date(userProfile.billingCycleEnd).toLocaleDateString()}
                 </p>
@@ -220,12 +220,12 @@ export default function SettingsPage() {
             </div>
 
             {/* Info Note */}
-            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+            <div className="bg-blue-50 dark:bg-blue-950/50 border-2 border-blue-200 dark:border-blue-800 rounded-lg p-4">
               <div className="flex gap-3">
                 <CheckCircle2 className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
-                <div className="text-sm text-blue-900 dark:text-blue-100">
-                  <p className="font-semibold mb-1">7-Day Money-Back Guarantee</p>
-                  <p className="text-blue-700 dark:text-blue-300">
+                <div className="text-sm">
+                  <p className="font-semibold mb-1 text-blue-900 dark:text-blue-200">7-Day Money-Back Guarantee</p>
+                  <p className="text-blue-800 dark:text-blue-300">
                     Not satisfied? Cancel within 7 days for a full refund, no questions asked.
                   </p>
                 </div>
@@ -236,8 +236,8 @@ export default function SettingsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Professional Profile</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-foreground">Professional Profile</CardTitle>
+          <CardDescription className="text-foreground/60">
             This information is used in all your generated resumes
           </CardDescription>
         </CardHeader>
@@ -257,7 +257,7 @@ export default function SettingsPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Full Name *</Label>
+                <Label htmlFor="name" className="text-foreground font-medium">Full Name *</Label>
                 <Input
                   id="name"
                   value={formData.name}
@@ -267,7 +267,7 @@ export default function SettingsPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email *</Label>
+                <Label htmlFor="email" className="text-foreground font-medium">Email *</Label>
                 <Input
                   id="email"
                   type="email"
@@ -278,7 +278,7 @@ export default function SettingsPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="phone">Phone</Label>
+                <Label htmlFor="phone" className="text-foreground font-medium">Phone</Label>
                 <Input
                   id="phone"
                   value={formData.phone}
@@ -287,7 +287,7 @@ export default function SettingsPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="location">Location</Label>
+                <Label htmlFor="location" className="text-foreground font-medium">Location</Label>
                 <Input
                   id="location"
                   value={formData.location}
@@ -297,7 +297,7 @@ export default function SettingsPage() {
               </div>
 
               <div className="space-y-2 col-span-2">
-                <Label htmlFor="linkedin">LinkedIn URL</Label>
+                <Label htmlFor="linkedin" className="text-foreground font-medium">LinkedIn URL</Label>
                 <Input
                   id="linkedin"
                   value={formData.linkedinUrl}
@@ -307,7 +307,7 @@ export default function SettingsPage() {
               </div>
 
               <div className="space-y-2 col-span-2">
-                <Label htmlFor="github">GitHub URL</Label>
+                <Label htmlFor="github" className="text-foreground font-medium">GitHub URL</Label>
                 <Input
                   id="github"
                   value={formData.githubUrl}
@@ -317,7 +317,7 @@ export default function SettingsPage() {
               </div>
 
               <div className="space-y-2 col-span-2">
-                <Label htmlFor="portfolio">Portfolio URL</Label>
+                <Label htmlFor="portfolio" className="text-foreground font-medium">Portfolio URL</Label>
                 <Input
                   id="portfolio"
                   value={formData.portfolioUrl}
@@ -327,7 +327,7 @@ export default function SettingsPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="customUrl">Custom URL</Label>
+                <Label htmlFor="customUrl" className="text-foreground font-medium">Custom URL</Label>
                 <Input
                   id="customUrl"
                   value={formData.customUrl}
@@ -337,7 +337,7 @@ export default function SettingsPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="customUrlLabel">Custom URL Label</Label>
+                <Label htmlFor="customUrlLabel" className="text-foreground font-medium">Custom URL Label</Label>
                 <Input
                   id="customUrlLabel"
                   value={formData.customUrlLabel}
