@@ -86,7 +86,7 @@ export function GenerationHistory({ history }: GenerationHistoryProps) {
             return (
               <div
                 key={generation.jobId}
-                className="group flex items-center gap-4 md:gap-6 p-4 md:p-5 hover:bg-muted/30 transition-all duration-200"
+                className="group flex items-center gap-4 md:gap-6 p-4 md:p-5 hover:bg-muted/30 transition-all duration-200 cursor-pointer"
               >
                 {/* Match Score Circle - Primary Visual */}
                 {matchScore && (
