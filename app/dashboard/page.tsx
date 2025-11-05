@@ -6,13 +6,16 @@ import { FileText, CheckCircle2, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { hasCompletedOnboarding } from "@/lib/api/profileApi";
+import { hasCompletedOnboarding, getUserProfile } from "@/lib/api/profileApi";
+import { hasCreditsAvailable, deductCredit, shouldResetBillingCycle, resetMonthlyCredits } from "@/lib/api/subscriptionApi";
+import { toast } from "sonner";
 
 // Components
 import { ResumeUpload } from "./components/ResumeUpload";
 import { JobDescription } from "./components/JobDescription";
 import { ResultsDisplay } from "./components/ResultsDisplay";
 import { GenerationHistory } from "./components/GenerationHistory";
+import { UpgradeModal } from "./components/UpgradeModal";
 
 // API Utilities
 import {
@@ -57,6 +60,9 @@ export default function Dashboard() {
 
   const [generationHistory, setGenerationHistory] = useState<Generation[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
+
+  const [userProfile, setUserProfile] = useState<any>(null);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   // Redirect to sign-in if not authenticated
   useEffect(() => {
@@ -120,8 +126,8 @@ export default function Dashboard() {
     loadResumes();
   }, [isSignedIn, isLoaded, getToken]);
 
-  // Function to fetch generation history (reusable)
-  const loadGenerationHistory = async () => {
+  // Function to reload generation history (for refreshing after new generation)
+  const reloadGenerationHistory = async () => {
     if (!isSignedIn || !isLoaded) return;
 
     try {
@@ -132,15 +138,55 @@ export default function Dashboard() {
       setGenerationHistory(history);
     } catch (error) {
       console.error("Error fetching generation history:", error);
-    } finally {
-      setIsLoadingHistory(false);
     }
   };
 
   // Fetch generation history on mount
   useEffect(() => {
+    const loadGenerationHistory = async () => {
+      if (!isSignedIn || !isLoaded) return;
+
+      try {
+        const token = await getToken();
+        if (!token) return;
+
+        const history = await fetchGenerationHistory(token);
+        setGenerationHistory(history);
+      } catch (error) {
+        console.error("Error fetching generation history:", error);
+      } finally {
+        setIsLoadingHistory(false);
+      }
+    };
+
     loadGenerationHistory();
-  }, [isSignedIn, isLoaded]);
+  }, [isSignedIn, isLoaded, getToken]);
+
+  // Load user profile and check billing cycle
+  useEffect(() => {
+    const loadProfile = async () => {
+      if (!isSignedIn || !user?.id || !isLoaded) return;
+
+      try {
+        const profileData = await getUserProfile(user.id);
+        if (profileData.hasProfile && profileData.profile) {
+          setUserProfile(profileData.profile);
+
+          // Check if billing cycle needs reset
+          if (shouldResetBillingCycle(profileData.profile)) {
+            await resetMonthlyCredits(user.id, profileData.profile);
+            // Reload profile
+            const updatedProfile = await getUserProfile(user.id);
+            setUserProfile(updatedProfile.profile);
+          }
+        }
+      } catch (error) {
+        console.error("Error loading profile:", error);
+      }
+    };
+
+    loadProfile();
+  }, [isSignedIn, user?.id, isLoaded]);
 
   // Handler: Select previous resume
   const handleSelectPreviousResume = (resumeFileId: string) => {
@@ -242,6 +288,13 @@ export default function Dashboard() {
       return;
     }
 
+    // Check if user has credits available
+    if (!hasCreditsAvailable(userProfile)) {
+      setShowUpgradeModal(true);
+      toast.error("You've run out of credits! Please upgrade to continue.");
+      return;
+    }
+
     setIsGenerating(true);
     setGenerationStatus("Starting generation...");
     setGeneratedDocs(null);
@@ -252,6 +305,14 @@ export default function Dashboard() {
         setGenerationStatus("Authentication error. Please sign in again.");
         setIsGenerating(false);
         return;
+      }
+
+      // Deduct credit before starting generation
+      if (user?.id && userProfile) {
+        await deductCredit(user.id, userProfile);
+        // Reload profile to show updated credits
+        const updatedProfile = await getUserProfile(user.id);
+        setUserProfile(updatedProfile.profile);
       }
 
       const { jobId } = await startGeneration(token, fileId, jobDescription);
@@ -308,7 +369,7 @@ export default function Dashboard() {
             setIsGenerating(false);
 
             // Refresh generation history to show the new entry
-            loadGenerationHistory();
+            reloadGenerationHistory();
           } else if (statusData.status === "FAILED") {
             clearInterval(pollInterval);
             setGenerationStatus(
@@ -363,6 +424,17 @@ export default function Dashboard() {
               </span>
             </div>
             <div className="flex items-center gap-3 md:gap-4">
+              {/* Credits Display */}
+              {userProfile && (
+                <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/20">
+                  <span className="text-xs font-medium text-primary">
+                    {userProfile.subscriptionTier === 'unlimited'
+                      ? 'Unlimited'
+                      : `${userProfile.creditsRemaining || 3} credits`
+                    }
+                  </span>
+                </div>
+              )}
               <Link href="/pricing">
                 <Button variant="ghost" size="sm" className="cursor-pointer text-xs md:text-sm">
                   Pricing
@@ -474,6 +546,14 @@ export default function Dashboard() {
           </div>
         </footer>
       </div>
+
+      {/* Upgrade Modal */}
+      <UpgradeModal
+        open={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        currentTier={userProfile?.subscriptionTier || 'free'}
+        creditsRemaining={userProfile?.creditsRemaining || 0}
+      />
     </div>
   );
 }

@@ -9,6 +9,7 @@ const isPublicRoute = createRouteMatcher([
   '/refund-policy', // Refund Policy
   '/sign-in(.*)',
   '/sign-up(.*)',
+  '/api/webhook', // Dodo Payments webhook
 ]);
 
 export default clerkMiddleware(async (auth, request) => {

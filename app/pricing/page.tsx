@@ -1,12 +1,20 @@
 "use client";
 
-import { Check, Sparkles, Zap, Crown } from "lucide-react";
+import { Check, Sparkles, Zap, Crown, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
+import { useUser } from "@clerk/nextjs";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function PricingPage() {
+  const { user, isSignedIn } = useUser();
+  const router = useRouter();
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+
   const tiers = [
     {
       name: "Free",
@@ -28,6 +36,7 @@ export default function PricingPage() {
       gradient: "from-blue-500/10 to-cyan-500/10",
       iconColor: "text-blue-500",
       borderColor: "border-blue-500/20",
+      productId: null, // Free plan - no product ID
     },
     {
       name: "Pro",
@@ -49,6 +58,7 @@ export default function PricingPage() {
       gradient: "from-primary/20 to-blue-600/20",
       iconColor: "text-primary",
       borderColor: "border-primary",
+      productId: process.env.NEXT_PUBLIC_DODO_PRO_PRODUCT_ID,
     },
     {
       name: "Unlimited",
@@ -70,8 +80,63 @@ export default function PricingPage() {
       gradient: "from-purple-500/10 to-pink-500/10",
       iconColor: "text-purple-500",
       borderColor: "border-purple-500/20",
+      productId: process.env.NEXT_PUBLIC_DODO_UNLIMITED_PRODUCT_ID,
     },
   ];
+
+  const handlePlanSelection = async (tierName: string, productId: string | null | undefined) => {
+    // Free plan - just redirect to dashboard
+    if (tierName === "Free") {
+      if (isSignedIn) {
+        router.push("/dashboard");
+      } else {
+        router.push("/sign-up");
+      }
+      return;
+    }
+
+    // Paid plans - need to be signed in
+    if (!isSignedIn) {
+      toast.error("Please sign in to upgrade your plan");
+      router.push("/sign-in");
+      return;
+    }
+
+    if (!productId) {
+      toast.error("Product configuration error. Please contact support.");
+      return;
+    }
+
+    try {
+      setLoadingPlan(tierName);
+
+      // Call checkout API
+      const response = await fetch("/api/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          productId,
+          email: user?.emailAddresses[0]?.emailAddress,
+          name: user?.fullName || user?.firstName || "Customer",
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to create checkout session");
+      }
+
+      // Redirect to Dodo Payments checkout
+      window.location.href = data.checkoutUrl;
+    } catch (error) {
+      console.error("Checkout error:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to start checkout");
+      setLoadingPlan(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
@@ -182,8 +247,17 @@ export default function PricingPage() {
                     }`}
                     variant={tier.popular ? "default" : "outline"}
                     size="lg"
+                    onClick={() => handlePlanSelection(tier.name, tier.productId)}
+                    disabled={loadingPlan !== null}
                   >
-                    {tier.cta}
+                    {loadingPlan === tier.name ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      tier.cta
+                    )}
                   </Button>
 
                   {/* Features */}

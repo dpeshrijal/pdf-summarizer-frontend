@@ -7,8 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, Save, ArrowLeft, FileText } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Loader2, Save, ArrowLeft, FileText, CreditCard, Calendar, CheckCircle2 } from "lucide-react";
 import { getUserProfile, saveUserProfile } from "@/lib/api/profileApi";
+import { getRemainingCredits } from "@/lib/api/subscriptionApi";
 import type { UserProfileInput } from "@/lib/types/userProfile";
 import Link from "next/link";
 
@@ -18,6 +20,7 @@ export default function SettingsPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [userProfile, setUserProfile] = useState<any>(null);
 
   const [formData, setFormData] = useState<UserProfileInput>({
     name: "",
@@ -43,6 +46,7 @@ export default function SettingsPage() {
     try {
       const response = await getUserProfile(user.id);
       if (response.hasProfile && response.profile) {
+        setUserProfile(response.profile);
         setFormData({
           name: response.profile.name,
           email: response.profile.email,
@@ -59,6 +63,32 @@ export default function SettingsPage() {
       setError("Failed to load profile");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const getTierDisplay = (tier: string = 'free') => {
+    switch (tier) {
+      case 'pro':
+        return { name: 'Pro', color: 'bg-primary' };
+      case 'unlimited':
+        return { name: 'Unlimited', color: 'bg-purple-500' };
+      default:
+        return { name: 'Free', color: 'bg-blue-500' };
+    }
+  };
+
+  const getStatusDisplay = (status: string = 'active') => {
+    switch (status) {
+      case 'active':
+        return { text: 'Active', color: 'text-green-600 bg-green-100 dark:bg-green-900/20' };
+      case 'cancelled':
+        return { text: 'Cancelled', color: 'text-red-600 bg-red-100 dark:bg-red-900/20' };
+      case 'paused':
+        return { text: 'Paused', color: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/20' };
+      case 'past_due':
+        return { text: 'Past Due', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/20' };
+      default:
+        return { text: 'Active', color: 'text-green-600 bg-green-100 dark:bg-green-900/20' };
     }
   };
 
@@ -116,8 +146,93 @@ export default function SettingsPage() {
       <div className="container max-w-4xl mx-auto p-8 space-y-6">
         <div>
           <h1 className="text-3xl font-bold">Settings</h1>
-          <p className="text-muted-foreground">Manage your professional profile</p>
+          <p className="text-muted-foreground">Manage your professional profile and subscription</p>
         </div>
+
+        {/* Subscription Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CreditCard className="h-5 w-5" />
+              Subscription
+            </CardTitle>
+            <CardDescription>Manage your plan and billing</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Current Plan */}
+            <div>
+              <p className="text-sm text-muted-foreground mb-2">Current Plan</p>
+              <div className="flex items-center gap-3">
+                <Badge className={`${getTierDisplay(userProfile?.subscriptionTier).color} text-white font-semibold px-3 py-1`}>
+                  {getTierDisplay(userProfile?.subscriptionTier).name}
+                </Badge>
+                <Badge className={`${getStatusDisplay(userProfile?.subscriptionStatus).color} font-medium px-3 py-1`}>
+                  {getStatusDisplay(userProfile?.subscriptionStatus).text}
+                </Badge>
+              </div>
+            </div>
+
+            {/* Credits Remaining */}
+            <div>
+              <p className="text-sm text-muted-foreground mb-2">Credits Remaining</p>
+              <div className="flex items-center gap-2">
+                <div className="text-3xl font-bold text-primary">
+                  {getRemainingCredits(userProfile) === -1 ? '∞' : getRemainingCredits(userProfile)}
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  {getRemainingCredits(userProfile) === -1 ? 'Unlimited' : `/ ${userProfile?.creditsLimit || 3} per month`}
+                </div>
+              </div>
+            </div>
+
+            {/* Billing Cycle */}
+            {userProfile?.billingCycleStart && userProfile?.billingCycleEnd && (
+              <div>
+                <p className="text-sm text-muted-foreground mb-2 flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  Billing Cycle
+                </p>
+                <p className="text-sm">
+                  {new Date(userProfile.billingCycleStart).toLocaleDateString()} -{" "}
+                  {new Date(userProfile.billingCycleEnd).toLocaleDateString()}
+                </p>
+              </div>
+            )}
+
+            {/* Actions */}
+            <div className="flex gap-3 pt-4">
+              {userProfile?.subscriptionTier === 'free' && (
+                <Link href="/pricing" className="w-full sm:w-auto">
+                  <Button className="w-full">
+                    Upgrade Plan
+                  </Button>
+                </Link>
+              )}
+              {userProfile?.subscriptionTier !== 'free' && (
+                <>
+                  <Link href="/pricing" className="w-full sm:w-auto">
+                    <Button variant="outline" className="w-full">
+                      Change Plan
+                    </Button>
+                  </Link>
+                </>
+              )}
+            </div>
+
+            {/* Info Note */}
+            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+              <div className="flex gap-3">
+                <CheckCircle2 className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                <div className="text-sm text-blue-900 dark:text-blue-100">
+                  <p className="font-semibold mb-1">7-Day Money-Back Guarantee</p>
+                  <p className="text-blue-700 dark:text-blue-300">
+                    Not satisfied? Cancel within 7 days for a full refund, no questions asked.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
       <Card>
         <CardHeader>

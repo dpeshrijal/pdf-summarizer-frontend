@@ -18,6 +18,19 @@ export interface UserProfile {
   customUrlLabel?: string;
   createdAt: string;
   updatedAt: string;
+  // Subscription fields
+  subscriptionTier?: 'free' | 'pro' | 'unlimited';
+  subscriptionStatus?: 'active' | 'cancelled' | 'paused' | 'past_due';
+  subscriptionId?: string;
+  dodoCustomerId?: string;
+  creditsRemaining?: number;
+  creditsLimit?: number;
+  billingCycleStart?: string;
+  billingCycleEnd?: string;
+  lastPaymentId?: string;
+  lastPaymentDate?: string;
+  cancelledAt?: string;
+  refundedAt?: string;
 }
 
 export interface UserProfileInput {
