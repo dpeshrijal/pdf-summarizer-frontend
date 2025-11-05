@@ -211,9 +211,15 @@ export default function Dashboard() {
         if (result.processingStatus === "READY_FOR_QUERY") {
           setUploadStatus("Resume processed successfully!");
           setIsUploading(false);
+          // Refresh the resume list
+          const resumes = await fetchUserResumes(token);
+          setPreviousResumes(resumes);
         } else if (result.processingStatus === "FAILED") {
-          setUploadStatus("Processing failed. Please try another file.");
+          // Get the detailed error message from Lambda
+          const errorMessage = (result as any).summary || "Processing failed. Please try another file.";
+          setUploadStatus(`Error: ${errorMessage}`);
           setIsUploading(false);
+          setFileId(null);
         } else {
           setTimeout(pollForReadyStatus, 5000);
         }

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth, useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ArrowLeft, Upload, FileText, Loader2, CheckCircle2, Sparkles } from "lucide-react";
+import { ArrowLeft, Upload, FileText, Loader2, CheckCircle2, Sparkles, AlertCircle } from "lucide-react";
 import { uploadPdfToS3, checkResumeStatus } from "@/lib/utils/dashboardApi";
 
 export default function OnboardingUpload() {
@@ -101,18 +101,22 @@ export default function OnboardingUpload() {
             setIsProcessing(false);
             setUploadComplete(true);
           } else if (status === "FAILED") {
-            throw new Error("Resume processing failed");
+            // Get the error message from the summary field (where Lambda stores it)
+            const errorMessage = (statusData as any).summary || "Resume processing failed";
+            throw new Error(errorMessage);
           } else {
             attempts++;
             if (attempts < maxAttempts) {
               setTimeout(pollStatus, 1000);
             } else {
-              throw new Error("Processing timeout");
+              throw new Error("Processing is taking longer than expected. Please try again or contact support.");
             }
           }
         } catch (err) {
-          setError(err instanceof Error ? err.message : "Status check failed");
+          const errorMsg = err instanceof Error ? err.message : "Status check failed";
+          setError(errorMsg);
           setIsProcessing(false);
+          setSelectedFile(null); // Reset file so user can upload again
         }
       };
 
@@ -155,7 +159,26 @@ export default function OnboardingUpload() {
         <div className="bg-background/60 backdrop-blur-sm border-2 border-border rounded-2xl p-8 shadow-xl space-y-6">
           {error && (
             <Alert variant="destructive" className="rounded-xl">
-              <AlertDescription>{error}</AlertDescription>
+              <div className="flex items-start gap-3">
+                <AlertCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
+                <div className="space-y-2 flex-1">
+                  <AlertDescription className="text-sm">{error}</AlertDescription>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setError(null);
+                      setSelectedFile(null);
+                      if (fileInputRef.current) {
+                        fileInputRef.current.value = "";
+                      }
+                    }}
+                    className="mt-2"
+                  >
+                    Try Again
+                  </Button>
+                </div>
+              </div>
             </Alert>
           )}
 
