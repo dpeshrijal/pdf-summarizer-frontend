@@ -12,41 +12,34 @@ interface MatchScoreDisplayProps {
 
 export function MatchScoreDisplay({ matchScore, compact = false }: MatchScoreDisplayProps) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const getScoreColor = (score: number): string => {
-    if (score >= 90) return "text-green-600 dark:text-green-400";
-    if (score >= 75) return "text-blue-600 dark:text-blue-400";
-    if (score >= 60) return "text-yellow-600 dark:text-yellow-400";
-    if (score >= 40) return "text-orange-600 dark:text-orange-400";
-    return "text-red-600 dark:text-red-400";
-  };
 
-  const getScoreBgColor = (score: number): string => {
-    if (score >= 90) return "bg-green-100 dark:bg-green-900/20";
-    if (score >= 75) return "bg-blue-100 dark:bg-blue-900/20";
-    if (score >= 60) return "bg-yellow-100 dark:bg-yellow-900/20";
-    if (score >= 40) return "bg-orange-100 dark:bg-orange-900/20";
-    return "bg-red-100 dark:bg-red-900/20";
+  // Gradient colors matching GenerationHistory
+  const getScoreGradient = (score: number): string => {
+    if (score >= 80) return "from-green-500 to-green-600";   // Strong = Green
+    if (score >= 60) return "from-blue-500 to-blue-600";     // Good = Blue
+    if (score >= 40) return "from-yellow-500 to-yellow-600"; // Fair = Yellow
+    return "from-red-500 to-red-600";                         // Low = Red
   };
 
   const getScoreLabel = (score: number): string => {
-    if (score >= 90) return "Excellent Match";
-    if (score >= 75) return "Strong Match";
+    if (score >= 80) return "Strong Match";
     if (score >= 60) return "Good Match";
-    if (score >= 40) return "Moderate Match";
-    return "Weak Match";
+    if (score >= 40) return "Fair Match";
+    return "Low Match";
   };
 
   // Compact view for history table
   if (compact) {
     return (
       <div className="flex items-center gap-3">
-        <div className={`flex items-center justify-center w-14 h-14 rounded-full flex-shrink-0 ${getScoreBgColor(matchScore.overallScore)}`}>
-          <span className={`text-xl font-bold leading-none ${getScoreColor(matchScore.overallScore)}`}>
-            {matchScore.overallScore}
-          </span>
+        <div className="relative w-14 h-14">
+          <div className={`absolute inset-0 rounded-full bg-gradient-to-br ${getScoreGradient(matchScore.overallScore)} opacity-10 blur-md`} />
+          <div className={`relative w-full h-full rounded-full bg-gradient-to-br ${getScoreGradient(matchScore.overallScore)} flex items-center justify-center shadow-lg`}>
+            <div className="text-xl font-bold text-white">{matchScore.overallScore}</div>
+          </div>
         </div>
         <div className="text-xs leading-tight">
-          <div className={`font-semibold ${getScoreColor(matchScore.overallScore)}`}>
+          <div className="font-semibold text-primary">
             {getScoreLabel(matchScore.overallScore)}
           </div>
           <div className="text-muted-foreground">
@@ -67,11 +60,14 @@ export function MatchScoreDisplay({ matchScore, compact = false }: MatchScoreDis
           className="w-full flex items-center justify-between p-4 hover:bg-accent/50 transition-colors text-left"
         >
           <div className="flex items-center gap-4 min-w-0 flex-1">
-            {/* Score Badge */}
-            <div className={`flex items-center justify-center w-16 h-16 rounded-full flex-shrink-0 ${getScoreBgColor(matchScore.overallScore)}`}>
-              <span className={`text-2xl font-bold leading-none ${getScoreColor(matchScore.overallScore)}`}>
-                {matchScore.overallScore}
-              </span>
+            {/* Score Badge with Gradient */}
+            <div className="relative w-16 h-16 flex-shrink-0">
+              <div className={`absolute inset-0 rounded-full bg-gradient-to-br ${getScoreGradient(matchScore.overallScore)} opacity-10 blur-md`} />
+              <div className={`relative w-full h-full rounded-full bg-gradient-to-br ${getScoreGradient(matchScore.overallScore)} flex items-center justify-center shadow-lg`}>
+                <span className="text-2xl font-bold text-white leading-none">
+                  {matchScore.overallScore}
+                </span>
+              </div>
             </div>
 
             {/* Title and Quick Stats */}
@@ -79,7 +75,7 @@ export function MatchScoreDisplay({ matchScore, compact = false }: MatchScoreDis
               <div className="flex items-center gap-2 flex-wrap">
                 <TrendingUp className="w-4 h-4 flex-shrink-0" />
                 <span className="font-semibold whitespace-nowrap">ATS Match Score</span>
-                <span className={`text-sm font-medium whitespace-nowrap ${getScoreColor(matchScore.overallScore)}`}>
+                <span className="text-sm font-medium whitespace-nowrap text-primary">
                   {getScoreLabel(matchScore.overallScore)}
                 </span>
               </div>
