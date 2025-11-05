@@ -7,7 +7,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { hasCompletedOnboarding, getUserProfile } from "@/lib/api/profileApi";
-import { hasCreditsAvailable, deductCredit, shouldResetBillingCycle, resetMonthlyCredits } from "@/lib/api/subscriptionApi";
+import { hasCreditsAvailable, deductCredit, shouldResetBillingCycle, resetMonthlyCredits, updateUserSubscription } from "@/lib/api/subscriptionApi";
 import { toast } from "sonner";
 
 // Components
@@ -170,14 +170,47 @@ export default function Dashboard() {
       try {
         const profileData = await getUserProfile(user.id);
         if (profileData.hasProfile && profileData.profile) {
-          setUserProfile(profileData.profile);
+          // Auto-migrate: Add subscription fields if missing
+          if (!profileData.profile.subscriptionTier) {
+            console.log("Migrating user to free tier with default credits");
+            try {
+              const now = new Date();
+              const nextMonth = new Date(now);
+              nextMonth.setMonth(nextMonth.getMonth() + 1);
 
-          // Check if billing cycle needs reset
-          if (shouldResetBillingCycle(profileData.profile)) {
-            await resetMonthlyCredits(user.id, profileData.profile);
-            // Reload profile
-            const updatedProfile = await getUserProfile(user.id);
-            setUserProfile(updatedProfile.profile);
+              await updateUserSubscription({
+                userId: user.id,
+                subscriptionTier: 'free',
+                subscriptionStatus: 'active',
+                creditsRemaining: 3,
+                creditsLimit: 3,
+                billingCycleStart: now.toISOString(),
+                billingCycleEnd: nextMonth.toISOString(),
+              });
+
+              // Reload profile with new subscription fields
+              const updatedProfile = await getUserProfile(user.id);
+              setUserProfile(updatedProfile.profile);
+              console.log("User migrated successfully");
+            } catch (error) {
+              console.log("Migration failed - subscription API not available yet");
+              // Set profile anyway so UI still works
+              setUserProfile(profileData.profile);
+            }
+          } else {
+            setUserProfile(profileData.profile);
+
+            // Check if billing cycle needs reset
+            if (shouldResetBillingCycle(profileData.profile)) {
+              try {
+                await resetMonthlyCredits(user.id, profileData.profile);
+                // Reload profile
+                const updatedProfile = await getUserProfile(user.id);
+                setUserProfile(updatedProfile.profile);
+              } catch (error) {
+                console.log("Billing cycle reset failed");
+              }
+            }
           }
         }
       } catch (error) {
