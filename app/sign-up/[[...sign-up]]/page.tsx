@@ -121,6 +121,7 @@ export default function SignUpPage() {
                       card: "bg-card/50 backdrop-blur-sm border-border/40 shadow-2xl",
                     }
                   }}
+                  forceRedirectUrl="/onboarding"
                 />
               </div>
             </div>
