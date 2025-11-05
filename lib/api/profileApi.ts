@@ -28,6 +28,7 @@ export async function getUserProfile(
     headers: {
       "Content-Type": "application/json",
     },
+    cache: "no-store", // Disable caching to always get fresh data
   });
 
   if (!response.ok) {

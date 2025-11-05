@@ -188,12 +188,19 @@ export default function Dashboard() {
                 billingCycleEnd: nextMonth.toISOString(),
               });
 
-              // Reload profile with new subscription fields
-              const updatedProfile = await getUserProfile(user.id);
-              setUserProfile(updatedProfile.profile);
+              // Optimistically set profile with new fields (don't wait for reload to avoid 500 error)
+              setUserProfile({
+                ...profileData.profile,
+                subscriptionTier: 'free',
+                subscriptionStatus: 'active',
+                creditsRemaining: 3,
+                creditsLimit: 3,
+                billingCycleStart: now.toISOString(),
+                billingCycleEnd: nextMonth.toISOString(),
+              });
               console.log("User migrated successfully");
             } catch (error) {
-              console.log("Migration failed - subscription API not available yet");
+              console.log("Migration failed - subscription API not available yet", error);
               // Set profile anyway so UI still works
               setUserProfile(profileData.profile);
             }
@@ -342,14 +349,22 @@ export default function Dashboard() {
 
       // Deduct credit before starting generation (only if subscription system is active)
       if (user?.id && userProfile?.subscriptionTier) {
+        const currentCredits = userProfile.creditsRemaining ?? 3;
+        const newCredits = Math.max(0, currentCredits - 1);
+
+        // Optimistically update UI immediately
+        setUserProfile({
+          ...userProfile,
+          creditsRemaining: newCredits,
+        });
+
         try {
+          // Send to backend in background
           await deductCredit(user.id, userProfile);
-          // Reload profile to show updated credits
-          const updatedProfile = await getUserProfile(user.id);
-          setUserProfile(updatedProfile.profile);
+          console.log(`Credit deducted: ${currentCredits} → ${newCredits}`);
         } catch (error) {
-          // Silently fail if subscription API not ready - allow generation to proceed
-          console.log("Credit deduction skipped - subscription API not available");
+          // Silently fail if subscription API not ready - UI already updated
+          console.log("Credit deduction API call failed, but UI updated", error);
         }
       }
 
