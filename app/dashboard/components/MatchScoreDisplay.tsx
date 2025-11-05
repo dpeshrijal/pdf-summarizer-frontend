@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import { CheckCircle2, AlertCircle, TrendingUp, ChevronDown, ChevronUp } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import type { MatchScore } from "@/lib/types/resumeSchema";
 
 interface MatchScoreDisplayProps {
@@ -58,79 +57,56 @@ export function MatchScoreDisplay({ matchScore, compact = false }: MatchScoreDis
     );
   }
 
-  // Full detailed view
+  // Full detailed view - Compact single line
   return (
     <Card className="border-2">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <TrendingUp className="w-5 h-5" />
-          ATS Match Score
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Overall Score - Large Display */}
-        <div className="flex items-center justify-center">
-          <div className={`relative flex items-center justify-center w-24 h-24 rounded-full ${getScoreBgColor(matchScore.overallScore)}`}>
-            <div className="text-center">
-              <div className={`text-3xl font-bold ${getScoreColor(matchScore.overallScore)}`}>
-                {matchScore.overallScore}%
-              </div>
-              <div className={`text-xs font-semibold mt-1 ${getScoreColor(matchScore.overallScore)}`}>
-                {getScoreLabel(matchScore.overallScore)}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Summary */}
-        <div className="text-sm text-muted-foreground text-center">
-          {matchScore.summary}
-        </div>
-
-        {/* Quick Stats - Always Visible */}
-        <div className="grid grid-cols-3 gap-2 text-center">
-          <div>
-            <div className={`text-lg font-bold ${getScoreColor(matchScore.skillsMatch)}`}>
-              {matchScore.skillsMatch}%
-            </div>
-            <div className="text-xs text-muted-foreground">Skills</div>
-          </div>
-          <div>
-            <div className={`text-lg font-bold ${getScoreColor(matchScore.experienceMatch)}`}>
-              {matchScore.experienceMatch}%
-            </div>
-            <div className="text-xs text-muted-foreground">Experience</div>
-          </div>
-          <div>
-            <div className={`text-lg font-bold ${getScoreColor(matchScore.educationMatch)}`}>
-              {matchScore.educationMatch}%
-            </div>
-            <div className="text-xs text-muted-foreground">Education</div>
-          </div>
-        </div>
-
-        {/* Show Details Button */}
-        <Button
-          variant="outline"
-          className="w-full"
+      <CardContent className="p-0">
+        {/* Compact Header - Single Line */}
+        <button
           onClick={() => setIsExpanded(!isExpanded)}
+          className="w-full flex items-center justify-between p-4 hover:bg-accent/50 transition-colors"
         >
+          <div className="flex items-center gap-4">
+            {/* Score Badge */}
+            <div className={`flex items-center justify-center w-12 h-12 rounded-full ${getScoreBgColor(matchScore.overallScore)}`}>
+              <span className={`text-lg font-bold ${getScoreColor(matchScore.overallScore)}`}>
+                {matchScore.overallScore}%
+              </span>
+            </div>
+
+            {/* Title and Quick Stats */}
+            <div className="flex items-center gap-6">
+              <div className="text-left">
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4" />
+                  <span className="font-semibold">ATS Match Score</span>
+                  <span className={`text-sm font-medium ${getScoreColor(matchScore.overallScore)}`}>
+                    {getScoreLabel(matchScore.overallScore)}
+                  </span>
+                </div>
+                <div className="text-xs text-muted-foreground mt-0.5">
+                  Skills: {matchScore.skillsMatch}% • Experience: {matchScore.experienceMatch}% • Education: {matchScore.educationMatch}%
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Expand Icon */}
           {isExpanded ? (
-            <>
-              <ChevronUp className="w-4 h-4 mr-2" />
-              Hide Details
-            </>
+            <ChevronUp className="w-5 h-5 text-muted-foreground flex-shrink-0" />
           ) : (
-            <>
-              <ChevronDown className="w-4 h-4 mr-2" />
-              Show Details
-            </>
+            <ChevronDown className="w-5 h-5 text-muted-foreground flex-shrink-0" />
           )}
-        </Button>
+        </button>
 
         {/* Expandable Details Section */}
         {isExpanded && (
-          <div className="space-y-4 pt-2 border-t">
+          <div className="px-4 pb-4 space-y-4 border-t">
+            {/* Summary */}
+            <div className="text-sm text-muted-foreground pt-4">
+              {matchScore.summary}
+            </div>
+
             {/* Breakdown Scores */}
             <div className="space-y-3">
               <div className="text-sm font-semibold">Detailed Breakdown</div>
