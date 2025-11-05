@@ -308,7 +308,12 @@ export default function OnboardingProfile() {
             <Button
               type="button"
               variant="ghost"
-              onClick={() => router.push("/onboarding/upload")}
+              onClick={() => {
+                if (user?.id) {
+                  localStorage.setItem(`onboarding_seen_${user.id}`, 'true');
+                }
+                router.push("/onboarding/upload");
+              }}
               className="text-muted-foreground"
             >
               Skip for now

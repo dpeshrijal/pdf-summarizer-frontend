@@ -47,24 +47,49 @@ export default function Dashboard() {
     }
   }, [isSignedIn, isLoaded, router]);
 
-  // Check onboarding status and redirect if needed
+  // Check onboarding status and redirect if needed (only for truly new users)
   useEffect(() => {
     const checkOnboarding = async () => {
       if (!isSignedIn || !user?.id) return;
 
+      // Check if user has explicitly marked onboarding as seen/skipped
+      const hasSeenOnboarding = localStorage.getItem(`onboarding_seen_${user.id}`);
+
+      // If they've seen it before, don't redirect
+      if (hasSeenOnboarding) {
+        return;
+      }
+
       try {
         const completed = await hasCompletedOnboarding(user.id);
-        if (!completed) {
-          router.push("/onboarding");
+
+        // If they have a profile, mark onboarding as seen and don't redirect
+        if (completed) {
+          localStorage.setItem(`onboarding_seen_${user.id}`, 'true');
+          return;
         }
+
+        // Check if this is a truly new user (no resumes uploaded yet)
+        // Old users will have resumes, so don't force them through onboarding
+        if (previousResumes.length > 0) {
+          // Existing user without profile - mark as seen, don't redirect
+          localStorage.setItem(`onboarding_seen_${user.id}`, 'true');
+          return;
+        }
+
+        // New user with no profile and no resumes - redirect to onboarding
+        router.push("/onboarding");
       } catch (error) {
         console.error("Error checking onboarding status:", error);
         // Don't block access if check fails
       }
     };
 
-    checkOnboarding();
-  }, [isSignedIn, user?.id, router]);
+    // Only check after we've loaded resumes
+    if (!isLoadingResumes) {
+      checkOnboarding();
+    }
+  }, [isSignedIn, user?.id, router, previousResumes, isLoadingResumes]);
 
   // State
   const [previousResumes, setPreviousResumes] = useState<Resume[]>([]);

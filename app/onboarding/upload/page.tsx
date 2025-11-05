@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth, useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ArrowLeft, Upload, FileText, Loader2, CheckCircle2, Sparkles } from "lucide-react";
@@ -11,6 +11,7 @@ import { uploadPdfToS3, checkResumeStatus } from "@/lib/utils/dashboardApi";
 export default function OnboardingUpload() {
   const router = useRouter();
   const { getToken } = useAuth();
+  const { user } = useUser();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [isUploading, setIsUploading] = useState(false);
@@ -294,7 +295,12 @@ export default function OnboardingUpload() {
               <Button
                 type="button"
                 variant="ghost"
-                onClick={() => router.push("/dashboard")}
+                onClick={() => {
+                  if (user?.id) {
+                    localStorage.setItem(`onboarding_seen_${user.id}`, 'true');
+                  }
+                  router.push("/dashboard");
+                }}
                 className="text-muted-foreground"
               >
                 Skip for now
