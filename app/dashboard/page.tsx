@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { UserButton, useAuth } from "@clerk/nextjs";
+import { UserButton, useAuth, useUser } from "@clerk/nextjs";
 import { FileText, CheckCircle2, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { hasCompletedOnboarding } from "@/lib/api/profileApi";
 
 // Components
 import { ResumeUpload } from "./components/ResumeUpload";
@@ -37,6 +38,7 @@ interface AIGeneratedDocs {
 export default function Dashboard() {
   const router = useRouter();
   const { isSignedIn, isLoaded, getToken } = useAuth();
+  const { user } = useUser();
 
   // Redirect to sign-in if not authenticated
   useEffect(() => {
@@ -44,6 +46,25 @@ export default function Dashboard() {
       router.push("/sign-in");
     }
   }, [isSignedIn, isLoaded, router]);
+
+  // Check onboarding status and redirect if needed
+  useEffect(() => {
+    const checkOnboarding = async () => {
+      if (!isSignedIn || !user?.id) return;
+
+      try {
+        const completed = await hasCompletedOnboarding(user.id);
+        if (!completed) {
+          router.push("/onboarding");
+        }
+      } catch (error) {
+        console.error("Error checking onboarding status:", error);
+        // Don't block access if check fails
+      }
+    };
+
+    checkOnboarding();
+  }, [isSignedIn, user?.id, router]);
 
   // State
   const [previousResumes, setPreviousResumes] = useState<Resume[]>([]);
