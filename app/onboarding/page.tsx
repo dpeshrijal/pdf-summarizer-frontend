@@ -2,116 +2,141 @@
 
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle2, FileText, Sparkles, Zap } from "lucide-react";
+import { ArrowRight, Sparkles, Zap, Shield, User } from "lucide-react";
 
 export default function OnboardingWelcome() {
   const router = useRouter();
 
   return (
-    <div className="space-y-8 py-12">
-      {/* Hero Section */}
-      <div className="text-center space-y-4">
-        <div className="flex justify-center">
-          <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
-            <Sparkles className="w-8 h-8 text-primary" />
+    <div className="container mx-auto px-4 py-16 md:py-24 relative">
+      {/* Floating Elements */}
+      <div className="hidden md:block absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-pulse opacity-20" />
+      <div className="hidden md:block absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse opacity-20" style={{ animationDelay: '1s' }} />
+
+      <div className="max-w-4xl mx-auto space-y-12 relative z-10">
+        {/* Hero Section */}
+        <div className="text-center space-y-6">
+          {/* Icon */}
+          <div className="flex justify-center">
+            <div className="relative">
+              <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full" />
+              <div className="relative h-20 w-20 rounded-2xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-2xl shadow-primary/30">
+                <Sparkles className="h-10 w-10 text-primary-foreground animate-pulse" />
+              </div>
+            </div>
+          </div>
+
+          {/* Headline */}
+          <div className="space-y-4">
+            <h1 className="text-4xl md:text-6xl font-bold tracking-tight">
+              Welcome to{" "}
+              <span className="bg-gradient-to-r from-primary via-blue-500 to-primary bg-clip-text text-transparent">
+                Resumi
+              </span>
+            </h1>
+            <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto">
+              Let's set up your profile in 2 quick steps
+            </p>
           </div>
         </div>
-        <h1 className="text-4xl font-bold tracking-tight">
-          Welcome to Your AI Resume Assistant
-        </h1>
-        <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-          Let's get you set up in just a few minutes. We'll help you create professional,
-          tailored resumes for every job application.
-        </p>
-      </div>
 
-      {/* Value Props */}
-      <div className="grid md:grid-cols-3 gap-6 py-8">
-        <Card className="border-2">
-          <CardHeader>
-            <div className="w-12 h-12 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center mb-4">
-              <Zap className="w-6 h-6 text-green-600 dark:text-green-400" />
-            </div>
-            <CardTitle className="text-lg">Generate in Seconds</CardTitle>
-            <CardDescription>
-              AI-powered resume generation tailored to each job description
-            </CardDescription>
-          </CardHeader>
-        </Card>
-
-        <Card className="border-2">
-          <CardHeader>
-            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center mb-4">
-              <FileText className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-            </div>
-            <CardTitle className="text-lg">Professional Formatting</CardTitle>
-            <CardDescription>
-              Perfect layout and structure, optimized for ATS systems
-            </CardDescription>
-          </CardHeader>
-        </Card>
-
-        <Card className="border-2">
-          <CardHeader>
-            <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/20 rounded-lg flex items-center justify-center mb-4">
-              <CheckCircle2 className="w-6 h-6 text-purple-600 dark:text-purple-400" />
-            </div>
-            <CardTitle className="text-lg">Your Info, Organized</CardTitle>
-            <CardDescription>
-              Store your professional details once, use them everywhere
-            </CardDescription>
-          </CardHeader>
-        </Card>
-      </div>
-
-      {/* What's Next */}
-      <Card className="border-2">
-        <CardHeader>
-          <CardTitle>What's Next?</CardTitle>
-          <CardDescription>We'll guide you through a quick 2-step setup:</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-start gap-4">
-            <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center flex-shrink-0 font-semibold">
-              1
-            </div>
-            <div>
-              <div className="font-semibold">Your Professional Profile</div>
-              <div className="text-sm text-muted-foreground">
-                Add your contact info and social links (LinkedIn, GitHub, etc.)
+        {/* Steps */}
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* Step 1 */}
+          <div className="group relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent rounded-2xl blur-xl group-hover:blur-2xl transition-all opacity-0 group-hover:opacity-100" />
+            <div className="relative bg-background/60 backdrop-blur-sm border-2 border-border hover:border-primary/50 rounded-2xl p-8 space-y-4 transition-all hover:shadow-2xl hover:shadow-primary/5 hover:-translate-y-1">
+              <div className="flex items-center gap-4">
+                <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <User className="h-6 w-6 text-primary" />
+                </div>
+                <div className="h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">
+                  1
+                </div>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold mb-2">Your Professional Profile</h3>
+                <p className="text-muted-foreground">
+                  Add your contact info and professional links so they're always accurate
+                </p>
               </div>
             </div>
           </div>
 
-          <div className="flex items-start gap-4">
-            <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center flex-shrink-0 font-semibold">
-              2
-            </div>
-            <div>
-              <div className="font-semibold">Upload Your Master Resume</div>
-              <div className="text-sm text-muted-foreground">
-                Upload a comprehensive resume with all your experience and skills
+          {/* Step 2 */}
+          <div className="group relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-transparent rounded-2xl blur-xl group-hover:blur-2xl transition-all opacity-0 group-hover:opacity-100" />
+            <div className="relative bg-background/60 backdrop-blur-sm border-2 border-border hover:border-primary/50 rounded-2xl p-8 space-y-4 transition-all hover:shadow-2xl hover:shadow-primary/5 hover:-translate-y-1">
+              <div className="flex items-center gap-4">
+                <div className="h-12 w-12 rounded-xl bg-purple-500/10 flex items-center justify-center">
+                  <Zap className="h-6 w-6 text-purple-500" />
+                </div>
+                <div className="h-8 w-8 rounded-full bg-purple-500 text-white flex items-center justify-center font-bold text-sm">
+                  2
+                </div>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold mb-2">Upload Master Resume</h3>
+                <p className="text-muted-foreground">
+                  Upload your comprehensive resume with all your experience and skills
+                </p>
               </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
-      {/* CTA */}
-      <div className="flex justify-center pt-4">
-        <Button
-          size="lg"
-          onClick={() => router.push("/onboarding/profile")}
-          className="text-lg px-8 py-6"
-        >
-          Get Started
-        </Button>
+        {/* Benefits */}
+        <div className="bg-background/60 backdrop-blur-sm border-2 border-border rounded-2xl p-8 shadow-xl">
+          <div className="text-center mb-8">
+            <h3 className="text-2xl font-semibold mb-2">What You'll Get</h3>
+            <p className="text-muted-foreground">Everything you need to land your dream job</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="text-center space-y-3">
+              <div className="mx-auto h-12 w-12 rounded-xl bg-green-500/10 flex items-center justify-center">
+                <Zap className="h-6 w-6 text-green-500" />
+              </div>
+              <div>
+                <div className="font-semibold mb-1">Generate in Seconds</div>
+                <div className="text-sm text-muted-foreground">AI-powered resume tailored to each job</div>
+              </div>
+            </div>
+            <div className="text-center space-y-3">
+              <div className="mx-auto h-12 w-12 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                <Shield className="h-6 w-6 text-blue-500" />
+              </div>
+              <div>
+                <div className="font-semibold mb-1">ATS Optimized</div>
+                <div className="text-sm text-muted-foreground">Beat applicant tracking systems</div>
+              </div>
+            </div>
+            <div className="text-center space-y-3">
+              <div className="mx-auto h-12 w-12 rounded-xl bg-purple-500/10 flex items-center justify-center">
+                <Sparkles className="h-6 w-6 text-purple-500" />
+              </div>
+              <div>
+                <div className="font-semibold mb-1">Always Consistent</div>
+                <div className="text-sm text-muted-foreground">Perfect formatting every time</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* CTA */}
+        <div className="text-center space-y-4">
+          <Button
+            size="lg"
+            onClick={() => router.push("/onboarding/profile")}
+            className="text-lg px-10 py-7 shadow-2xl shadow-primary/30 hover:shadow-primary/50 transition-all hover:scale-105"
+          >
+            Get Started
+            <ArrowRight className="ml-2 h-5 w-5" />
+          </Button>
+          <p className="text-sm text-muted-foreground">
+            Takes less than 3 minutes • Your data is secure and encrypted
+          </p>
+        </div>
       </div>
-
-      <p className="text-center text-sm text-muted-foreground">
-        Takes less than 5 minutes • Your data is secure and private
-      </p>
     </div>
   );
 }
