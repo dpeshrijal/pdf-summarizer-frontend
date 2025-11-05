@@ -47,7 +47,7 @@ export default function Dashboard() {
     }
   }, [isSignedIn, isLoaded, router]);
 
-  // Check onboarding status and redirect if needed (only for truly new users)
+  // Check onboarding status and redirect if needed
   useEffect(() => {
     const checkOnboarding = async () => {
       if (!isSignedIn || !user?.id) return;
@@ -69,15 +69,9 @@ export default function Dashboard() {
           return;
         }
 
-        // Check if this is a truly new user (no resumes uploaded yet)
-        // Old users will have resumes, so don't force them through onboarding
-        if (previousResumes.length > 0) {
-          // Existing user without profile - mark as seen, don't redirect
-          localStorage.setItem(`onboarding_seen_${user.id}`, 'true');
-          return;
-        }
-
-        // New user with no profile and no resumes - redirect to onboarding
+        // User doesn't have a profile yet - show onboarding
+        // This applies to both new users AND existing users without profiles
+        // Gives everyone a chance to add their professional links
         router.push("/onboarding");
       } catch (error) {
         console.error("Error checking onboarding status:", error);
@@ -89,7 +83,7 @@ export default function Dashboard() {
     if (!isLoadingResumes) {
       checkOnboarding();
     }
-  }, [isSignedIn, user?.id, router, previousResumes, isLoadingResumes]);
+  }, [isSignedIn, user?.id, router, isLoadingResumes]);
 
   // State
   const [previousResumes, setPreviousResumes] = useState<Resume[]>([]);
