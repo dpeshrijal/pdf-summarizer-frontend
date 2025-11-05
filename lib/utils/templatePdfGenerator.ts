@@ -272,35 +272,80 @@ export const generateResumePDF = async (
     return true;
   };
 
+  // Helper: Clean URL for display (remove https://)
+  const cleanUrl = (url: string): string => {
+    return url.replace(/^https?:\/\//, "").replace(/^www\./, "");
+  };
+
   // 1. HEADER (Name and Contact)
+  // Name - centered
   doc.setFontSize(FONT_SIZES.name);
   doc.setFont("helvetica", "bold");
-  doc.text(resume.contact.name.toUpperCase(), margins.left, yPos);
+  const nameWidth = doc.getTextWidth(resume.contact.name.toUpperCase());
+  const nameX = (PAGE.width - nameWidth) / 2;
+  doc.text(resume.contact.name.toUpperCase(), nameX, yPos);
   yPos += SPACING.afterName;
 
-  // Contact info (normal weight, single line)
+  // Contact info - centered, single line with clickable links
   doc.setFontSize(FONT_SIZES.small);
   doc.setFont("helvetica", "normal");
 
-  const contactParts = [`Email: ${resume.contact.email}`];
+  const contactParts: Array<{ text: string; url?: string }> = [
+    { text: resume.contact.email, url: `mailto:${resume.contact.email}` }
+  ];
 
-  // Add optional contact fields only if they exist
+  // Add optional contact fields
   if (resume.contact.phone) {
-    contactParts.push(`Phone: ${resume.contact.phone}`);
+    contactParts.push({ text: resume.contact.phone });
   }
   if (resume.contact.linkedin) {
-    contactParts.push(`LinkedIn: ${resume.contact.linkedin}`);
+    contactParts.push({
+      text: cleanUrl(resume.contact.linkedin),
+      url: resume.contact.linkedin.startsWith('http') ? resume.contact.linkedin : `https://${resume.contact.linkedin}`
+    });
   }
   if (resume.contact.github) {
-    contactParts.push(`GitHub: ${resume.contact.github}`);
+    contactParts.push({
+      text: cleanUrl(resume.contact.github),
+      url: resume.contact.github.startsWith('http') ? resume.contact.github : `https://${resume.contact.github}`
+    });
   }
   if (resume.contact.location) {
-    contactParts.push(`Location: ${resume.contact.location}`);
+    contactParts.push({ text: resume.contact.location });
   }
 
-  const contactLine = contactParts.join(" | ");
-  addText(contactLine, margins.left, FONT_SIZES.small, "normal");
-  yPos += SPACING.afterContactInfo;
+  // Build contact line with separators
+  const contactTexts = contactParts.map(p => p.text);
+  const contactLine = contactTexts.join(" | ");
+  const contactLineWidth = doc.getTextWidth(contactLine);
+  const contactX = (PAGE.width - contactLineWidth) / 2;
+
+  // Render contact info with clickable links
+  let currentX = contactX;
+  contactParts.forEach((part, index) => {
+    const textWidth = doc.getTextWidth(part.text);
+
+    if (part.url) {
+      // Add clickable link
+      doc.setTextColor(0, 0, 255); // Blue color for links
+      doc.textWithLink(part.text, currentX, yPos, { url: part.url });
+      doc.setTextColor(0, 0, 0); // Reset to black
+    } else {
+      doc.text(part.text, currentX, yPos);
+    }
+
+    currentX += textWidth;
+
+    // Add separator if not last item
+    if (index < contactParts.length - 1) {
+      const separator = " | ";
+      const separatorWidth = doc.getTextWidth(separator);
+      doc.text(separator, currentX, yPos);
+      currentX += separatorWidth;
+    }
+  });
+
+  yPos += SPACING.lineHeight + SPACING.afterContactInfo;
 
   // 2. SUMMARY
   if (resume.summary && addSectionHeader("SUMMARY")) {
