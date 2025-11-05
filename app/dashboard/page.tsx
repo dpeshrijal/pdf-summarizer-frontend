@@ -1,12 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { UserButton, useAuth, useUser } from "@clerk/nextjs";
+import { UserButton, useAuth } from "@clerk/nextjs";
 import { FileText, CheckCircle2, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { hasCompletedOnboarding } from "@/lib/api/profileApi";
 
 // Components
 import { ResumeUpload } from "./components/ResumeUpload";
@@ -38,7 +37,6 @@ interface AIGeneratedDocs {
 export default function Dashboard() {
   const router = useRouter();
   const { isSignedIn, isLoaded, getToken } = useAuth();
-  const { user } = useUser();
 
   // State - Declare before useEffects
   const [previousResumes, setPreviousResumes] = useState<Resume[]>([]);
@@ -57,56 +55,12 @@ export default function Dashboard() {
   const [generationHistory, setGenerationHistory] = useState<Generation[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
 
-  const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(true);
-
   // Redirect to sign-in if not authenticated
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
       router.push("/sign-in");
     }
   }, [isSignedIn, isLoaded, router]);
-
-  // Check onboarding status and redirect if needed - IMMEDIATELY, don't wait for data
-  useEffect(() => {
-    const checkOnboarding = async () => {
-      if (!isSignedIn || !user?.id || !isLoaded) {
-        setIsCheckingOnboarding(false);
-        return;
-      }
-
-      // Check if user has explicitly marked onboarding as seen/skipped
-      const hasSeenOnboarding = localStorage.getItem(`onboarding_seen_${user.id}`);
-
-      // If they've seen it before, don't redirect
-      if (hasSeenOnboarding) {
-        setIsCheckingOnboarding(false);
-        return;
-      }
-
-      try {
-        const completed = await hasCompletedOnboarding(user.id);
-
-        // If they have a profile, mark onboarding as seen and don't redirect
-        if (completed) {
-          localStorage.setItem(`onboarding_seen_${user.id}`, 'true');
-          setIsCheckingOnboarding(false);
-          return;
-        }
-
-        // User doesn't have a profile yet - show onboarding
-        // This applies to both new users AND existing users without profiles
-        // Gives everyone a chance to add their professional links
-        router.replace("/onboarding"); // Use replace instead of push to avoid back navigation
-      } catch (error) {
-        console.error("Error checking onboarding status:", error);
-        // Don't block access if check fails
-        setIsCheckingOnboarding(false);
-      }
-    };
-
-    // Check immediately when user is authenticated - don't wait for resume loading
-    checkOnboarding();
-  }, [isSignedIn, user?.id, isLoaded, router]);
 
   // Fetch previous resumes on mount
   useEffect(() => {
@@ -338,35 +292,6 @@ export default function Dashboard() {
       setIsGenerating(false);
     }
   };
-
-  // Show loading screen while checking onboarding to prevent flash
-  if (isCheckingOnboarding) {
-    return (
-      <div className="min-h-screen bg-background relative overflow-hidden">
-        {/* Animated Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-secondary/10 pointer-events-none" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(59,130,246,0.1),transparent_50%)] pointer-events-none" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(139,92,246,0.08),transparent_50%)] pointer-events-none" />
-
-        <main className="container mx-auto px-4 py-8 md:py-12 max-w-7xl">
-          <div className="flex flex-col items-center justify-center min-h-screen space-y-6">
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-primary via-purple-500 to-primary rounded-full blur-2xl opacity-20 animate-pulse" />
-              <Loader2 className="relative h-16 w-16 animate-spin text-primary" />
-            </div>
-            <div className="text-center space-y-2">
-              <h2 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-primary via-purple-500 to-primary bg-clip-text text-transparent animate-gradient">
-                Preparing Your Workspace
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                Setting up your personalized resume experience...
-              </p>
-            </div>
-          </div>
-        </main>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
