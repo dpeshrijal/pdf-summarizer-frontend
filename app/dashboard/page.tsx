@@ -467,7 +467,7 @@ export default function Dashboard() {
                   <span className="text-xs font-medium text-primary">
                     {userProfile.subscriptionTier === 'unlimited'
                       ? 'Unlimited'
-                      : `${userProfile.creditsRemaining || 3} credits`
+                      : `${userProfile.creditsRemaining ?? 3} credits`
                     }
                   </span>
                 </div>
