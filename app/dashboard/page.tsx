@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { UserButton, useAuth } from "@clerk/nextjs";
+import { UserButton, useAuth, useUser } from "@clerk/nextjs";
 import { FileText, CheckCircle2, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { hasCompletedOnboarding } from "@/lib/api/profileApi";
 
 // Components
 import { ResumeUpload } from "./components/ResumeUpload";
@@ -37,10 +38,12 @@ interface AIGeneratedDocs {
 export default function Dashboard() {
   const router = useRouter();
   const { isSignedIn, isLoaded, getToken } = useAuth();
+  const { user } = useUser();
 
   // State - Declare before useEffects
   const [previousResumes, setPreviousResumes] = useState<Resume[]>([]);
   const [isLoadingResumes, setIsLoadingResumes] = useState(true);
+  const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(true);
   const [selectedResumeId, setSelectedResumeId] = useState<string | null>(null);
   const [fileId, setFileId] = useState<string | null>(null);
 
@@ -61,6 +64,40 @@ export default function Dashboard() {
       router.push("/sign-in");
     }
   }, [isSignedIn, isLoaded, router]);
+
+  // Check onboarding - localStorage FIRST (synchronous), then API
+  useEffect(() => {
+    const checkOnboarding = async () => {
+      if (!isSignedIn || !user?.id || !isLoaded) {
+        setIsCheckingOnboarding(false);
+        return;
+      }
+
+      // INSTANT CHECK: localStorage (no API call, no delay)
+      const hasSeenOnboarding = localStorage.getItem(`onboarding_seen_${user.id}`);
+      if (hasSeenOnboarding) {
+        setIsCheckingOnboarding(false);
+        return;
+      }
+
+      // API CHECK: Only if localStorage doesn't have it
+      try {
+        const completed = await hasCompletedOnboarding(user.id);
+        if (completed) {
+          localStorage.setItem(`onboarding_seen_${user.id}`, 'true');
+          setIsCheckingOnboarding(false);
+          return;
+        }
+        // User needs onboarding - redirect
+        router.replace("/onboarding");
+      } catch (error) {
+        console.error("Error checking onboarding status:", error);
+        setIsCheckingOnboarding(false);
+      }
+    };
+
+    checkOnboarding();
+  }, [isSignedIn, user?.id, isLoaded, router]);
 
   // Fetch previous resumes on mount
   useEffect(() => {
@@ -292,6 +329,18 @@ export default function Dashboard() {
       setIsGenerating(false);
     }
   };
+
+  // Show minimal loading screen while checking onboarding
+  if (isCheckingOnboarding) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex flex-col items-center space-y-4">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">

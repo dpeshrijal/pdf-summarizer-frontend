@@ -1,67 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth, useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Sparkles, Zap, Shield, User, Loader2 } from "lucide-react";
-import { hasCompletedOnboarding } from "@/lib/api/profileApi";
+import { ArrowRight, Sparkles, Zap, Shield, User } from "lucide-react";
 
 export default function OnboardingWelcome() {
   const router = useRouter();
-  const { isSignedIn, isLoaded } = useAuth();
-  const { user } = useUser();
-  const [isChecking, setIsChecking] = useState(true);
-  const [shouldRedirect, setShouldRedirect] = useState(false);
-
-  // Combined check - both localStorage and API
-  useEffect(() => {
-    const checkStatus = async () => {
-      if (!isSignedIn || !user?.id || !isLoaded) {
-        setIsChecking(false);
-        return;
-      }
-
-      // FIRST: Check localStorage (synchronous, instant)
-      const hasSeenOnboarding = localStorage.getItem(`onboarding_seen_${user.id}`);
-      if (hasSeenOnboarding) {
-        setShouldRedirect(true);
-        router.replace("/dashboard");
-        return;
-      }
-
-      // SECOND: Check API (async)
-      try {
-        const completed = await hasCompletedOnboarding(user.id);
-        if (completed) {
-          localStorage.setItem(`onboarding_seen_${user.id}`, 'true');
-          setShouldRedirect(true);
-          router.replace("/dashboard");
-          return;
-        }
-        // User needs onboarding - show the page
-        setIsChecking(false);
-      } catch (error) {
-        console.error("Error checking onboarding status:", error);
-        // On error, let them proceed with onboarding
-        setIsChecking(false);
-      }
-    };
-
-    checkStatus();
-  }, [isSignedIn, user?.id, isLoaded, router]);
-
-  // Show loading while checking
-  if (isChecking) {
-    return (
-      <div className="container mx-auto px-4 py-16 md:py-24">
-        <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6">
-          <Loader2 className="h-16 w-16 animate-spin text-primary" />
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="container mx-auto px-4 py-16 md:py-24 relative">
