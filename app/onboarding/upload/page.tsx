@@ -212,18 +212,18 @@ export default function OnboardingUpload() {
               <div
                 className={`relative border-2 border-dashed rounded-2xl p-12 transition-all ${
                   isUploading || isProcessing
-                    ? "border-muted-foreground/10 bg-muted/5 cursor-not-allowed opacity-75"
+                    ? "border-muted-foreground/10 bg-muted/5 cursor-not-allowed opacity-75 pointer-events-none"
                     : dragActive
-                    ? "border-primary bg-primary/5 scale-105"
+                    ? "border-primary bg-primary/5 scale-105 cursor-pointer"
                     : selectedFile
-                    ? "border-primary/50 bg-primary/5"
+                    ? "border-primary/50 bg-primary/5 cursor-pointer"
                     : "border-muted-foreground/25 hover:border-muted-foreground/50 hover:bg-muted/10 cursor-pointer"
                 }`}
                 onDragEnter={isUploading || isProcessing ? undefined : handleDrag}
                 onDragLeave={isUploading || isProcessing ? undefined : handleDrag}
                 onDragOver={isUploading || isProcessing ? undefined : handleDrag}
                 onDrop={isUploading || isProcessing ? undefined : handleDrop}
-                onClick={() => !isUploading && !isProcessing && fileInputRef.current?.click()}
+                onClick={isUploading || isProcessing ? undefined : () => fileInputRef.current?.click()}
               >
                 <input
                   ref={fileInputRef}

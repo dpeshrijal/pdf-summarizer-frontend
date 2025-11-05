@@ -139,14 +139,24 @@ export function ResumeUpload({
           <>
             <label
               htmlFor="file-upload"
-              className={`flex flex-col items-center justify-center w-full h-44 md:h-48 border-2 border-dashed rounded-xl cursor-pointer transition-all duration-300 ${
-                masterResumeFile
-                  ? "border-primary bg-primary/10 shadow-lg shadow-primary/10"
-                  : "border-muted-foreground/25 hover:border-primary/50 hover:bg-primary/5 hover:shadow-lg"
+              className={`flex flex-col items-center justify-center w-full h-44 md:h-48 border-2 border-dashed rounded-xl transition-all duration-300 ${
+                isUploading
+                  ? "border-muted-foreground/10 bg-muted/5 cursor-not-allowed opacity-75 pointer-events-none"
+                  : masterResumeFile
+                  ? "border-primary bg-primary/10 shadow-lg shadow-primary/10 cursor-pointer"
+                  : "border-muted-foreground/25 hover:border-primary/50 hover:bg-primary/5 hover:shadow-lg cursor-pointer"
               }`}
             >
               <div className="flex flex-col items-center justify-center py-6">
-                {masterResumeFile ? (
+                {isUploading ? (
+                  <>
+                    <Loader2 className="w-14 h-14 md:w-16 md:h-16 animate-spin text-primary mb-3" />
+                    <p className="text-sm md:text-base font-semibold">Processing...</p>
+                    <p className="text-xs md:text-sm text-muted-foreground mt-1">
+                      Please wait while we process your resume
+                    </p>
+                  </>
+                ) : masterResumeFile ? (
                   <>
                     <div className="h-14 w-14 md:h-16 md:w-16 rounded-xl bg-primary/10 flex items-center justify-center mb-3">
                       <FileText className="h-8 w-8 md:h-10 md:w-10 text-primary" />
@@ -178,6 +188,7 @@ export function ResumeUpload({
                 accept="application/pdf"
                 onChange={handleFileChange}
                 className="hidden"
+                disabled={isUploading}
               />
             </label>
 

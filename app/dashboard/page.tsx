@@ -57,6 +57,8 @@ export default function Dashboard() {
   const [generationHistory, setGenerationHistory] = useState<Generation[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
 
+  const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(true);
+
   // Redirect to sign-in if not authenticated
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
@@ -67,13 +69,17 @@ export default function Dashboard() {
   // Check onboarding status and redirect if needed - IMMEDIATELY, don't wait for data
   useEffect(() => {
     const checkOnboarding = async () => {
-      if (!isSignedIn || !user?.id || !isLoaded) return;
+      if (!isSignedIn || !user?.id || !isLoaded) {
+        setIsCheckingOnboarding(false);
+        return;
+      }
 
       // Check if user has explicitly marked onboarding as seen/skipped
       const hasSeenOnboarding = localStorage.getItem(`onboarding_seen_${user.id}`);
 
       // If they've seen it before, don't redirect
       if (hasSeenOnboarding) {
+        setIsCheckingOnboarding(false);
         return;
       }
 
@@ -83,6 +89,7 @@ export default function Dashboard() {
         // If they have a profile, mark onboarding as seen and don't redirect
         if (completed) {
           localStorage.setItem(`onboarding_seen_${user.id}`, 'true');
+          setIsCheckingOnboarding(false);
           return;
         }
 
@@ -93,6 +100,7 @@ export default function Dashboard() {
       } catch (error) {
         console.error("Error checking onboarding status:", error);
         // Don't block access if check fails
+        setIsCheckingOnboarding(false);
       }
     };
 
