@@ -375,8 +375,8 @@ export default function Dashboard() {
           </div>
         </header>
 
-        {/* Page Loader - Shows while data is loading */}
-        {isLoadingResumes || isLoadingHistory ? (
+        {/* Page Loader - Shows while data is loading or checking onboarding */}
+        {isCheckingOnboarding || isLoadingResumes || isLoadingHistory ? (
           <main className="container mx-auto px-4 py-8 md:py-12 max-w-7xl">
             <div className="flex flex-col items-center justify-center min-h-[70vh] space-y-6">
               <div className="relative">
