@@ -39,13 +39,13 @@ export function MatchScoreDisplay({ matchScore, compact = false }: MatchScoreDis
   // Compact view for history table
   if (compact) {
     return (
-      <div className="flex items-center gap-2">
-        <div className={`flex items-center justify-center w-12 h-12 rounded-full ${getScoreBgColor(matchScore.overallScore)}`}>
-          <span className={`text-lg font-bold ${getScoreColor(matchScore.overallScore)}`}>
+      <div className="flex items-center gap-3">
+        <div className={`flex items-center justify-center w-14 h-14 rounded-full flex-shrink-0 ${getScoreBgColor(matchScore.overallScore)}`}>
+          <span className={`text-xl font-bold leading-none ${getScoreColor(matchScore.overallScore)}`}>
             {matchScore.overallScore}
           </span>
         </div>
-        <div className="text-xs">
+        <div className="text-xs leading-tight">
           <div className={`font-semibold ${getScoreColor(matchScore.overallScore)}`}>
             {getScoreLabel(matchScore.overallScore)}
           </div>
@@ -64,38 +64,36 @@ export function MatchScoreDisplay({ matchScore, compact = false }: MatchScoreDis
         {/* Compact Header - Single Line */}
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="w-full flex items-center justify-between p-4 hover:bg-accent/50 transition-colors"
+          className="w-full flex items-center justify-between p-4 hover:bg-accent/50 transition-colors text-left"
         >
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 min-w-0 flex-1">
             {/* Score Badge */}
-            <div className={`flex items-center justify-center w-12 h-12 rounded-full ${getScoreBgColor(matchScore.overallScore)}`}>
-              <span className={`text-lg font-bold ${getScoreColor(matchScore.overallScore)}`}>
-                {matchScore.overallScore}%
+            <div className={`flex items-center justify-center w-16 h-16 rounded-full flex-shrink-0 ${getScoreBgColor(matchScore.overallScore)}`}>
+              <span className={`text-2xl font-bold leading-none ${getScoreColor(matchScore.overallScore)}`}>
+                {matchScore.overallScore}
               </span>
             </div>
 
             {/* Title and Quick Stats */}
-            <div className="flex items-center gap-6">
-              <div className="text-left">
-                <div className="flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4" />
-                  <span className="font-semibold">ATS Match Score</span>
-                  <span className={`text-sm font-medium ${getScoreColor(matchScore.overallScore)}`}>
-                    {getScoreLabel(matchScore.overallScore)}
-                  </span>
-                </div>
-                <div className="text-xs text-muted-foreground mt-0.5">
-                  Skills: {matchScore.skillsMatch}% • Experience: {matchScore.experienceMatch}% • Education: {matchScore.educationMatch}%
-                </div>
+            <div className="flex flex-col min-w-0 flex-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <TrendingUp className="w-4 h-4 flex-shrink-0" />
+                <span className="font-semibold whitespace-nowrap">ATS Match Score</span>
+                <span className={`text-sm font-medium whitespace-nowrap ${getScoreColor(matchScore.overallScore)}`}>
+                  {getScoreLabel(matchScore.overallScore)}
+                </span>
+              </div>
+              <div className="text-xs text-muted-foreground mt-1.5 leading-relaxed">
+                Skills: {matchScore.skillsMatch}% • Experience: {matchScore.experienceMatch}% • Education: {matchScore.educationMatch}%
               </div>
             </div>
           </div>
 
           {/* Expand Icon */}
           {isExpanded ? (
-            <ChevronUp className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+            <ChevronUp className="w-5 h-5 text-muted-foreground flex-shrink-0 ml-4" />
           ) : (
-            <ChevronDown className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+            <ChevronDown className="w-5 h-5 text-muted-foreground flex-shrink-0 ml-4" />
           )}
         </button>
 
