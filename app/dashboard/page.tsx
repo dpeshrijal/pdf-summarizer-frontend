@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { UserButton, useAuth, useUser } from "@clerk/nextjs";
-import { FileText, CheckCircle2, Loader2, Settings } from "lucide-react";
+import { FileText, CheckCircle2, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
@@ -361,8 +361,7 @@ export default function Dashboard() {
               </Link>
               <Link href="/settings">
                 <Button variant="ghost" size="sm" className="cursor-pointer text-xs md:text-sm">
-                  <Settings className="h-4 w-4 mr-2" />
-                  <span className="hidden sm:inline">Settings</span>
+                  Settings
                 </Button>
               </Link>
               <UserButton />
