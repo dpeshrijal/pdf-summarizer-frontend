@@ -75,7 +75,7 @@ export default function OnboardingUpload() {
       }
 
       const response = await fetch(
-        process.env.NEXT_PUBLIC_API_GATEWAY_URL!,
+        `${process.env.NEXT_PUBLIC_API_GATEWAY_URL}?fileName=${encodeURIComponent(selectedFile.name)}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -83,8 +83,8 @@ export default function OnboardingUpload() {
 
       if (!response.ok) throw new Error("Failed to get upload URL");
 
-      const { presignedUrl, fileId } = await response.json();
-      await uploadPdfToS3(presignedUrl, selectedFile, fileId);
+      const { uploadUrl, fileId } = await response.json();
+      await uploadPdfToS3(uploadUrl, selectedFile, fileId);
 
       setIsUploading(false);
       setIsProcessing(true);
