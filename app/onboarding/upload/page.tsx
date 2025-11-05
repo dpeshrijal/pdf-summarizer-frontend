@@ -75,7 +75,7 @@ export default function OnboardingUpload() {
       }
 
       const response = await fetch(
-        process.env.NEXT_PUBLIC_GET_UPLOAD_URL_API_URL!,
+        process.env.NEXT_PUBLIC_API_GATEWAY_URL!,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
