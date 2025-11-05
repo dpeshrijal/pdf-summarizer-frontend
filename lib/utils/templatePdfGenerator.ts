@@ -31,26 +31,155 @@ const SPACING = {
   tightLineHeight: 4, // Tighter line height for sub-info
 };
 
-// Page constraints - optimized margins to maximize content space
+// Margin presets - progressively tighter to fit content on one page
+const MARGIN_PRESETS = [
+  { name: "comfortable", size: 19 }, // ~0.75 inches - good readability
+  { name: "medium", size: 13 },      // ~0.5 inches - balanced
+  { name: "tight", size: 10 },       // ~0.4 inches - compact but readable
+  { name: "minimal", size: 7 },      // ~0.27 inches - last resort
+];
+
+// Page constraints
 const PAGE = {
   width: 210, // A4 width in mm
   height: 297, // A4 height in mm
-  marginLeft: 20, // Reduced from 15mm to fit more content
-  marginRight: 20,
-  marginTop: 20, // Reduced from 15mm
-  marginBottom: 20,
 };
 
-const MAX_CONTENT_WIDTH = PAGE.width - PAGE.marginLeft - PAGE.marginRight;
-const MAX_CONTENT_HEIGHT = PAGE.height - PAGE.marginTop - PAGE.marginBottom;
+/**
+ * Estimate content height for a resume (in mm)
+ * Used to determine optimal margins before rendering
+ */
+const estimateContentHeight = (resume: StructuredResume): number => {
+  let height = 0;
+
+  // Name (20pt font) + spacing
+  height += 10;
+
+  // Contact info + spacing
+  height += 8;
+
+  // Summary section (if exists)
+  if (resume.summary) {
+    height += SPACING.beforeSection + SPACING.afterSectionHeader; // Section header
+    // Estimate ~140 chars per line at normal font
+    const summaryLines = Math.ceil(resume.summary.length / 140);
+    height += summaryLines * SPACING.lineHeight;
+  }
+
+  // Skills section
+  if (resume.skills.length > 0) {
+    height += SPACING.beforeSection + SPACING.afterSectionHeader; // Section header
+    resume.skills.forEach(skillCat => {
+      const skillText = skillCat.skills.join(", ");
+      // Estimate ~100 chars per line with category name
+      const lines = Math.ceil((skillCat.category.length + skillText.length) / 100);
+      height += lines * SPACING.lineHeight;
+    });
+  }
+
+  // Work Experience section
+  if (resume.experience.length > 0) {
+    height += SPACING.beforeSection + SPACING.afterSectionHeader; // Section header
+    resume.experience.forEach((exp, index) => {
+      height += SPACING.tightLineHeight; // Job title line
+      height += SPACING.lineHeight + 0.5; // Company line
+
+      // Achievements
+      exp.achievements.forEach(achievement => {
+        // Estimate ~120 chars per line for bullets
+        const lines = Math.ceil(achievement.length / 120);
+        height += lines * SPACING.lineHeight;
+      });
+
+      // Space between jobs (except last)
+      if (index < resume.experience.length - 1) {
+        height += SPACING.betweenJobs;
+      }
+    });
+  }
+
+  // Education section
+  if (resume.education.length > 0) {
+    height += SPACING.beforeSection + SPACING.afterSectionHeader; // Section header
+    resume.education.forEach((edu, index) => {
+      height += SPACING.tightLineHeight; // Degree line
+      height += SPACING.lineHeight; // Institution line
+
+      // Coursework if exists
+      if (edu.coursework && edu.coursework.length > 0) {
+        const courseworkText = edu.coursework.join(", ");
+        const lines = Math.ceil(courseworkText.length / 100);
+        height += lines * SPACING.lineHeight;
+      }
+
+      if (index < resume.education.length - 1) {
+        height += SPACING.betweenEducation;
+      }
+    });
+  }
+
+  // Projects section (if exists)
+  if (resume.projects && resume.projects.length > 0) {
+    height += SPACING.beforeSection + SPACING.afterSectionHeader;
+    resume.projects.forEach(project => {
+      height += SPACING.tightLineHeight; // Project name
+      const descLines = Math.ceil(project.description.length / 120);
+      height += descLines * SPACING.lineHeight;
+    });
+  }
+
+  // Certifications section (if exists)
+  if (resume.certifications && resume.certifications.length > 0) {
+    height += SPACING.beforeSection + SPACING.afterSectionHeader;
+    height += resume.certifications.length * SPACING.lineHeight;
+  }
+
+  // Add 10% buffer for spacing variations
+  return height * 1.1;
+};
+
+/**
+ * Select optimal margins based on content height
+ */
+const selectOptimalMargins = (resume: StructuredResume): number => {
+  const contentHeight = estimateContentHeight(resume);
+
+  // Try each margin preset until content fits
+  for (const preset of MARGIN_PRESETS) {
+    const availableHeight = PAGE.height - (preset.size * 2); // Top + bottom margins
+
+    if (contentHeight <= availableHeight) {
+      console.log(`📄 Selected ${preset.name} margins (${preset.size}mm) - estimated ${Math.round(contentHeight)}mm content fits in ${Math.round(availableHeight)}mm`);
+      return preset.size;
+    }
+  }
+
+  // If nothing fits, use minimal margins as last resort
+  const minimalMargin = MARGIN_PRESETS[MARGIN_PRESETS.length - 1].size;
+  console.warn(`⚠️ Content very long (${Math.round(contentHeight)}mm), using minimal margins (${minimalMargin}mm)`);
+  return minimalMargin;
+};
 
 /**
  * Generate resume PDF from structured data
+ * Automatically adjusts margins to fit content on one page
  */
 export const generateResumePDF = async (
   resume: StructuredResume,
   filename: string = "Resume.pdf"
 ) => {
+  // Select optimal margins based on content
+  const optimalMargin = selectOptimalMargins(resume);
+
+  const margins = {
+    left: optimalMargin,
+    right: optimalMargin,
+    top: optimalMargin,
+    bottom: optimalMargin,
+  };
+
+  const MAX_CONTENT_WIDTH = PAGE.width - margins.left - margins.right;
+
   const { jsPDF } = await import("jspdf");
   const doc = new jsPDF({
     orientation: "portrait",
@@ -58,11 +187,11 @@ export const generateResumePDF = async (
     format: "a4",
   });
 
-  let yPos = PAGE.marginTop;
+  let yPos = margins.top;
 
   // Helper: Check if content fits on page
   const fitsOnPage = (heightNeeded: number): boolean => {
-    return yPos + heightNeeded <= PAGE.height - PAGE.marginBottom;
+    return yPos + heightNeeded <= PAGE.height - margins.bottom;
   };
 
   // Helper: Add text with proper wrapping
@@ -97,15 +226,15 @@ export const generateResumePDF = async (
     yPos += SPACING.beforeSection;
     doc.setFontSize(FONT_SIZES.sectionHeader);
     doc.setFont("helvetica", "bold");
-    doc.text(title.toUpperCase(), PAGE.marginLeft, yPos);
+    doc.text(title.toUpperCase(), margins.left, yPos);
 
     // Underline - positioned below the text
     const textWidth = doc.getTextWidth(title.toUpperCase());
     doc.setLineWidth(0.5);
     doc.line(
-      PAGE.marginLeft,
+      margins.left,
       yPos + 1.5,
-      PAGE.marginLeft + textWidth,
+      margins.left + textWidth,
       yPos + 1.5
     );
 
@@ -117,7 +246,7 @@ export const generateResumePDF = async (
   // 1. HEADER (Name and Contact)
   doc.setFontSize(FONT_SIZES.name);
   doc.setFont("helvetica", "bold");
-  doc.text(resume.contact.name.toUpperCase(), PAGE.marginLeft, yPos);
+  doc.text(resume.contact.name.toUpperCase(), margins.left, yPos);
   yPos += SPACING.afterName;
 
   // Contact info (normal weight, single line)
@@ -141,12 +270,12 @@ export const generateResumePDF = async (
   }
 
   const contactLine = contactParts.join(" | ");
-  addText(contactLine, PAGE.marginLeft, FONT_SIZES.small, "normal");
+  addText(contactLine, margins.left, FONT_SIZES.small, "normal");
   yPos += SPACING.afterContactInfo;
 
   // 2. SUMMARY
   if (resume.summary && addSectionHeader("SUMMARY")) {
-    addText(resume.summary, PAGE.marginLeft, FONT_SIZES.normal);
+    addText(resume.summary, margins.left, FONT_SIZES.normal);
   }
 
   // 3. SKILLS
@@ -159,7 +288,7 @@ export const generateResumePDF = async (
       doc.setFont("helvetica", "bold");
       const categoryText = `${skillCat.category}:`;
       const categoryWidth = doc.getTextWidth(categoryText);
-      doc.text(categoryText, PAGE.marginLeft, yPos);
+      doc.text(categoryText, margins.left, yPos);
 
       // Skills in normal weight on same line
       doc.setFont("helvetica", "normal");
@@ -173,11 +302,11 @@ export const generateResumePDF = async (
       for (let i = 0; i < skillLines.length; i++) {
         if (i === 0) {
           // First line on same line as category
-          doc.text(skillLines[i], PAGE.marginLeft + categoryWidth + 2, yPos);
+          doc.text(skillLines[i], margins.left + categoryWidth + 2, yPos);
         } else {
           // Continuation lines
           yPos += SPACING.lineHeight;
-          doc.text(skillLines[i], PAGE.marginLeft, yPos);
+          doc.text(skillLines[i], margins.left, yPos);
         }
       }
       yPos += SPACING.lineHeight;
@@ -193,21 +322,21 @@ export const generateResumePDF = async (
       // Job title (bold) and date (normal, right-aligned) on same line
       doc.setFontSize(FONT_SIZES.jobTitle);
       doc.setFont("helvetica", "bold");
-      doc.text(exp.title, PAGE.marginLeft, yPos);
+      doc.text(exp.title, margins.left, yPos);
 
       // Date on the right (normal weight)
       doc.setFontSize(FONT_SIZES.normal);
       doc.setFont("helvetica", "normal");
       const dateText = `${exp.startDate} - ${exp.endDate}`;
       const dateWidth = doc.getTextWidth(dateText);
-      doc.text(dateText, PAGE.width - PAGE.marginRight - dateWidth, yPos);
+      doc.text(dateText, PAGE.width - margins.right - dateWidth, yPos);
 
       yPos += SPACING.tightLineHeight;
 
       // Company name (normal weight, slightly smaller)
       doc.setFontSize(FONT_SIZES.company);
       doc.setFont("helvetica", "normal");
-      doc.text(exp.company, PAGE.marginLeft, yPos);
+      doc.text(exp.company, margins.left, yPos);
       yPos += SPACING.lineHeight + 0.5;
 
       // Achievements (bullets)
@@ -216,7 +345,7 @@ export const generateResumePDF = async (
         if (!fitsOnPage(6)) break;
 
         // Bullet point
-        doc.text("•", PAGE.marginLeft, yPos);
+        doc.text("•", margins.left, yPos);
 
         // Achievement text (wrapped if needed)
         const achievementLines = doc.splitTextToSize(
@@ -228,7 +357,7 @@ export const generateResumePDF = async (
           if (!fitsOnPage(5)) break;
           doc.text(
             achievementLines[j],
-            PAGE.marginLeft + SPACING.bulletIndent,
+            margins.left + SPACING.bulletIndent,
             yPos
           );
           yPos += SPACING.lineHeight;
@@ -255,13 +384,13 @@ export const generateResumePDF = async (
       // Project name (bold) and date (normal, right-aligned) on same line
       doc.setFontSize(FONT_SIZES.jobTitle);
       doc.setFont("helvetica", "bold");
-      doc.text(proj.name, PAGE.marginLeft, yPos);
+      doc.text(proj.name, margins.left, yPos);
 
       if (proj.date) {
         doc.setFontSize(FONT_SIZES.normal);
         doc.setFont("helvetica", "normal");
         const dateWidth = doc.getTextWidth(proj.date);
-        doc.text(proj.date, PAGE.width - PAGE.marginRight - dateWidth, yPos);
+        doc.text(proj.date, PAGE.width - margins.right - dateWidth, yPos);
       }
 
       yPos += SPACING.tightLineHeight;
@@ -269,19 +398,19 @@ export const generateResumePDF = async (
       // Description
       doc.setFontSize(FONT_SIZES.normal);
       doc.setFont("helvetica", "normal");
-      addText(proj.description, PAGE.marginLeft, FONT_SIZES.normal);
+      addText(proj.description, margins.left, FONT_SIZES.normal);
 
       // Technologies (if present)
       if (proj.technologies && proj.technologies.length > 0) {
         doc.setFont("helvetica", "italic");
         const techText = `Technologies: ${proj.technologies.join(", ")}`;
-        addText(techText, PAGE.marginLeft, FONT_SIZES.small);
+        addText(techText, margins.left, FONT_SIZES.small);
       }
 
       // URL (if present)
       if (proj.url) {
         doc.setFont("helvetica", "normal");
-        addText(proj.url, PAGE.marginLeft, FONT_SIZES.small);
+        addText(proj.url, margins.left, FONT_SIZES.small);
       }
 
       if (i < resume.projects.length - 1) {
@@ -303,12 +432,12 @@ export const generateResumePDF = async (
       // Title (bold)
       doc.setFontSize(FONT_SIZES.normal);
       doc.setFont("helvetica", "bold");
-      addText(pub.title, PAGE.marginLeft, FONT_SIZES.normal);
+      addText(pub.title, margins.left, FONT_SIZES.normal);
 
       // Authors, venue, date (normal)
       doc.setFont("helvetica", "normal");
       const pubDetails = `${pub.authors}. ${pub.venue}, ${pub.date}`;
-      addText(pubDetails, PAGE.marginLeft, FONT_SIZES.small);
+      addText(pubDetails, margins.left, FONT_SIZES.small);
 
       if (i < resume.publications.length - 1) {
         yPos += SPACING.betweenEducation;
@@ -329,7 +458,7 @@ export const generateResumePDF = async (
       // Certification name (bold)
       doc.setFontSize(FONT_SIZES.normal);
       doc.setFont("helvetica", "bold");
-      doc.text(cert.name, PAGE.marginLeft, yPos);
+      doc.text(cert.name, margins.left, yPos);
       yPos += SPACING.tightLineHeight;
 
       // Issuer and date (normal weight)
@@ -344,7 +473,7 @@ export const generateResumePDF = async (
       if (cert.credentialId) {
         certDetails += ` | ID: ${cert.credentialId}`;
       }
-      addText(certDetails, PAGE.marginLeft, FONT_SIZES.normal);
+      addText(certDetails, margins.left, FONT_SIZES.normal);
 
       if (i < resume.certifications.length - 1) {
         yPos += SPACING.betweenEducation;
@@ -365,7 +494,7 @@ export const generateResumePDF = async (
       // Award title (bold)
       doc.setFontSize(FONT_SIZES.normal);
       doc.setFont("helvetica", "bold");
-      doc.text(award.title, PAGE.marginLeft, yPos);
+      doc.text(award.title, margins.left, yPos);
       yPos += SPACING.tightLineHeight;
 
       // Issuer and date
@@ -374,7 +503,7 @@ export const generateResumePDF = async (
       if (award.description) {
         awardDetails += ` - ${award.description}`;
       }
-      addText(awardDetails, PAGE.marginLeft, FONT_SIZES.normal);
+      addText(awardDetails, margins.left, FONT_SIZES.normal);
 
       if (i < resume.awards.length - 1) {
         yPos += SPACING.betweenEducation;
@@ -391,7 +520,7 @@ export const generateResumePDF = async (
       // Degree (bold)
       doc.setFontSize(FONT_SIZES.normal);
       doc.setFont("helvetica", "bold");
-      doc.text(edu.degree, PAGE.marginLeft, yPos);
+      doc.text(edu.degree, margins.left, yPos);
       yPos += SPACING.tightLineHeight;
 
       // Institution and year (normal weight)
@@ -399,7 +528,7 @@ export const generateResumePDF = async (
       const eduDetails = `${edu.institution}${
         edu.location ? ", " + edu.location : ""
       } (${edu.graduationYear})`;
-      addText(eduDetails, PAGE.marginLeft, FONT_SIZES.normal);
+      addText(eduDetails, margins.left, FONT_SIZES.normal);
 
       // Coursework (if present)
       if (edu.coursework && edu.coursework.length > 0) {
@@ -407,7 +536,7 @@ export const generateResumePDF = async (
         const courseworkText = `Relevant Coursework: ${edu.coursework.join(
           ", "
         )}`;
-        addText(courseworkText, PAGE.marginLeft, FONT_SIZES.small);
+        addText(courseworkText, margins.left, FONT_SIZES.small);
       }
 
       // Add space between education entries (but not after the last one)
@@ -430,34 +559,34 @@ export const generateResumePDF = async (
       // Role (bold) and date (normal, right-aligned) on same line
       doc.setFontSize(FONT_SIZES.jobTitle);
       doc.setFont("helvetica", "bold");
-      doc.text(vol.role, PAGE.marginLeft, yPos);
+      doc.text(vol.role, margins.left, yPos);
 
       doc.setFontSize(FONT_SIZES.normal);
       doc.setFont("helvetica", "normal");
       const dateText = `${vol.startDate} - ${vol.endDate}`;
       const dateWidth = doc.getTextWidth(dateText);
-      doc.text(dateText, PAGE.width - PAGE.marginRight - dateWidth, yPos);
+      doc.text(dateText, PAGE.width - margins.right - dateWidth, yPos);
 
       yPos += SPACING.tightLineHeight;
 
       // Organization (normal)
       doc.setFontSize(FONT_SIZES.company);
       doc.setFont("helvetica", "normal");
-      doc.text(vol.organization, PAGE.marginLeft, yPos);
+      doc.text(vol.organization, margins.left, yPos);
       yPos += SPACING.lineHeight;
 
       // Description bullets
       doc.setFontSize(FONT_SIZES.normal);
       for (const desc of vol.description) {
         if (!fitsOnPage(6)) break;
-        doc.text("•", PAGE.marginLeft, yPos);
+        doc.text("•", margins.left, yPos);
         const descLines = doc.splitTextToSize(
           desc,
           MAX_CONTENT_WIDTH - SPACING.bulletIndent
         );
         for (let j = 0; j < descLines.length; j++) {
           if (!fitsOnPage(5)) break;
-          doc.text(descLines[j], PAGE.marginLeft + SPACING.bulletIndent, yPos);
+          doc.text(descLines[j], margins.left + SPACING.bulletIndent, yPos);
           yPos += SPACING.lineHeight;
         }
       }
@@ -481,7 +610,7 @@ export const generateResumePDF = async (
       // Organization (bold)
       doc.setFontSize(FONT_SIZES.normal);
       doc.setFont("helvetica", "bold");
-      doc.text(memb.organization, PAGE.marginLeft, yPos);
+      doc.text(memb.organization, margins.left, yPos);
       yPos += SPACING.tightLineHeight;
 
       // Role and dates (normal)
@@ -497,7 +626,7 @@ export const generateResumePDF = async (
         }
       }
       if (membDetails) {
-        addText(membDetails, PAGE.marginLeft, FONT_SIZES.normal);
+        addText(membDetails, margins.left, FONT_SIZES.normal);
       }
 
       if (i < resume.professionalMemberships.length - 1) {
@@ -520,7 +649,7 @@ export const generateResumePDF = async (
       (lang) => `${lang.language} (${lang.proficiency})`
     );
     const langLine = langTexts.join(" | ");
-    addText(langLine, PAGE.marginLeft, FONT_SIZES.normal);
+    addText(langLine, margins.left, FONT_SIZES.normal);
   }
 
   // Save
@@ -535,6 +664,16 @@ export const generateCoverLetterPDF = async (
   contactInfo: { name: string; email: string; phone: string },
   filename: string = "CoverLetter.pdf"
 ) => {
+  // Cover letters typically don't need dynamic margins, use comfortable margins
+  const margins = {
+    left: 19,
+    right: 19,
+    top: 19,
+    bottom: 19,
+  };
+
+  const MAX_CONTENT_WIDTH = PAGE.width - margins.left - margins.right;
+
   const { jsPDF } = await import("jspdf");
   const doc = new jsPDF({
     orientation: "portrait",
@@ -542,19 +681,19 @@ export const generateCoverLetterPDF = async (
     format: "a4",
   });
 
-  let yPos = PAGE.marginTop;
+  let yPos = margins.top;
 
   // Header with contact info
   doc.setFontSize(14);
   doc.setFont("helvetica", "bold");
-  doc.text(contactInfo.name, PAGE.marginLeft, yPos);
+  doc.text(contactInfo.name, margins.left, yPos);
   yPos += 6;
 
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
-  doc.text(contactInfo.email, PAGE.marginLeft, yPos);
+  doc.text(contactInfo.email, margins.left, yPos);
   yPos += 5;
-  doc.text(contactInfo.phone, PAGE.marginLeft, yPos);
+  doc.text(contactInfo.phone, margins.left, yPos);
   yPos += 10;
 
   // Date
@@ -563,13 +702,13 @@ export const generateCoverLetterPDF = async (
     day: "numeric",
     year: "numeric",
   });
-  doc.text(today, PAGE.marginLeft, yPos);
+  doc.text(today, margins.left, yPos);
   yPos += 10;
 
   // Recipient
   doc.text(
     `Dear ${coverLetter.companyName} Hiring Team,`,
-    PAGE.marginLeft,
+    margins.left,
     yPos
   );
   yPos += 8;
@@ -579,8 +718,8 @@ export const generateCoverLetterPDF = async (
   for (const paragraph of coverLetter.paragraphs) {
     const lines = doc.splitTextToSize(paragraph, MAX_CONTENT_WIDTH);
     for (const line of lines) {
-      if (yPos > PAGE.height - PAGE.marginBottom) break;
-      doc.text(line, PAGE.marginLeft, yPos);
+      if (yPos > PAGE.height - margins.bottom) break;
+      doc.text(line, margins.left, yPos);
       yPos += 5;
     }
     yPos += 3; // Space between paragraphs
@@ -588,10 +727,10 @@ export const generateCoverLetterPDF = async (
 
   // Closing
   yPos += 5;
-  doc.text("Sincerely,", PAGE.marginLeft, yPos);
+  doc.text("Sincerely,", margins.left, yPos);
   yPos += 8;
   doc.setFont("helvetica", "bold");
-  doc.text(contactInfo.name, PAGE.marginLeft, yPos);
+  doc.text(contactInfo.name, margins.left, yPos);
 
   doc.save(filename);
 };
