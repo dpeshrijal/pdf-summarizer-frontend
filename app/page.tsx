@@ -239,7 +239,7 @@ export default function LandingPage() {
                 </p>
                 <div className="space-y-3">
                   <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 border">
-                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
                       88
                     </div>
                     <div className="flex-1 min-w-0">

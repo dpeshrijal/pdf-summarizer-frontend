@@ -70,9 +70,9 @@ export function GenerationHistory({ history }: GenerationHistoryProps) {
 
             // Get match rating color
             const getScoreColor = (score: number) => {
-              if (score >= 80) return "from-blue-500 to-blue-600";
-              if (score >= 60) return "from-green-500 to-green-600";
-              return "from-yellow-500 to-yellow-600";
+              if (score >= 80) return "from-green-500 to-green-600"; // Strong = Green
+              if (score >= 60) return "from-blue-500 to-blue-600";   // Good = Blue
+              return "from-yellow-500 to-yellow-600";                 // Fair = Yellow
             };
 
             const getScoreRating = (score: number) => {
