@@ -211,16 +211,18 @@ export default function OnboardingUpload() {
             <>
               <div
                 className={`relative border-2 border-dashed rounded-2xl p-12 transition-all ${
-                  dragActive
+                  isUploading || isProcessing
+                    ? "border-muted-foreground/10 bg-muted/5 cursor-not-allowed opacity-75"
+                    : dragActive
                     ? "border-primary bg-primary/5 scale-105"
                     : selectedFile
                     ? "border-primary/50 bg-primary/5"
-                    : "border-muted-foreground/25 hover:border-muted-foreground/50 hover:bg-muted/10"
-                } ${!isUploading && !isProcessing ? "cursor-pointer" : ""}`}
-                onDragEnter={handleDrag}
-                onDragLeave={handleDrag}
-                onDragOver={handleDrag}
-                onDrop={handleDrop}
+                    : "border-muted-foreground/25 hover:border-muted-foreground/50 hover:bg-muted/10 cursor-pointer"
+                }`}
+                onDragEnter={isUploading || isProcessing ? undefined : handleDrag}
+                onDragLeave={isUploading || isProcessing ? undefined : handleDrag}
+                onDragOver={isUploading || isProcessing ? undefined : handleDrag}
+                onDrop={isUploading || isProcessing ? undefined : handleDrop}
                 onClick={() => !isUploading && !isProcessing && fileInputRef.current?.click()}
               >
                 <input
@@ -229,6 +231,7 @@ export default function OnboardingUpload() {
                   accept=".pdf"
                   onChange={handleFileSelect}
                   className="hidden"
+                  disabled={isUploading || isProcessing}
                 />
 
                 <div className="flex flex-col items-center space-y-4">

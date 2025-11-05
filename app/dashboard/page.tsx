@@ -64,10 +64,10 @@ export default function Dashboard() {
     }
   }, [isSignedIn, isLoaded, router]);
 
-  // Check onboarding status and redirect if needed
+  // Check onboarding status and redirect if needed - IMMEDIATELY, don't wait for data
   useEffect(() => {
     const checkOnboarding = async () => {
-      if (!isSignedIn || !user?.id) return;
+      if (!isSignedIn || !user?.id || !isLoaded) return;
 
       // Check if user has explicitly marked onboarding as seen/skipped
       const hasSeenOnboarding = localStorage.getItem(`onboarding_seen_${user.id}`);
@@ -96,11 +96,9 @@ export default function Dashboard() {
       }
     };
 
-    // Only check after we've loaded resumes
-    if (!isLoadingResumes) {
-      checkOnboarding();
-    }
-  }, [isSignedIn, user?.id, router, isLoadingResumes]);
+    // Check immediately when user is authenticated - don't wait for resume loading
+    checkOnboarding();
+  }, [isSignedIn, user?.id, isLoaded, router]);
 
   // Fetch previous resumes on mount
   useEffect(() => {
