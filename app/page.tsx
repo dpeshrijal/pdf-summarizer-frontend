@@ -62,7 +62,7 @@ export default function LandingPage() {
 
           <div className="max-w-5xl mx-auto text-center space-y-6 md:space-y-8 relative z-10">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs md:text-sm font-medium backdrop-blur-sm shadow-lg shadow-primary/5 animate-pulse">
+            <div className="inline-flex items-center gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs md:text-sm font-medium backdrop-blur-sm shadow-lg shadow-primary/5">
               <Brain className="h-3 w-3 md:h-4 md:w-4" />
               <span>Powered by Advanced AI • Match Scoring • Smart Validation</span>
             </div>
@@ -171,9 +171,9 @@ export default function LandingPage() {
           {/* Feature Grid with Visual Examples */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Feature 1: Match Score */}
-            <div className="group relative">
+            <div className="group relative flex">
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent rounded-3xl blur-xl group-hover:blur-2xl transition-all opacity-0 group-hover:opacity-100" />
-              <div className="relative bg-card border-2 border-border hover:border-primary/50 rounded-2xl p-8 transition-all hover:shadow-2xl hover:-translate-y-1">
+              <div className="relative bg-card border-2 border-border hover:border-primary/50 rounded-2xl p-8 transition-all hover:shadow-2xl hover:-translate-y-1 flex flex-col w-full">
                 <div className="mb-6">
                   <div className="relative w-24 h-24 mx-auto">
                     {/* Animated Score Circle */}
@@ -204,9 +204,9 @@ export default function LandingPage() {
             </div>
 
             {/* Feature 2: Smart Validation */}
-            <div className="group relative">
+            <div className="group relative flex">
               <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-transparent rounded-3xl blur-xl group-hover:blur-2xl transition-all opacity-0 group-hover:opacity-100" />
-              <div className="relative bg-card border-2 border-border hover:border-primary/50 rounded-2xl p-8 transition-all hover:shadow-2xl hover:-translate-y-1">
+              <div className="relative bg-card border-2 border-border hover:border-primary/50 rounded-2xl p-8 transition-all hover:shadow-2xl hover:-translate-y-1 flex flex-col w-full">
                 <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-green-500/20 to-green-600/20 flex items-center justify-center mx-auto mb-6">
                   <Shield className="h-8 w-8 text-green-600" />
                 </div>
@@ -227,9 +227,9 @@ export default function LandingPage() {
             </div>
 
             {/* Feature 3: Generation History */}
-            <div className="group relative">
+            <div className="group relative flex">
               <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-transparent rounded-3xl blur-xl group-hover:blur-2xl transition-all opacity-0 group-hover:opacity-100" />
-              <div className="relative bg-card border-2 border-border hover:border-primary/50 rounded-2xl p-8 transition-all hover:shadow-2xl hover:-translate-y-1">
+              <div className="relative bg-card border-2 border-border hover:border-primary/50 rounded-2xl p-8 transition-all hover:shadow-2xl hover:-translate-y-1 flex flex-col w-full">
                 <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-purple-500/20 to-purple-600/20 flex items-center justify-center mx-auto mb-6">
                   <History className="h-8 w-8 text-purple-600" />
                 </div>

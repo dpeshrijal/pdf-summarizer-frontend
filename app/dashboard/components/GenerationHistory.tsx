@@ -1,14 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { History, Building2, Clock, Download, ChevronLeft, ChevronRight } from "lucide-react";
+import { History, Clock, Download, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { downloadAsPDF } from "@/lib/utils/pdfGenerator";
 import { generateResumePDF, generateCoverLetterPDF } from "@/lib/utils/templatePdfGenerator";
 import type { Generation } from "@/lib/utils/dashboardApi";
 import type { GenerationOutput } from "@/lib/types/resumeSchema";
-import { MatchScoreDisplay } from "./MatchScoreDisplay";
 
 interface GenerationHistoryProps {
   history: Generation[];
@@ -69,45 +68,61 @@ export function GenerationHistory({ history }: GenerationHistoryProps) {
               }
             }
 
+            // Get match rating color
+            const getScoreColor = (score: number) => {
+              if (score >= 80) return "from-blue-500 to-blue-600";
+              if (score >= 60) return "from-green-500 to-green-600";
+              return "from-yellow-500 to-yellow-600";
+            };
+
+            const getScoreRating = (score: number) => {
+              if (score >= 80) return "Strong Match";
+              if (score >= 60) return "Good Match";
+              return "Fair Match";
+            };
+
             return (
               <div
                 key={generation.jobId}
-                className="group flex items-center gap-3 md:gap-6 p-4 md:p-5 hover:bg-primary/5 transition-all duration-200"
+                className="group flex items-center gap-4 md:gap-6 p-4 md:p-5 hover:bg-muted/30 transition-all duration-200"
               >
-                {/* Icon - Hidden on mobile */}
-                <div className="hidden sm:flex h-12 w-12 rounded-xl bg-gradient-to-br from-primary/10 to-blue-500/10 items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                  <Building2 className="h-6 w-6 text-primary" />
-                </div>
+                {/* Match Score Circle - Primary Visual */}
+                {matchScore && (
+                  <div className="flex-shrink-0">
+                    <div className="relative w-14 h-14 md:w-16 md:h-16">
+                      <div className={`absolute inset-0 rounded-full bg-gradient-to-br ${getScoreColor(matchScore.overallScore)} opacity-10 blur-md`} />
+                      <div className={`relative w-full h-full rounded-full bg-gradient-to-br ${getScoreColor(matchScore.overallScore)} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}>
+                        <div className="text-center">
+                          <div className="text-lg md:text-xl font-bold text-white">{matchScore.overallScore}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Company & Position Info */}
                 <div className="flex-1 min-w-0 space-y-1">
-                  <div className="flex items-baseline gap-2">
+                  <div className="flex flex-col gap-1">
                     <h3 className="font-bold text-base md:text-lg truncate group-hover:text-primary transition-colors">
                       {generation.companyName}
                     </h3>
-                    <span className="hidden md:inline text-xs text-muted-foreground">
-                      •
-                    </span>
-                    <span className="hidden md:inline text-sm text-muted-foreground truncate">
+                    <p className="text-sm text-muted-foreground truncate">
                       {generation.jobTitle}
-                    </span>
+                    </p>
                   </div>
-                  <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
-                    <Clock className="h-3 w-3 md:h-3.5 md:w-3.5" />
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Clock className="h-3 w-3" />
                     <span>{formattedDate}</span>
-                    <span className="md:hidden">•</span>
-                    <span className="md:hidden truncate text-xs">
-                      {generation.jobTitle}
-                    </span>
+                    {matchScore && (
+                      <>
+                        <span className="hidden sm:inline">•</span>
+                        <span className="hidden sm:inline text-primary font-medium">
+                          {getScoreRating(matchScore.overallScore)}
+                        </span>
+                      </>
+                    )}
                   </div>
                 </div>
-
-                {/* Match Score - Hidden on mobile */}
-                {matchScore && (
-                  <div className="hidden lg:block flex-shrink-0">
-                    <MatchScoreDisplay matchScore={matchScore} compact />
-                  </div>
-                )}
 
                 {/* Action Buttons */}
                 <div className="flex items-center gap-2 flex-shrink-0">
