@@ -137,81 +137,102 @@ export function ResumeUpload({
           </>
         ) : (
           <>
-            <label
-              htmlFor="file-upload"
-              className={`flex flex-col items-center justify-center w-full h-44 md:h-48 border-2 border-dashed rounded-xl transition-all duration-300 ${
-                isUploading
-                  ? "border-muted-foreground/10 bg-muted/5 cursor-not-allowed opacity-75 pointer-events-none"
-                  : masterResumeFile
-                  ? "border-primary bg-primary/10 shadow-lg shadow-primary/10 cursor-pointer"
-                  : "border-muted-foreground/25 hover:border-primary/50 hover:bg-primary/5 hover:shadow-lg cursor-pointer"
-              }`}
-            >
-              <div className="flex flex-col items-center justify-center py-6">
-                {isUploading ? (
-                  <>
-                    <Loader2 className="w-14 h-14 md:w-16 md:h-16 animate-spin text-primary mb-3" />
-                    <p className="text-sm md:text-base font-semibold">Processing...</p>
-                    <p className="text-xs md:text-sm text-muted-foreground mt-1">
-                      Please wait while we process your resume
-                    </p>
-                  </>
-                ) : masterResumeFile ? (
-                  <>
-                    <div className="h-14 w-14 md:h-16 md:w-16 rounded-xl bg-primary/10 flex items-center justify-center mb-3">
-                      <FileText className="h-8 w-8 md:h-10 md:w-10 text-primary" />
-                    </div>
-                    <p className="text-sm md:text-base font-semibold px-4 text-center">
-                      {masterResumeFile.name}
-                    </p>
-                    <p className="text-xs md:text-sm text-muted-foreground mt-1">
-                      {(masterResumeFile.size / 1024 / 1024).toFixed(2)} MB
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <div className="h-14 w-14 md:h-16 md:w-16 rounded-xl bg-muted flex items-center justify-center mb-3">
-                      <Upload className="h-8 w-8 md:h-10 md:w-10 text-muted-foreground" />
-                    </div>
-                    <p className="text-sm md:text-base font-medium text-foreground mb-1">
-                      Click to upload or drag and drop
-                    </p>
-                    <p className="text-xs md:text-sm text-muted-foreground">
-                      PDF file (max. 5MB)
-                    </p>
-                  </>
-                )}
-              </div>
-              <input
-                id="file-upload"
-                type="file"
-                accept="application/pdf"
-                onChange={handleFileChange}
-                className="hidden"
-                disabled={isUploading}
-              />
-            </label>
+            {/* Single Unified Loading State */}
+            {isUploading ? (
+              <div className="relative w-full h-44 md:h-48 border-2 border-primary/30 rounded-xl bg-gradient-to-br from-primary/5 to-primary/10 overflow-hidden">
+                {/* Animated background shimmer */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/10 to-transparent animate-shimmer"
+                     style={{
+                       backgroundSize: '200% 100%',
+                       animation: 'shimmer 2s infinite linear'
+                     }}
+                />
 
-            <Button
-              onClick={handleUpload}
-              disabled={!masterResumeFile || isUploading}
-              className="w-full mt-auto shadow-lg hover:shadow-xl transition-all text-base md:text-lg"
-              size="lg"
-            >
-              {isUploading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 md:h-5 md:w-5 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                <>
+                {/* Content */}
+                <div className="relative h-full flex flex-col items-center justify-center gap-4 p-6">
+                  {/* Elegant spinner with pulse effect */}
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl animate-pulse" />
+                    <Loader2 className="relative w-16 h-16 animate-spin text-primary" />
+                  </div>
+
+                  {/* Status text */}
+                  <div className="text-center space-y-2">
+                    <p className="text-base md:text-lg font-semibold text-foreground">
+                      {uploadStatus || "Processing your resume..."}
+                    </p>
+                    <p className="text-xs md:text-sm text-muted-foreground max-w-xs">
+                      This usually takes 10-15 seconds
+                    </p>
+                  </div>
+
+                  {/* Progress dots */}
+                  <div className="flex gap-2">
+                    <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '300ms' }} />
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <>
+                <label
+                  htmlFor="file-upload"
+                  className={`flex flex-col items-center justify-center w-full h-44 md:h-48 border-2 border-dashed rounded-xl transition-all duration-300 ${
+                    masterResumeFile
+                      ? "border-primary bg-primary/10 shadow-lg shadow-primary/10 cursor-pointer"
+                      : "border-muted-foreground/25 hover:border-primary/50 hover:bg-primary/5 hover:shadow-lg cursor-pointer"
+                  }`}
+                >
+                  <div className="flex flex-col items-center justify-center py-6">
+                    {masterResumeFile ? (
+                      <>
+                        <div className="h-14 w-14 md:h-16 md:w-16 rounded-xl bg-primary/10 flex items-center justify-center mb-3">
+                          <FileText className="h-8 w-8 md:h-10 md:w-10 text-primary" />
+                        </div>
+                        <p className="text-sm md:text-base font-semibold px-4 text-center">
+                          {masterResumeFile.name}
+                        </p>
+                        <p className="text-xs md:text-sm text-muted-foreground mt-1">
+                          {(masterResumeFile.size / 1024 / 1024).toFixed(2)} MB
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <div className="h-14 w-14 md:h-16 md:w-16 rounded-xl bg-muted flex items-center justify-center mb-3">
+                          <Upload className="h-8 w-8 md:h-10 md:w-10 text-muted-foreground" />
+                        </div>
+                        <p className="text-sm md:text-base font-medium text-foreground mb-1">
+                          Click to upload or drag and drop
+                        </p>
+                        <p className="text-xs md:text-sm text-muted-foreground">
+                          PDF file (max. 5MB)
+                        </p>
+                      </>
+                    )}
+                  </div>
+                  <input
+                    id="file-upload"
+                    type="file"
+                    accept="application/pdf"
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+                </label>
+
+                <Button
+                  onClick={handleUpload}
+                  disabled={!masterResumeFile}
+                  className="w-full mt-auto shadow-lg hover:shadow-xl transition-all text-base md:text-lg"
+                  size="lg"
+                >
                   <Upload className="mr-2 h-4 w-4 md:h-5 md:w-5" />
                   Upload & Process
-                </>
-              )}
-            </Button>
+                </Button>
+              </>
+            )}
 
-            {showUploadNew && previousResumes.length > 0 && (
+            {showUploadNew && previousResumes.length > 0 && !isUploading && (
               <Button
                 onClick={() => {
                   setShowUploadNew(false);
@@ -224,28 +245,25 @@ export function ResumeUpload({
                 Cancel - Use Previous Resume
               </Button>
             )}
-          </>
-        )}
 
-        {uploadStatus && (
-          <div
-            className={`flex items-start gap-2 md:gap-3 p-3 md:p-4 rounded-xl text-xs md:text-sm font-medium border-2 ${
-              uploadStatus.includes("successfully")
-                ? "bg-green-100 text-green-800 border-green-300"
-                : uploadStatus.includes("Error") || uploadStatus.includes("failed")
-                ? "bg-red-100 text-red-800 border-red-300"
-                : "bg-blue-100 text-blue-800 border-blue-300"
-            }`}
-          >
-            {uploadStatus.includes("successfully") ? (
-              <CheckCircle2 className="h-4 w-4 md:h-5 md:w-5 mt-0.5 flex-shrink-0 text-green-600" />
-            ) : uploadStatus.includes("Error") || uploadStatus.includes("failed") ? (
-              <AlertCircle className="h-4 w-4 md:h-5 md:w-5 mt-0.5 flex-shrink-0 text-red-600" />
-            ) : (
-              <Loader2 className="h-4 w-4 md:h-5 md:w-5 mt-0.5 flex-shrink-0 animate-spin text-blue-600" />
+            {/* Success/Error messages only (no loading state here) */}
+            {uploadStatus && !isUploading && (
+              <div
+                className={`flex items-start gap-2 md:gap-3 p-3 md:p-4 rounded-xl text-xs md:text-sm font-medium border-2 ${
+                  uploadStatus.includes("successfully")
+                    ? "bg-green-100 text-green-800 border-green-300"
+                    : "bg-red-100 text-red-800 border-red-300"
+                }`}
+              >
+                {uploadStatus.includes("successfully") ? (
+                  <CheckCircle2 className="h-4 w-4 md:h-5 md:w-5 mt-0.5 flex-shrink-0 text-green-600" />
+                ) : (
+                  <AlertCircle className="h-4 w-4 md:h-5 md:w-5 mt-0.5 flex-shrink-0 text-red-600" />
+                )}
+                <span className="leading-relaxed">{uploadStatus}</span>
+              </div>
             )}
-            <span className="leading-relaxed">{uploadStatus}</span>
-          </div>
+          </>
         )}
       </CardContent>
     </Card>
