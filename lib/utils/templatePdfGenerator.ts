@@ -31,12 +31,14 @@ const SPACING = {
   tightLineHeight: 4, // Tighter line height for sub-info
 };
 
-// Margin presets - progressively tighter to fit content on one page
+// Margin presets - from spacious to minimal
 const MARGIN_PRESETS = [
-  { name: "comfortable", size: 19 }, // ~0.75 inches - good readability
+  { name: "spacious", size: 25 },    // ~1 inch - for very short resumes
+  { name: "generous", size: 22 },    // ~0.87 inches - extra breathing room
+  { name: "comfortable", size: 19 }, // ~0.75 inches - good readability (default)
   { name: "medium", size: 13 },      // ~0.5 inches - balanced
   { name: "tight", size: 10 },       // ~0.4 inches - compact but readable
-  { name: "minimal", size: 7 },      // ~0.27 inches - last resort
+  { name: "minimal", size: 7 },      // ~0.27 inches - last resort for long content
 ];
 
 // Page constraints
@@ -140,13 +142,40 @@ const estimateContentHeight = (resume: StructuredResume): number => {
 
 /**
  * Select optimal margins based on content height
+ * Works bidirectionally: expands margins for short content, shrinks for long content
  */
 const selectOptimalMargins = (resume: StructuredResume): number => {
   const contentHeight = estimateContentHeight(resume);
+  const comfortableIndex = 2; // "comfortable" is our target/default
 
-  // Try each margin preset until content fits
-  for (const preset of MARGIN_PRESETS) {
-    const availableHeight = PAGE.height - (preset.size * 2); // Top + bottom margins
+  // TARGET: Aim for comfortable margins (19mm) as the sweet spot
+  const targetMargin = MARGIN_PRESETS[comfortableIndex];
+  const targetAvailableHeight = PAGE.height - (targetMargin.size * 2);
+
+  // STRATEGY 1: If content is SHORT (< 70% of comfortable space), use LARGER margins
+  const contentRatio = contentHeight / targetAvailableHeight;
+  if (contentRatio < 0.7) {
+    // Try spacious or generous margins for better visual balance
+    for (let i = 0; i < comfortableIndex; i++) {
+      const preset = MARGIN_PRESETS[i];
+      const availableHeight = PAGE.height - (preset.size * 2);
+
+      // Use larger margins if content still comfortably fits (at least 60% filled)
+      if (contentHeight / availableHeight >= 0.6) {
+        console.log(`📄 Short resume detected (${Math.round(contentHeight)}mm) - using ${preset.name} margins (${preset.size}mm) for better visual balance`);
+        return preset.size;
+      }
+    }
+    // If very short, use comfortable as minimum
+    console.log(`📄 Very short resume (${Math.round(contentHeight)}mm) - using ${targetMargin.name} margins (${targetMargin.size}mm)`);
+    return targetMargin.size;
+  }
+
+  // STRATEGY 2: Content is NORMAL or LONG - find smallest margin that fits
+  // Start from comfortable and go tighter if needed
+  for (let i = comfortableIndex; i < MARGIN_PRESETS.length; i++) {
+    const preset = MARGIN_PRESETS[i];
+    const availableHeight = PAGE.height - (preset.size * 2);
 
     if (contentHeight <= availableHeight) {
       console.log(`📄 Selected ${preset.name} margins (${preset.size}mm) - estimated ${Math.round(contentHeight)}mm content fits in ${Math.round(availableHeight)}mm`);
