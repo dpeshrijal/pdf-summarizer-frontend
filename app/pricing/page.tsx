@@ -97,8 +97,8 @@ export default function PricingPage() {
 
     // Paid plans - need to be signed in
     if (!isSignedIn) {
-      toast.error("Please sign in to upgrade your plan");
-      router.push("/sign-in");
+      toast.error("Please sign up to choose your plan");
+      router.push("/sign-up");
       return;
     }
 

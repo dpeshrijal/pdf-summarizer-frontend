@@ -45,7 +45,7 @@ export default function LandingPage() {
               <Link href="/sign-in" className="cursor-pointer">
                 <Button variant="ghost" size="sm" className="hidden sm:inline-flex cursor-pointer text-xs md:text-sm">Sign In</Button>
               </Link>
-              <Link href="/sign-up" className="cursor-pointer">
+              <Link href="/pricing" className="cursor-pointer">
                 <Button size="sm" className="shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all cursor-pointer text-xs md:text-sm">
                   Get Started <ArrowRight className="ml-2 h-3 w-3 md:h-4 md:w-4" />
                 </Button>
@@ -84,7 +84,7 @@ export default function LandingPage() {
 
             {/* CTA Buttons - Full width on mobile */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-4 pt-4 md:pt-6 px-4">
-              <Link href="/sign-up" className="cursor-pointer w-full sm:w-auto">
+              <Link href="/pricing" className="cursor-pointer w-full sm:w-auto">
                 <Button size="lg" className="w-full sm:w-auto text-base md:text-lg px-8 md:px-10 py-5 md:py-6 shadow-2xl shadow-primary/25 hover:shadow-primary/40 hover:scale-105 transition-all cursor-pointer">
                   Start Free <ArrowRight className="ml-2 h-4 w-4 md:h-5 md:w-5" />
                 </Button>
@@ -437,7 +437,7 @@ export default function LandingPage() {
           <p className="text-base md:text-lg mb-6 md:mb-8 opacity-90">
             Join professionals who are getting more interviews with Resumi
           </p>
-          <Link href="/sign-up" className="cursor-pointer inline-block">
+          <Link href="/pricing" className="cursor-pointer inline-block">
             <Button size="lg" variant="secondary" className="w-full sm:w-auto text-base md:text-lg px-6 md:px-8 cursor-pointer">
               Get Started Free <ArrowRight className="ml-2 h-4 w-4 md:h-5 md:w-5" />
             </Button>
