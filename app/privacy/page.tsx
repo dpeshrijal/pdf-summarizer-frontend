@@ -226,8 +226,8 @@ export default function PrivacyPolicy() {
               If you have any questions about this Privacy Policy or our data practices, please contact us at:
             </p>
             <div className="mt-3">
-              <p>Email: <a href="mailto:privacy@resumi.com" className="text-primary hover:underline">privacy@resumi.com</a></p>
-              <p>Support: <a href="mailto:support@resumi.com" className="text-primary hover:underline">support@resumi.com</a></p>
+              <p>Email: <a href="mailto:privacy@resumi.cv" className="text-primary hover:underline">privacy@resumi.cv</a></p>
+              <p>Support: <a href="mailto:support@resumi.cv" className="text-primary hover:underline">support@resumi.cv</a></p>
             </div>
           </section>
         </div>

@@ -209,7 +209,7 @@ export default function TermsOfService() {
               If you have any questions about these Terms, please contact us at:
             </p>
             <p className="mt-3">
-              Email: <a href="mailto:support@resumi.com" className="text-primary hover:underline">support@resumi.com</a>
+              Email: <a href="mailto:support@resumi.cv" className="text-primary hover:underline">support@resumi.cv</a>
             </p>
           </section>
         </div>

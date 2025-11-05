@@ -58,7 +58,7 @@ export default function RefundPolicy() {
             <h3 className="text-xl font-semibold mb-2 mt-4">2.2 How to Request</h3>
             <p>
               To request a refund under our 7-day guarantee, email us at{" "}
-              <a href="mailto:support@resumi.com" className="text-primary hover:underline">support@resumi.com</a> with:
+              <a href="mailto:support@resumi.cv" className="text-primary hover:underline">support@resumi.cv</a> with:
             </p>
             <ul className="list-disc pl-6 space-y-2 mt-2">
               <li>Your account email address</li>
@@ -220,7 +220,7 @@ export default function RefundPolicy() {
               For refund requests or questions about this policy, please contact us:
             </p>
             <div className="mt-3">
-              <p><strong>Email:</strong> <a href="mailto:support@resumi.com" className="text-primary hover:underline">support@resumi.com</a></p>
+              <p><strong>Email:</strong> <a href="mailto:support@resumi.cv" className="text-primary hover:underline">support@resumi.cv</a></p>
               <p className="mt-2"><strong>Subject Line:</strong> "Refund Request" or "Billing Question"</p>
               <p className="mt-2"><strong>Response Time:</strong> We typically respond within 24-48 hours (excluding weekends)</p>
             </div>
