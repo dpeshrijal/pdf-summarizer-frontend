@@ -93,7 +93,8 @@ export default function OnboardingUpload() {
 
       const pollStatus = async () => {
         try {
-          const status = await checkResumeStatus(token, fileId);
+          const statusData = await checkResumeStatus(token, fileId);
+          const status = statusData.processingStatus;
 
           if (status === "READY_FOR_QUERY") {
             setIsProcessing(false);
