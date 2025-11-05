@@ -164,7 +164,7 @@ export default function LandingPage() {
               </span>
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Our AI doesn't just rewrite—it analyzes, optimizes, and scores your match to help you win
+              Our AI doesn't just rewrite. It analyzes, optimizes, and scores your match to help you win
             </p>
           </div>
 
@@ -320,7 +320,7 @@ export default function LandingPage() {
               Simple 3-Step Process
             </h2>
             <p className="text-base md:text-lg text-muted-foreground">
-              From master resume to job offer—streamlined
+              From master resume to job offer, streamlined
             </p>
           </div>
 
