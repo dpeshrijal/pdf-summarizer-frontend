@@ -393,8 +393,8 @@ export const generateResumePDF = async (
     return url.replace(/^https?:\/\//, "").replace(/^www\./, "");
   };
 
-  // ========== 1. HEADER - Name and Contact ==========
-  // Name - bold, larger, professional
+  // ========== 1. HEADER - Minimalist Two-Line Elegance ==========
+  // Line 1: Name - commanding presence
   doc.setFontSize(scaledFontSizes.name);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(COLORS.black.r, COLORS.black.g, COLORS.black.b);
@@ -403,80 +403,107 @@ export const generateResumePDF = async (
   doc.text(workingResume.contact.name, nameX, yPos);
   yPos += scaledSpacing.afterName;
 
-  // Contact info - all on ONE line, compact and professional
+  // Line 2: Primary Contact - Email & Phone (essential reach-out info)
   doc.setFontSize(scaledFontSizes.small);
   doc.setFont("helvetica", "normal");
-  doc.setTextColor(COLORS.gray.r, COLORS.gray.g, COLORS.gray.b);
 
-  // Build contact line: Email • Phone • LinkedIn • GitHub • Location
-  const contactParts: Array<{ text: string; url?: string }> = [];
+  const primaryContactParts: Array<{ text: string; url?: string }> = [];
 
-  // Email (clickable)
-  contactParts.push({
+  // Email (always present, clickable)
+  primaryContactParts.push({
     text: workingResume.contact.email,
     url: `mailto:${workingResume.contact.email}`
   });
 
-  // Phone
+  // Phone (if available)
   if (workingResume.contact.phone) {
-    contactParts.push({ text: workingResume.contact.phone });
+    primaryContactParts.push({ text: workingResume.contact.phone });
   }
 
-  // LinkedIn (clickable)
-  if (workingResume.contact.linkedin) {
-    contactParts.push({
-      text: cleanUrl(workingResume.contact.linkedin),
-      url: workingResume.contact.linkedin.startsWith('http') ? workingResume.contact.linkedin : `https://${workingResume.contact.linkedin}`
-    });
-  }
+  // Calculate width and render primary contact
+  const primaryTexts = primaryContactParts.map(p => p.text);
+  const primaryLine = primaryTexts.join(" • ");
+  const primaryWidth = doc.getTextWidth(primaryLine);
+  let currentX = (PAGE.width - primaryWidth) / 2;
 
-  // GitHub (clickable)
-  if (workingResume.contact.github) {
-    contactParts.push({
-      text: cleanUrl(workingResume.contact.github),
-      url: workingResume.contact.github.startsWith('http') ? workingResume.contact.github : `https://${workingResume.contact.github}`
-    });
-  }
-
-  // Location
-  if (workingResume.contact.location) {
-    contactParts.push({ text: workingResume.contact.location });
-  }
-
-  // Calculate total width for centering
-  const contactTexts = contactParts.map(p => p.text);
-  const contactLine = contactTexts.join("  •  ");
-  const contactLineWidth = doc.getTextWidth(contactLine);
-  const contactX = (PAGE.width - contactLineWidth) / 2;
-
-  // Render all contact info on one line
-  let currentX = contactX;
-  contactParts.forEach((part, index) => {
+  primaryContactParts.forEach((part, index) => {
     const textWidth = doc.getTextWidth(part.text);
 
     if (part.url) {
-      // Clickable links in black
       doc.setTextColor(COLORS.black.r, COLORS.black.g, COLORS.black.b);
       doc.textWithLink(part.text, currentX, yPos, { url: part.url });
     } else {
-      // Non-clickable text in gray
       doc.setTextColor(COLORS.gray.r, COLORS.gray.g, COLORS.gray.b);
       doc.text(part.text, currentX, yPos);
     }
 
     currentX += textWidth;
 
-    // Add bullet separator
-    if (index < contactParts.length - 1) {
+    if (index < primaryContactParts.length - 1) {
       doc.setTextColor(COLORS.gray.r, COLORS.gray.g, COLORS.gray.b);
-      const separator = "  •  ";
-      const separatorWidth = doc.getTextWidth(separator);
+      const separator = " • ";
       doc.text(separator, currentX, yPos);
-      currentX += separatorWidth;
+      currentX += doc.getTextWidth(separator);
     }
   });
 
-  yPos += scaledSpacing.afterContactInfo;
+  yPos += scaledSpacing.afterContactInfo * 0.6; // Tighter spacing
+
+  // Line 3: Secondary Contact - LinkedIn, GitHub, Location (online presence)
+  const secondaryContactParts: Array<{ text: string; url?: string }> = [];
+
+  if (workingResume.contact.linkedin) {
+    secondaryContactParts.push({
+      text: cleanUrl(workingResume.contact.linkedin),
+      url: workingResume.contact.linkedin.startsWith('http') ? workingResume.contact.linkedin : `https://${workingResume.contact.linkedin}`
+    });
+  }
+
+  if (workingResume.contact.github) {
+    secondaryContactParts.push({
+      text: cleanUrl(workingResume.contact.github),
+      url: workingResume.contact.github.startsWith('http') ? workingResume.contact.github : `https://${workingResume.contact.github}`
+    });
+  }
+
+  if (workingResume.contact.location) {
+    secondaryContactParts.push({ text: workingResume.contact.location });
+  }
+
+  // Render secondary contact (slightly smaller, more subtle)
+  if (secondaryContactParts.length > 0) {
+    doc.setFontSize(scaledFontSizes.small * 0.95); // Slightly smaller for hierarchy
+
+    const secondaryTexts = secondaryContactParts.map(p => p.text);
+    const secondaryLine = secondaryTexts.join(" • ");
+    const secondaryWidth = doc.getTextWidth(secondaryLine);
+    currentX = (PAGE.width - secondaryWidth) / 2;
+
+    secondaryContactParts.forEach((part, index) => {
+      const textWidth = doc.getTextWidth(part.text);
+
+      if (part.url) {
+        doc.setTextColor(COLORS.gray.r, COLORS.gray.g, COLORS.gray.b);
+        doc.textWithLink(part.text, currentX, yPos, { url: part.url });
+      } else {
+        doc.setTextColor(COLORS.gray.r, COLORS.gray.g, COLORS.gray.b);
+        doc.text(part.text, currentX, yPos);
+      }
+
+      currentX += textWidth;
+
+      if (index < secondaryContactParts.length - 1) {
+        doc.setTextColor(COLORS.gray.r, COLORS.gray.g, COLORS.gray.b);
+        const separator = " • ";
+        doc.text(separator, currentX, yPos);
+        currentX += doc.getTextWidth(separator);
+      }
+    });
+
+    yPos += scaledSpacing.afterContactInfo;
+  } else {
+    yPos += scaledSpacing.afterContactInfo * 0.7; // Less space if no secondary info
+  }
 
   // ========== 2. SUMMARY ==========
   if (workingResume.summary && addSectionHeader("SUMMARY")) {
