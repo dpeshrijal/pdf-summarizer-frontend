@@ -132,42 +132,25 @@ const estimateContentHeight = (resume: StructuredResume): number => {
 };
 
 /**
- * Intelligently trim work experience bullets to fit content on one page
- * Removes bullets from the END of work experience (older jobs) first
+ * Remove one bullet from work experience (oldest job first)
  */
-const trimWorkExperienceToFit = (resume: StructuredResume, maxBulletsToRemove: number = 10): {
-  trimmedResume: StructuredResume;
-  bulletsRemoved: number
-} => {
-  let bulletsRemoved = 0;
-  const trimmedResume = { ...resume };
-
+const removeOneBullet = (resume: StructuredResume): { success: boolean; resume: StructuredResume } => {
   // Work backwards through experience (remove from older jobs first)
-  for (let i = trimmedResume.experience.length - 1; i >= 0 && bulletsRemoved < maxBulletsToRemove; i--) {
-    const exp = trimmedResume.experience[i];
+  for (let i = resume.experience.length - 1; i >= 0; i--) {
+    const exp = resume.experience[i];
 
     // Keep at least 1 bullet per job
-    while (exp.achievements.length > 1 && bulletsRemoved < maxBulletsToRemove) {
-      exp.achievements.pop(); // Remove last bullet
-      bulletsRemoved++;
-
-      // Check if it fits now
-      const newHeight = estimateContentHeight(trimmedResume);
-      const minMargin = MARGIN_PRESETS[MARGIN_PRESETS.length - 1].size;
-      const availableHeight = PAGE.height - (minMargin * 2);
-
-      if (newHeight <= availableHeight) {
-        console.log(`📄 Removed ${bulletsRemoved} bullet(s) from work experience to fit on one page`);
-        return { trimmedResume, bulletsRemoved };
-      }
+    if (exp.achievements.length > 1) {
+      exp.achievements.pop();
+      return { success: true, resume };
     }
   }
 
-  return { trimmedResume, bulletsRemoved };
+  return { success: false, resume };
 };
 
 /**
- * Select optimal margins
+ * Select optimal margins for given resume
  */
 const selectOptimalMargins = (resume: StructuredResume): number => {
   const contentHeight = estimateContentHeight(resume);
@@ -182,7 +165,6 @@ const selectOptimalMargins = (resume: StructuredResume): number => {
       const preset = MARGIN_PRESETS[i];
       const availableHeight = PAGE.height - (preset.size * 2);
       if (contentHeight / availableHeight >= 0.6) {
-        console.log(`📄 Using ${preset.name} margins (${preset.size}mm)`);
         return preset.size;
       }
     }
@@ -193,14 +175,98 @@ const selectOptimalMargins = (resume: StructuredResume): number => {
     const preset = MARGIN_PRESETS[i];
     const availableHeight = PAGE.height - (preset.size * 2);
     if (contentHeight <= availableHeight) {
-      console.log(`📄 Using ${preset.name} margins (${preset.size}mm)`);
       return preset.size;
     }
   }
 
   const minimalMargin = MARGIN_PRESETS[MARGIN_PRESETS.length - 1].size;
-  console.warn(`⚠️ Using minimal margins (${minimalMargin}mm)`);
   return minimalMargin;
+};
+
+/**
+ * Check if resume fits with given margin
+ */
+const fitsWithMargin = (resume: StructuredResume, margin: number): boolean => {
+  const contentHeight = estimateContentHeight(resume);
+  const availableHeight = PAGE.height - (margin * 2);
+  return contentHeight <= availableHeight;
+};
+
+/**
+ * Progressive optimization: try multiple strategies before truncating
+ */
+const optimizeResumeToFit = (resume: StructuredResume): {
+  resume: StructuredResume;
+  margin: number;
+  fontScale: number;
+  bulletsRemoved: number;
+  optimizationApplied: string;
+} => {
+  let workingResume = JSON.parse(JSON.stringify(resume)); // Deep clone
+  let bulletsRemoved = 0;
+  let fontScale = 1.0;
+
+  // Strategy 1: Try with progressively smaller margins
+  const minMargin = MARGIN_PRESETS[MARGIN_PRESETS.length - 1].size;
+  if (fitsWithMargin(workingResume, minMargin)) {
+    const optimalMargin = selectOptimalMargins(workingResume);
+    console.log(`✓ Fits with optimal margins (${optimalMargin}mm)`);
+    return { resume: workingResume, margin: optimalMargin, fontScale, bulletsRemoved, optimizationApplied: 'none' };
+  }
+
+  console.log('⚠️ Content too long, trying optimizations...');
+
+  // Strategy 2: Try reducing font sizes by 5%
+  fontScale = 0.95;
+  // Note: We'll apply fontScale during rendering, so we need to estimate with reduced height
+  let estimatedHeight = estimateContentHeight(workingResume) * fontScale;
+  if (estimatedHeight <= PAGE.height - (minMargin * 2)) {
+    console.log('✓ Fits with 5% smaller fonts');
+    return { resume: workingResume, margin: minMargin, fontScale, bulletsRemoved, optimizationApplied: 'font-reduction' };
+  }
+
+  // Strategy 3: Try 5% font reduction + remove bullets one by one
+  let maxBulletsToTry = 10;
+  while (bulletsRemoved < maxBulletsToTry) {
+    const result = removeOneBullet(workingResume);
+    if (!result.success) break;
+
+    bulletsRemoved++;
+    workingResume = result.resume;
+
+    estimatedHeight = estimateContentHeight(workingResume) * fontScale;
+    if (estimatedHeight <= PAGE.height - (minMargin * 2)) {
+      console.log(`✓ Fits with 5% smaller fonts + ${bulletsRemoved} bullet(s) removed`);
+      return { resume: workingResume, margin: minMargin, fontScale, bulletsRemoved, optimizationApplied: 'font-reduction-and-bullets' };
+    }
+  }
+
+  // Strategy 4: Try 10% font reduction with current bullet removal
+  fontScale = 0.90;
+  estimatedHeight = estimateContentHeight(workingResume) * fontScale;
+  if (estimatedHeight <= PAGE.height - (minMargin * 2)) {
+    console.log(`✓ Fits with 10% smaller fonts + ${bulletsRemoved} bullet(s) removed`);
+    return { resume: workingResume, margin: minMargin, fontScale, bulletsRemoved, optimizationApplied: 'aggressive-font-reduction' };
+  }
+
+  // Strategy 5: Continue removing bullets with 10% font reduction
+  while (bulletsRemoved < 20) {
+    const result = removeOneBullet(workingResume);
+    if (!result.success) break;
+
+    bulletsRemoved++;
+    workingResume = result.resume;
+
+    estimatedHeight = estimateContentHeight(workingResume) * fontScale;
+    if (estimatedHeight <= PAGE.height - (minMargin * 2)) {
+      console.log(`✓ Fits with 10% smaller fonts + ${bulletsRemoved} bullet(s) removed`);
+      return { resume: workingResume, margin: minMargin, fontScale, bulletsRemoved, optimizationApplied: 'aggressive-optimization' };
+    }
+  }
+
+  // Last resort: return what we have (will truncate during rendering)
+  console.warn(`⚠️ Could not fit all content. Applied: 10% font reduction + ${bulletsRemoved} bullets removed. Some content may be truncated.`);
+  return { resume: workingResume, margin: minMargin, fontScale, bulletsRemoved, optimizationApplied: 'maximum-with-truncation' };
 };
 
 /**
@@ -210,34 +276,43 @@ export const generateResumePDF = async (
   resume: StructuredResume,
   filename: string = "Resume.pdf"
 ) => {
-  // Step 1: Try to fit with optimal margins
-  let optimalMargin = selectOptimalMargins(resume);
-  let workingResume = resume;
-  let bulletsRemoved = 0;
-
-  // Step 2: If even minimal margins don't fit, trim work experience bullets
-  const minMargin = MARGIN_PRESETS[MARGIN_PRESETS.length - 1].size;
-  const contentHeight = estimateContentHeight(resume);
-  const minAvailableHeight = PAGE.height - (minMargin * 2);
-
-  if (contentHeight > minAvailableHeight) {
-    console.log("⚠️ Content too long even with minimal margins, trimming work experience...");
-    const trimResult = trimWorkExperienceToFit(resume);
-    workingResume = trimResult.trimmedResume;
-    bulletsRemoved = trimResult.bulletsRemoved;
-
-    // Recalculate optimal margins with trimmed content
-    optimalMargin = selectOptimalMargins(workingResume);
-  }
+  // Apply progressive optimization strategies
+  const optimization = optimizeResumeToFit(resume);
+  const workingResume = optimization.resume;
+  const fontScale = optimization.fontScale;
+  const bulletsRemoved = optimization.bulletsRemoved;
 
   const margins = {
-    left: optimalMargin,
-    right: optimalMargin,
-    top: optimalMargin,
-    bottom: optimalMargin,
+    left: optimization.margin,
+    right: optimization.margin,
+    top: optimization.margin,
+    bottom: optimization.margin,
   };
 
   const MAX_CONTENT_WIDTH = PAGE.width - margins.left - margins.right;
+
+  // Apply font and spacing scaling if optimization required it
+  const scaledFontSizes = {
+    name: FONT_SIZES.name * fontScale,
+    sectionHeader: FONT_SIZES.sectionHeader * fontScale,
+    jobTitle: FONT_SIZES.jobTitle * fontScale,
+    company: FONT_SIZES.company * fontScale,
+    normal: FONT_SIZES.normal * fontScale,
+    small: FONT_SIZES.small * fontScale,
+    tiny: FONT_SIZES.tiny * fontScale,
+  };
+
+  const scaledSpacing = {
+    afterName: SPACING.afterName * fontScale,
+    afterContactInfo: SPACING.afterContactInfo * fontScale,
+    beforeSection: SPACING.beforeSection * fontScale,
+    afterSectionHeader: SPACING.afterSectionHeader * fontScale,
+    betweenJobs: SPACING.betweenJobs * fontScale,
+    betweenEducation: SPACING.betweenEducation * fontScale,
+    bulletIndent: SPACING.bulletIndent * fontScale,
+    lineHeight: SPACING.lineHeight * fontScale,
+    tightLineHeight: SPACING.tightLineHeight * fontScale,
+  };
 
   const { jsPDF } = await import("jspdf");
   const doc = new jsPDF({
@@ -275,7 +350,7 @@ export const generateResumePDF = async (
         return linesAdded;
       }
       doc.text(line, x, yPos);
-      yPos += SPACING.lineHeight;
+      yPos += scaledSpacing.lineHeight;
       linesAdded++;
     }
 
@@ -289,10 +364,10 @@ export const generateResumePDF = async (
       return false;
     }
 
-    yPos += SPACING.beforeSection;
+    yPos += scaledSpacing.beforeSection;
 
     // Section title in black
-    doc.setFontSize(FONT_SIZES.sectionHeader);
+    doc.setFontSize(scaledFontSizes.sectionHeader);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(COLORS.black.r, COLORS.black.g, COLORS.black.b);
     doc.text(title.toUpperCase(), margins.left, yPos);
@@ -305,7 +380,7 @@ export const generateResumePDF = async (
     doc.setLineWidth(0.3);
     doc.line(margins.left, yPos, PAGE.width - margins.right, yPos);
 
-    yPos += SPACING.afterSectionHeader;
+    yPos += scaledSpacing.afterSectionHeader;
     return true;
   };
 
@@ -316,13 +391,13 @@ export const generateResumePDF = async (
 
   // ========== 1. HEADER - Name and Contact ==========
   // Name - bold, larger, professional
-  doc.setFontSize(FONT_SIZES.name);
+  doc.setFontSize(scaledFontSizes.name);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(COLORS.black.r, COLORS.black.g, COLORS.black.b);
   const nameWidth = doc.getTextWidth(workingResume.contact.name);
   const nameX = (PAGE.width - nameWidth) / 2;
   doc.text(workingResume.contact.name, nameX, yPos);
-  yPos += SPACING.afterName;
+  yPos += scaledSpacing.afterName;
 
   // Thin line under name for elegance
   const underlineY = yPos;
@@ -333,7 +408,7 @@ export const generateResumePDF = async (
   yPos += 3;
 
   // Contact info - centered, clean layout
-  doc.setFontSize(FONT_SIZES.small);
+  doc.setFontSize(scaledFontSizes.small);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(COLORS.gray.r, COLORS.gray.g, COLORS.gray.b);
 
@@ -387,11 +462,11 @@ export const generateResumePDF = async (
     }
   });
 
-  yPos += SPACING.afterContactInfo;
+  yPos += scaledSpacing.afterContactInfo;
 
   // ========== 2. SUMMARY ==========
   if (workingResume.summary && addSectionHeader("PROFESSIONAL SUMMARY")) {
-    addText(workingResume.summary, margins.left, FONT_SIZES.normal, "normal", COLORS.black);
+    addText(workingResume.summary, margins.left, scaledFontSizes.normal, "normal", COLORS.black);
   }
 
   // ========== 3. SKILLS ==========
@@ -399,7 +474,7 @@ export const generateResumePDF = async (
     for (const skillCat of workingResume.skills) {
       if (!fitsOnPage(6)) break;
 
-      doc.setFontSize(FONT_SIZES.normal);
+      doc.setFontSize(scaledFontSizes.normal);
       doc.setFont("helvetica", "bold");
       doc.setTextColor(COLORS.black.r, COLORS.black.g, COLORS.black.b);
       const categoryText = `${skillCat.category}:`;
@@ -418,11 +493,11 @@ export const generateResumePDF = async (
         if (i === 0) {
           doc.text(skillLines[i], margins.left + categoryWidth + 2, yPos);
         } else {
-          yPos += SPACING.lineHeight;
+          yPos += scaledSpacing.lineHeight;
           doc.text(skillLines[i], margins.left, yPos);
         }
       }
-      yPos += SPACING.lineHeight;
+      yPos += scaledSpacing.lineHeight;
     }
   }
 
@@ -433,30 +508,30 @@ export const generateResumePDF = async (
       if (!fitsOnPage(15)) break;
 
       // Job title - bold, prominent
-      doc.setFontSize(FONT_SIZES.jobTitle);
+      doc.setFontSize(scaledFontSizes.jobTitle);
       doc.setFont("helvetica", "bold");
       doc.setTextColor(COLORS.black.r, COLORS.black.g, COLORS.black.b);
       doc.text(exp.title, margins.left, yPos);
 
       // Date - right aligned, smaller
-      doc.setFontSize(FONT_SIZES.small);
+      doc.setFontSize(scaledFontSizes.small);
       doc.setFont("helvetica", "normal");
       doc.setTextColor(COLORS.gray.r, COLORS.gray.g, COLORS.gray.b);
       const dateText = `${exp.startDate} - ${exp.endDate}`;
       const dateWidth = doc.getTextWidth(dateText);
       doc.text(dateText, PAGE.width - margins.right - dateWidth, yPos);
 
-      yPos += SPACING.tightLineHeight;
+      yPos += scaledSpacing.tightLineHeight;
 
       // Company - slightly lighter
-      doc.setFontSize(FONT_SIZES.company);
+      doc.setFontSize(scaledFontSizes.company);
       doc.setFont("helvetica", "italic");
       doc.setTextColor(COLORS.gray.r, COLORS.gray.g, COLORS.gray.b);
       doc.text(exp.company, margins.left, yPos);
-      yPos += SPACING.lineHeight + 0.5;
+      yPos += scaledSpacing.lineHeight + 0.5;
 
       // Achievements with modern bullets
-      doc.setFontSize(FONT_SIZES.normal);
+      doc.setFontSize(scaledFontSizes.normal);
       doc.setFont("helvetica", "normal");
       doc.setTextColor(COLORS.black.r, COLORS.black.g, COLORS.black.b);
 
@@ -469,22 +544,22 @@ export const generateResumePDF = async (
 
         const achievementLines = doc.splitTextToSize(
           achievement,
-          MAX_CONTENT_WIDTH - SPACING.bulletIndent
+          MAX_CONTENT_WIDTH - scaledSpacing.bulletIndent
         );
 
         for (let j = 0; j < achievementLines.length; j++) {
           if (!fitsOnPage(5)) break;
           doc.text(
             achievementLines[j],
-            margins.left + SPACING.bulletIndent,
+            margins.left + scaledSpacing.bulletIndent,
             yPos
           );
-          yPos += SPACING.lineHeight;
+          yPos += scaledSpacing.lineHeight;
         }
       }
 
       if (i < workingResume.experience.length - 1) {
-        yPos += SPACING.betweenJobs;
+        yPos += scaledSpacing.betweenJobs;
       }
     }
   }
@@ -495,32 +570,32 @@ export const generateResumePDF = async (
       const proj = workingResume.projects[i];
       if (!fitsOnPage(10)) break;
 
-      doc.setFontSize(FONT_SIZES.jobTitle);
+      doc.setFontSize(scaledFontSizes.jobTitle);
       doc.setFont("helvetica", "bold");
       doc.setTextColor(COLORS.black.r, COLORS.black.g, COLORS.black.b);
       doc.text(proj.name, margins.left, yPos);
 
       if (proj.date) {
-        doc.setFontSize(FONT_SIZES.small);
+        doc.setFontSize(scaledFontSizes.small);
         doc.setFont("helvetica", "normal");
         doc.setTextColor(COLORS.gray.r, COLORS.gray.g, COLORS.gray.b);
         const dateWidth = doc.getTextWidth(proj.date);
         doc.text(proj.date, PAGE.width - margins.right - dateWidth, yPos);
       }
 
-      yPos += SPACING.tightLineHeight;
+      yPos += scaledSpacing.tightLineHeight;
 
-      addText(proj.description, margins.left, FONT_SIZES.normal, "normal", COLORS.black);
+      addText(proj.description, margins.left, scaledFontSizes.normal, "normal", COLORS.black);
 
       if (proj.technologies && proj.technologies.length > 0) {
         doc.setFont("helvetica", "italic");
         doc.setTextColor(COLORS.gray.r, COLORS.gray.g, COLORS.gray.b);
         const techText = `Technologies: ${proj.technologies.join(", ")}`;
-        addText(techText, margins.left, FONT_SIZES.small, "italic", COLORS.gray);
+        addText(techText, margins.left, scaledFontSizes.small, "italic", COLORS.gray);
       }
 
       if (i < workingResume.projects.length - 1) {
-        yPos += SPACING.betweenEducation;
+        yPos += scaledSpacing.betweenEducation;
       }
     }
   }
@@ -531,15 +606,15 @@ export const generateResumePDF = async (
       const pub = workingResume.publications[i];
       if (!fitsOnPage(8)) break;
 
-      addText(pub.title, margins.left, FONT_SIZES.normal, "bold", COLORS.black);
+      addText(pub.title, margins.left, scaledFontSizes.normal, "bold", COLORS.black);
 
       doc.setFont("helvetica", "normal");
       doc.setTextColor(COLORS.gray.r, COLORS.gray.g, COLORS.gray.b);
       const pubDetails = `${pub.authors}. ${pub.venue}, ${pub.date}`;
-      addText(pubDetails, margins.left, FONT_SIZES.small, "normal", COLORS.gray);
+      addText(pubDetails, margins.left, scaledFontSizes.small, "normal", COLORS.gray);
 
       if (i < workingResume.publications.length - 1) {
-        yPos += SPACING.betweenEducation;
+        yPos += scaledSpacing.betweenEducation;
       }
     }
   }
@@ -550,11 +625,11 @@ export const generateResumePDF = async (
       const cert = workingResume.certifications[i];
       if (!fitsOnPage(8)) break;
 
-      doc.setFontSize(FONT_SIZES.normal);
+      doc.setFontSize(scaledFontSizes.normal);
       doc.setFont("helvetica", "bold");
       doc.setTextColor(COLORS.black.r, COLORS.black.g, COLORS.black.b);
       doc.text(cert.name, margins.left, yPos);
-      yPos += SPACING.tightLineHeight;
+      yPos += scaledSpacing.tightLineHeight;
 
       doc.setFont("helvetica", "normal");
       doc.setTextColor(COLORS.gray.r, COLORS.gray.g, COLORS.gray.b);
@@ -568,10 +643,10 @@ export const generateResumePDF = async (
       if (cert.credentialId) {
         certDetails += ` | ID: ${cert.credentialId}`;
       }
-      addText(certDetails, margins.left, FONT_SIZES.normal, "normal", COLORS.gray);
+      addText(certDetails, margins.left, scaledFontSizes.normal, "normal", COLORS.gray);
 
       if (i < workingResume.certifications.length - 1) {
-        yPos += SPACING.betweenEducation;
+        yPos += scaledSpacing.betweenEducation;
       }
     }
   }
@@ -582,11 +657,11 @@ export const generateResumePDF = async (
       const award = workingResume.awards[i];
       if (!fitsOnPage(8)) break;
 
-      doc.setFontSize(FONT_SIZES.normal);
+      doc.setFontSize(scaledFontSizes.normal);
       doc.setFont("helvetica", "bold");
       doc.setTextColor(COLORS.black.r, COLORS.black.g, COLORS.black.b);
       doc.text(award.title, margins.left, yPos);
-      yPos += SPACING.tightLineHeight;
+      yPos += scaledSpacing.tightLineHeight;
 
       doc.setFont("helvetica", "normal");
       doc.setTextColor(COLORS.gray.r, COLORS.gray.g, COLORS.gray.b);
@@ -594,10 +669,10 @@ export const generateResumePDF = async (
       if (award.description) {
         awardDetails += ` - ${award.description}`;
       }
-      addText(awardDetails, margins.left, FONT_SIZES.normal, "normal", COLORS.gray);
+      addText(awardDetails, margins.left, scaledFontSizes.normal, "normal", COLORS.gray);
 
       if (i < workingResume.awards.length - 1) {
-        yPos += SPACING.betweenEducation;
+        yPos += scaledSpacing.betweenEducation;
       }
     }
   }
@@ -608,28 +683,28 @@ export const generateResumePDF = async (
       const edu = workingResume.education[i];
       if (!fitsOnPage(8)) break;
 
-      doc.setFontSize(FONT_SIZES.normal);
+      doc.setFontSize(scaledFontSizes.normal);
       doc.setFont("helvetica", "bold");
       doc.setTextColor(COLORS.black.r, COLORS.black.g, COLORS.black.b);
       doc.text(edu.degree, margins.left, yPos);
-      yPos += SPACING.tightLineHeight;
+      yPos += scaledSpacing.tightLineHeight;
 
       doc.setFont("helvetica", "italic");
       doc.setTextColor(COLORS.gray.r, COLORS.gray.g, COLORS.gray.b);
       const eduDetails = `${edu.institution}${
         edu.location ? ", " + edu.location : ""
       } (${edu.graduationYear})`;
-      addText(eduDetails, margins.left, FONT_SIZES.normal, "italic", COLORS.gray);
+      addText(eduDetails, margins.left, scaledFontSizes.normal, "italic", COLORS.gray);
 
       if (edu.coursework && edu.coursework.length > 0) {
         doc.setFont("helvetica", "normal");
         doc.setTextColor(COLORS.gray.r, COLORS.gray.g, COLORS.gray.b);
         const courseworkText = `Relevant Coursework: ${edu.coursework.join(", ")}`;
-        addText(courseworkText, margins.left, FONT_SIZES.small, "normal", COLORS.gray);
+        addText(courseworkText, margins.left, scaledFontSizes.small, "normal", COLORS.gray);
       }
 
       if (i < workingResume.education.length - 1) {
-        yPos += SPACING.betweenEducation;
+        yPos += scaledSpacing.betweenEducation;
       }
     }
   }
@@ -640,26 +715,26 @@ export const generateResumePDF = async (
       const vol = workingResume.volunteerExperience[i];
       if (!fitsOnPage(12)) break;
 
-      doc.setFontSize(FONT_SIZES.jobTitle);
+      doc.setFontSize(scaledFontSizes.jobTitle);
       doc.setFont("helvetica", "bold");
       doc.setTextColor(COLORS.black.r, COLORS.black.g, COLORS.black.b);
       doc.text(vol.role, margins.left, yPos);
 
-      doc.setFontSize(FONT_SIZES.small);
+      doc.setFontSize(scaledFontSizes.small);
       doc.setFont("helvetica", "normal");
       doc.setTextColor(COLORS.gray.r, COLORS.gray.g, COLORS.gray.b);
       const dateText = `${vol.startDate} - ${vol.endDate}`;
       const dateWidth = doc.getTextWidth(dateText);
       doc.text(dateText, PAGE.width - margins.right - dateWidth, yPos);
 
-      yPos += SPACING.tightLineHeight;
+      yPos += scaledSpacing.tightLineHeight;
 
-      doc.setFontSize(FONT_SIZES.company);
+      doc.setFontSize(scaledFontSizes.company);
       doc.setFont("helvetica", "italic");
       doc.text(vol.organization, margins.left, yPos);
-      yPos += SPACING.lineHeight;
+      yPos += scaledSpacing.lineHeight;
 
-      doc.setFontSize(FONT_SIZES.normal);
+      doc.setFontSize(scaledFontSizes.normal);
       doc.setFont("helvetica", "normal");
       doc.setTextColor(COLORS.black.r, COLORS.black.g, COLORS.black.b);
 
@@ -669,17 +744,17 @@ export const generateResumePDF = async (
         doc.circle(margins.left + 1.5, yPos - 1, 0.8, 'F');
         const descLines = doc.splitTextToSize(
           desc,
-          MAX_CONTENT_WIDTH - SPACING.bulletIndent
+          MAX_CONTENT_WIDTH - scaledSpacing.bulletIndent
         );
         for (let j = 0; j < descLines.length; j++) {
           if (!fitsOnPage(5)) break;
-          doc.text(descLines[j], margins.left + SPACING.bulletIndent, yPos);
-          yPos += SPACING.lineHeight;
+          doc.text(descLines[j], margins.left + scaledSpacing.bulletIndent, yPos);
+          yPos += scaledSpacing.lineHeight;
         }
       }
 
       if (i < workingResume.volunteerExperience.length - 1) {
-        yPos += SPACING.betweenJobs;
+        yPos += scaledSpacing.betweenJobs;
       }
     }
   }
@@ -690,11 +765,11 @@ export const generateResumePDF = async (
       const memb = workingResume.professionalMemberships[i];
       if (!fitsOnPage(6)) break;
 
-      doc.setFontSize(FONT_SIZES.normal);
+      doc.setFontSize(scaledFontSizes.normal);
       doc.setFont("helvetica", "bold");
       doc.setTextColor(COLORS.black.r, COLORS.black.g, COLORS.black.b);
       doc.text(memb.organization, margins.left, yPos);
-      yPos += SPACING.tightLineHeight;
+      yPos += scaledSpacing.tightLineHeight;
 
       doc.setFont("helvetica", "normal");
       doc.setTextColor(COLORS.gray.r, COLORS.gray.g, COLORS.gray.b);
@@ -709,18 +784,18 @@ export const generateResumePDF = async (
         }
       }
       if (membDetails) {
-        addText(membDetails, margins.left, FONT_SIZES.normal, "normal", COLORS.gray);
+        addText(membDetails, margins.left, scaledFontSizes.normal, "normal", COLORS.gray);
       }
 
       if (i < workingResume.professionalMemberships.length - 1) {
-        yPos += SPACING.betweenEducation;
+        yPos += scaledSpacing.betweenEducation;
       }
     }
   }
 
   // ========== 12. LANGUAGES ==========
   if (workingResume.languages && workingResume.languages.length > 0 && addSectionHeader("LANGUAGES")) {
-    doc.setFontSize(FONT_SIZES.normal);
+    doc.setFontSize(scaledFontSizes.normal);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(COLORS.black.r, COLORS.black.g, COLORS.black.b);
 
@@ -728,18 +803,22 @@ export const generateResumePDF = async (
       (lang) => `${lang.language} (${lang.proficiency})`
     );
     const langLine = langTexts.join(" | ");
-    addText(langLine, margins.left, FONT_SIZES.normal, "normal", COLORS.black);
+    addText(langLine, margins.left, scaledFontSizes.normal, "normal", COLORS.black);
   }
 
-  // Warn if content was intelligently trimmed or truncated
-  if (bulletsRemoved > 0) {
-    console.warn(`⚠️ Removed ${bulletsRemoved} bullet point(s) from work experience to fit resume on one page`);
+  // Log optimization applied
+  if (fontScale < 1.0 || bulletsRemoved > 0) {
+    console.log(`📄 Resume optimized to fit on one page:`);
+    if (fontScale < 1.0) {
+      const reduction = Math.round((1 - fontScale) * 100);
+      console.log(`   • Font size reduced by ${reduction}%`);
+    }
+    if (bulletsRemoved > 0) {
+      console.log(`   • Removed ${bulletsRemoved} bullet point(s) from older work experience`);
+    }
   }
   if (contentTruncated) {
-    console.warn("⚠️ Resume content was truncated to fit on one page. Consider:");
-    console.warn("   • Shortening bullet points");
-    console.warn("   • Removing older work experience");
-    console.warn("   • Reducing coursework or project details");
+    console.warn("⚠️ Warning: Some content may have been truncated. The resume is very long.");
   }
 
   // Save
