@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Download, CheckCircle2, FileText, Edit2, Check, X } from "lucide-react";
+import { Download, CheckCircle2, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -38,7 +38,6 @@ export function ResultsDisplay({
   const [editableData, setEditableData] = useState<GenerationOutput | null>(
     structured ? JSON.parse(JSON.stringify(structured)) : null
   );
-  const [isEditing, setIsEditing] = useState(false);
 
   const handleDownloadResume = () => {
     // Use edited data if available, otherwise use original
@@ -74,15 +73,6 @@ export function ResultsDisplay({
     }
   };
 
-  const handleSaveEdits = () => {
-    setIsEditing(false);
-  };
-
-  const handleCancelEdits = () => {
-    // Revert to original data
-    setEditableData(structured ? JSON.parse(JSON.stringify(structured)) : null);
-    setIsEditing(false);
-  };
 
   // Render structured preview
   const renderStructuredResumePreview = () => {
@@ -108,19 +98,15 @@ export function ResultsDisplay({
           <div>
             <div className="font-bold text-sm uppercase mb-1">Summary</div>
             <div
-              contentEditable={isEditing}
+              contentEditable={true}
               suppressContentEditableWarning
               onBlur={(e) => {
-                if (!editableData || !isEditing) return;
+                if (!editableData) return;
                 const newData = JSON.parse(JSON.stringify(editableData));
                 newData.resume.summary = e.currentTarget.textContent || '';
                 setEditableData(newData);
               }}
-              className={`text-xs md:text-sm ${
-                isEditing
-                  ? 'outline-none focus:ring-2 focus:ring-primary/50 rounded-md p-2 bg-muted/30 cursor-text hover:bg-muted/50 transition-colors'
-                  : ''
-              }`}
+              className="text-xs md:text-sm outline-none focus:ring-2 focus:ring-primary/50 rounded-md p-2 cursor-text hover:bg-muted/30 transition-colors"
             >
               {resume.summary}
             </div>
@@ -158,19 +144,15 @@ export function ResultsDisplay({
                   {exp.achievements.map((achievement, i) => (
                     <li key={i} className="text-xs">
                       <span
-                        contentEditable={isEditing}
+                        contentEditable={true}
                         suppressContentEditableWarning
                         onBlur={(e) => {
-                          if (!editableData || !isEditing) return;
+                          if (!editableData) return;
                           const newData = JSON.parse(JSON.stringify(editableData));
                           newData.resume.experience[idx].achievements[i] = e.currentTarget.textContent || '';
                           setEditableData(newData);
                         }}
-                        className={`${
-                          isEditing
-                            ? 'outline-none focus:ring-2 focus:ring-primary/50 rounded px-1 bg-muted/20 cursor-text hover:bg-muted/40 transition-colors inline-block w-full'
-                            : ''
-                        }`}
+                        className="outline-none focus:ring-2 focus:ring-primary/50 rounded px-1 cursor-text hover:bg-muted/30 transition-colors inline-block w-full"
                       >
                         {achievement}
                       </span>
@@ -361,19 +343,15 @@ export function ResultsDisplay({
         {cl.paragraphs.map((para, idx) => (
           <div
             key={idx}
-            contentEditable={isEditing}
+            contentEditable={true}
             suppressContentEditableWarning
             onBlur={(e) => {
-              if (!editableData || !isEditing) return;
+              if (!editableData) return;
               const newData = JSON.parse(JSON.stringify(editableData));
               newData.coverLetter.paragraphs[idx] = e.currentTarget.textContent || '';
               setEditableData(newData);
             }}
-            className={`text-justify text-xs md:text-sm ${
-              isEditing
-                ? 'outline-none focus:ring-2 focus:ring-primary/50 rounded-md p-2 bg-muted/30 cursor-text hover:bg-muted/50 transition-colors'
-                : ''
-            }`}
+            className="text-justify text-xs md:text-sm outline-none focus:ring-2 focus:ring-primary/50 rounded-md p-2 cursor-text hover:bg-muted/30 transition-colors"
           >
             {para}
           </div>
@@ -413,43 +391,6 @@ export function ResultsDisplay({
           {/* Match Score - only for structured format */}
           {isStructured && structured?.matchScore && (
             <MatchScoreDisplay matchScore={structured.matchScore} />
-          )}
-
-          {/* Edit Controls - only for structured format */}
-          {isStructured && (
-            <div className="flex items-center justify-end gap-3">
-              {isEditing ? (
-                <>
-                  <Button
-                    onClick={handleCancelEdits}
-                    variant="outline"
-                    size="sm"
-                    className="gap-2"
-                  >
-                    <X className="h-4 w-4" />
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={handleSaveEdits}
-                    size="sm"
-                    className="gap-2 bg-green-600 hover:bg-green-700"
-                  >
-                    <Check className="h-4 w-4" />
-                    Save Changes
-                  </Button>
-                </>
-              ) : (
-                <Button
-                  onClick={() => setIsEditing(true)}
-                  variant="outline"
-                  size="sm"
-                  className="gap-2"
-                >
-                  <Edit2 className="h-4 w-4" />
-                  Edit Content
-                </Button>
-              )}
-            </div>
           )}
 
           {/* Download Buttons */}
