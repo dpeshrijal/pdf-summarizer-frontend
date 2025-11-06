@@ -411,67 +411,75 @@ export const generateResumePDF = async (
   doc.line(underlineMargin, underlineY, PAGE.width - underlineMargin, underlineY);
   yPos += 5; // More spacing before contact info
 
-  // Contact info - elegant two-line layout
+  // Contact info - world-class elegant layout
   doc.setFontSize(scaledFontSizes.small);
   doc.setFont("helvetica", "normal");
-  doc.setTextColor(COLORS.gray.r, COLORS.gray.g, COLORS.gray.b);
 
-  // Line 1: Email, Phone, LinkedIn, GitHub (contact methods)
-  const contactMethods: Array<{ text: string; url?: string }> = [
-    { text: workingResume.contact.email, url: `mailto:${workingResume.contact.email}` }
-  ];
+  // Line 1: Email (clickable, prominent)
+  const emailText = workingResume.contact.email;
+  const emailWidth = doc.getTextWidth(emailText);
+  const emailX = (PAGE.width - emailWidth) / 2;
+  doc.setTextColor(COLORS.black.r, COLORS.black.g, COLORS.black.b);
+  doc.textWithLink(emailText, emailX, yPos, { url: `mailto:${emailText}` });
+  yPos += scaledSpacing.tightLineHeight;
 
+  // Line 2: Phone • Location (personal info, grouped together)
+  const line2Parts: string[] = [];
   if (workingResume.contact.phone) {
-    contactMethods.push({ text: workingResume.contact.phone });
+    line2Parts.push(workingResume.contact.phone);
   }
+  if (workingResume.contact.location) {
+    line2Parts.push(workingResume.contact.location);
+  }
+
+  if (line2Parts.length > 0) {
+    const line2Text = line2Parts.join("  •  ");
+    const line2Width = doc.getTextWidth(line2Text);
+    const line2X = (PAGE.width - line2Width) / 2;
+    doc.setTextColor(COLORS.gray.r, COLORS.gray.g, COLORS.gray.b);
+    doc.text(line2Text, line2X, yPos);
+    yPos += scaledSpacing.tightLineHeight;
+  }
+
+  // Line 3: LinkedIn • GitHub (professional links)
+  const professionalLinks: Array<{ text: string; url: string }> = [];
+
   if (workingResume.contact.linkedin) {
-    contactMethods.push({
+    professionalLinks.push({
       text: cleanUrl(workingResume.contact.linkedin),
       url: workingResume.contact.linkedin.startsWith('http') ? workingResume.contact.linkedin : `https://${workingResume.contact.linkedin}`
     });
   }
   if (workingResume.contact.github) {
-    contactMethods.push({
+    professionalLinks.push({
       text: cleanUrl(workingResume.contact.github),
       url: workingResume.contact.github.startsWith('http') ? workingResume.contact.github : `https://${workingResume.contact.github}`
     });
   }
 
-  // Render first line centered
-  const contactTexts = contactMethods.map(p => p.text);
-  const contactLine = contactTexts.join("  •  ");
-  const contactLineWidth = doc.getTextWidth(contactLine);
-  const contactX = (PAGE.width - contactLineWidth) / 2;
+  if (professionalLinks.length > 0) {
+    const linkTexts = professionalLinks.map(l => l.text);
+    const linksLine = linkTexts.join("  •  ");
+    const linksLineWidth = doc.getTextWidth(linksLine);
+    const linksX = (PAGE.width - linksLineWidth) / 2;
 
-  let currentX = contactX;
-  contactMethods.forEach((part, index) => {
-    const textWidth = doc.getTextWidth(part.text);
+    let currentX = linksX;
+    professionalLinks.forEach((link, index) => {
+      const textWidth = doc.getTextWidth(link.text);
 
-    if (part.url) {
       doc.setTextColor(COLORS.black.r, COLORS.black.g, COLORS.black.b);
-      doc.textWithLink(part.text, currentX, yPos, { url: part.url });
-      doc.setTextColor(COLORS.gray.r, COLORS.gray.g, COLORS.gray.b);
-    } else {
-      doc.text(part.text, currentX, yPos);
-    }
+      doc.textWithLink(link.text, currentX, yPos, { url: link.url });
 
-    currentX += textWidth;
+      currentX += textWidth;
 
-    if (index < contactMethods.length - 1) {
-      const separator = "  •  ";
-      const separatorWidth = doc.getTextWidth(separator);
-      doc.text(separator, currentX, yPos);
-      currentX += separatorWidth;
-    }
-  });
-
-  yPos += scaledSpacing.tightLineHeight;
-
-  // Line 2: Location (if present) - centered below
-  if (workingResume.contact.location) {
-    const locationWidth = doc.getTextWidth(workingResume.contact.location);
-    const locationX = (PAGE.width - locationWidth) / 2;
-    doc.text(workingResume.contact.location, locationX, yPos);
+      if (index < professionalLinks.length - 1) {
+        doc.setTextColor(COLORS.gray.r, COLORS.gray.g, COLORS.gray.b);
+        const separator = "  •  ";
+        const separatorWidth = doc.getTextWidth(separator);
+        doc.text(separator, currentX, yPos);
+        currentX += separatorWidth;
+      }
+    });
     yPos += scaledSpacing.tightLineHeight;
   }
 
