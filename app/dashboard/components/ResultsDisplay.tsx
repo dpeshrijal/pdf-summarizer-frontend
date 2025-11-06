@@ -10,7 +10,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
 import { downloadAsPDF } from "@/lib/utils/pdfGenerator";
 import {
   generateResumePDF,
@@ -108,20 +107,23 @@ export function ResultsDisplay({
         {resume.summary && (
           <div>
             <div className="font-bold text-sm uppercase mb-1">Summary</div>
-            {isEditing ? (
-              <Textarea
-                value={resume.summary}
-                onChange={(e) => {
-                  if (!editableData) return;
-                  const newData = JSON.parse(JSON.stringify(editableData));
-                  newData.resume.summary = e.target.value;
-                  setEditableData(newData);
-                }}
-                className="min-h-[80px] text-xs md:text-sm"
-              />
-            ) : (
-              <div>{resume.summary}</div>
-            )}
+            <div
+              contentEditable={isEditing}
+              suppressContentEditableWarning
+              onBlur={(e) => {
+                if (!editableData || !isEditing) return;
+                const newData = JSON.parse(JSON.stringify(editableData));
+                newData.resume.summary = e.currentTarget.textContent || '';
+                setEditableData(newData);
+              }}
+              className={`text-xs md:text-sm ${
+                isEditing
+                  ? 'outline-none focus:ring-2 focus:ring-primary/50 rounded-md p-2 bg-muted/30 cursor-text hover:bg-muted/50 transition-colors'
+                  : ''
+              }`}
+            >
+              {resume.summary}
+            </div>
           </div>
         )}
 
@@ -155,20 +157,23 @@ export function ResultsDisplay({
                 <ul className="list-disc list-inside space-y-0.5">
                   {exp.achievements.map((achievement, i) => (
                     <li key={i} className="text-xs">
-                      {isEditing ? (
-                        <Textarea
-                          value={achievement}
-                          onChange={(e) => {
-                            if (!editableData) return;
-                            const newData = JSON.parse(JSON.stringify(editableData));
-                            newData.resume.experience[idx].achievements[i] = e.target.value;
-                            setEditableData(newData);
-                          }}
-                          className="min-h-[60px] text-xs md:text-sm mb-1"
-                        />
-                      ) : (
-                        achievement
-                      )}
+                      <span
+                        contentEditable={isEditing}
+                        suppressContentEditableWarning
+                        onBlur={(e) => {
+                          if (!editableData || !isEditing) return;
+                          const newData = JSON.parse(JSON.stringify(editableData));
+                          newData.resume.experience[idx].achievements[i] = e.currentTarget.textContent || '';
+                          setEditableData(newData);
+                        }}
+                        className={`${
+                          isEditing
+                            ? 'outline-none focus:ring-2 focus:ring-primary/50 rounded px-1 bg-muted/20 cursor-text hover:bg-muted/40 transition-colors inline-block w-full'
+                            : ''
+                        }`}
+                      >
+                        {achievement}
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -354,21 +359,23 @@ export function ResultsDisplay({
 
         {/* Paragraphs */}
         {cl.paragraphs.map((para, idx) => (
-          <div key={idx} className="text-justify">
-            {isEditing ? (
-              <Textarea
-                value={para}
-                onChange={(e) => {
-                  if (!editableData) return;
-                  const newData = JSON.parse(JSON.stringify(editableData));
-                  newData.coverLetter.paragraphs[idx] = e.target.value;
-                  setEditableData(newData);
-                }}
-                className="min-h-[100px] text-xs md:text-sm"
-              />
-            ) : (
-              para
-            )}
+          <div
+            key={idx}
+            contentEditable={isEditing}
+            suppressContentEditableWarning
+            onBlur={(e) => {
+              if (!editableData || !isEditing) return;
+              const newData = JSON.parse(JSON.stringify(editableData));
+              newData.coverLetter.paragraphs[idx] = e.currentTarget.textContent || '';
+              setEditableData(newData);
+            }}
+            className={`text-justify text-xs md:text-sm ${
+              isEditing
+                ? 'outline-none focus:ring-2 focus:ring-primary/50 rounded-md p-2 bg-muted/30 cursor-text hover:bg-muted/50 transition-colors'
+                : ''
+            }`}
+          >
+            {para}
           </div>
         ))}
 
