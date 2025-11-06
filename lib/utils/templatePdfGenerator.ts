@@ -133,16 +133,20 @@ const estimateContentHeight = (resume: StructuredResume): number => {
 
 /**
  * Remove one bullet from work experience (oldest job first)
+ * Returns a NEW resume object with the bullet removed
  */
 const removeOneBullet = (resume: StructuredResume): { success: boolean; resume: StructuredResume } => {
+  // Create a deep clone
+  const newResume = JSON.parse(JSON.stringify(resume)) as StructuredResume;
+
   // Work backwards through experience (remove from older jobs first)
-  for (let i = resume.experience.length - 1; i >= 0; i--) {
-    const exp = resume.experience[i];
+  for (let i = newResume.experience.length - 1; i >= 0; i--) {
+    const exp = newResume.experience[i];
 
     // Keep at least 1 bullet per job
     if (exp.achievements.length > 1) {
       exp.achievements.pop();
-      return { success: true, resume };
+      return { success: true, resume: newResume };
     }
   }
 
@@ -405,7 +409,7 @@ export const generateResumePDF = async (
   doc.setLineWidth(0.3);
   const underlineMargin = 30;
   doc.line(underlineMargin, underlineY, PAGE.width - underlineMargin, underlineY);
-  yPos += 3;
+  yPos += 5; // More spacing before contact info
 
   // Contact info - centered, clean layout
   doc.setFontSize(scaledFontSizes.small);
