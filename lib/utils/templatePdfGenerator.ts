@@ -32,13 +32,10 @@ const SPACING = {
   tightLineHeight: 4.2,
 };
 
-// Professional color palette (RGB)
+// Black and white only
 const COLORS = {
-  primary: { r: 37, g: 99, b: 235 },      // Professional blue
-  darkGray: { r: 55, g: 65, b: 81 },      // For text
-  mediumGray: { r: 107, g: 114, b: 128 }, // For secondary text
-  lightGray: { r: 229, g: 231, b: 235 },  // For lines
   black: { r: 0, g: 0, b: 0 },
+  gray: { r: 100, g: 100, b: 100 }, // For dates/secondary info
 };
 
 // Margin presets
@@ -263,7 +260,7 @@ export const generateResumePDF = async (
     x: number,
     fontSize: number,
     style: "normal" | "bold" | "italic" = "normal",
-    color: { r: number; g: number; b: number } = COLORS.darkGray,
+    color: { r: number; g: number; b: number } = COLORS.black,
     maxWidth: number = MAX_CONTENT_WIDTH
   ): number => {
     doc.setFontSize(fontSize);
@@ -285,7 +282,7 @@ export const generateResumePDF = async (
     return linesAdded;
   };
 
-  // Helper: Add modern section header with accent line
+  // Helper: Add section header with underline
   const addSectionHeader = (title: string) => {
     if (!fitsOnPage(10)) {
       contentTruncated = true;
@@ -294,17 +291,19 @@ export const generateResumePDF = async (
 
     yPos += SPACING.beforeSection;
 
-    // Section title
+    // Section title in black
     doc.setFontSize(FONT_SIZES.sectionHeader);
     doc.setFont("helvetica", "bold");
-    doc.setTextColor(COLORS.primary.r, COLORS.primary.g, COLORS.primary.b);
+    doc.setTextColor(COLORS.black.r, COLORS.black.g, COLORS.black.b);
     doc.text(title.toUpperCase(), margins.left, yPos);
 
-    // Modern accent line (full width, thin)
-    const lineY = yPos + 2;
-    doc.setDrawColor(COLORS.primary.r, COLORS.primary.g, COLORS.primary.b);
-    doc.setLineWidth(0.4);
-    doc.line(margins.left, lineY, PAGE.width - margins.right, lineY);
+    // Add some spacing before the line
+    yPos += 2.5;
+
+    // Accent line (full width, thin)
+    doc.setDrawColor(COLORS.black.r, COLORS.black.g, COLORS.black.b);
+    doc.setLineWidth(0.3);
+    doc.line(margins.left, yPos, PAGE.width - margins.right, yPos);
 
     yPos += SPACING.afterSectionHeader;
     return true;
@@ -327,7 +326,7 @@ export const generateResumePDF = async (
 
   // Thin line under name for elegance
   const underlineY = yPos;
-  doc.setDrawColor(COLORS.lightGray.r, COLORS.lightGray.g, COLORS.lightGray.b);
+  doc.setDrawColor(COLORS.black.r, COLORS.black.g, COLORS.black.b);
   doc.setLineWidth(0.3);
   const underlineMargin = 30;
   doc.line(underlineMargin, underlineY, PAGE.width - underlineMargin, underlineY);
@@ -336,7 +335,7 @@ export const generateResumePDF = async (
   // Contact info - centered, clean layout
   doc.setFontSize(FONT_SIZES.small);
   doc.setFont("helvetica", "normal");
-  doc.setTextColor(COLORS.mediumGray.r, COLORS.mediumGray.g, COLORS.mediumGray.b);
+  doc.setTextColor(COLORS.gray.r, COLORS.gray.g, COLORS.gray.b);
 
   const contactParts: Array<{ text: string; url?: string }> = [
     { text: workingResume.contact.email, url: `mailto:${workingResume.contact.email}` }
@@ -371,9 +370,9 @@ export const generateResumePDF = async (
     const textWidth = doc.getTextWidth(part.text);
 
     if (part.url) {
-      doc.setTextColor(COLORS.primary.r, COLORS.primary.g, COLORS.primary.b);
+      doc.setTextColor(COLORS.black.r, COLORS.black.g, COLORS.black.b);
       doc.textWithLink(part.text, currentX, yPos, { url: part.url });
-      doc.setTextColor(COLORS.mediumGray.r, COLORS.mediumGray.g, COLORS.mediumGray.b);
+      doc.setTextColor(COLORS.gray.r, COLORS.gray.g, COLORS.gray.b);
     } else {
       doc.text(part.text, currentX, yPos);
     }
@@ -392,7 +391,7 @@ export const generateResumePDF = async (
 
   // ========== 2. SUMMARY ==========
   if (workingResume.summary && addSectionHeader("PROFESSIONAL SUMMARY")) {
-    addText(workingResume.summary, margins.left, FONT_SIZES.normal, "normal", COLORS.darkGray);
+    addText(workingResume.summary, margins.left, FONT_SIZES.normal, "normal", COLORS.black);
   }
 
   // ========== 3. SKILLS ==========
@@ -402,13 +401,13 @@ export const generateResumePDF = async (
 
       doc.setFontSize(FONT_SIZES.normal);
       doc.setFont("helvetica", "bold");
-      doc.setTextColor(COLORS.darkGray.r, COLORS.darkGray.g, COLORS.darkGray.b);
+      doc.setTextColor(COLORS.black.r, COLORS.black.g, COLORS.black.b);
       const categoryText = `${skillCat.category}:`;
       const categoryWidth = doc.getTextWidth(categoryText);
       doc.text(categoryText, margins.left, yPos);
 
       doc.setFont("helvetica", "normal");
-      doc.setTextColor(COLORS.darkGray.r, COLORS.darkGray.g, COLORS.darkGray.b);
+      doc.setTextColor(COLORS.black.r, COLORS.black.g, COLORS.black.b);
       const skillsText = skillCat.skills.join(", ");
 
       const skillLines = doc.splitTextToSize(
@@ -436,13 +435,13 @@ export const generateResumePDF = async (
       // Job title - bold, prominent
       doc.setFontSize(FONT_SIZES.jobTitle);
       doc.setFont("helvetica", "bold");
-      doc.setTextColor(COLORS.darkGray.r, COLORS.darkGray.g, COLORS.darkGray.b);
+      doc.setTextColor(COLORS.black.r, COLORS.black.g, COLORS.black.b);
       doc.text(exp.title, margins.left, yPos);
 
       // Date - right aligned, smaller
       doc.setFontSize(FONT_SIZES.small);
       doc.setFont("helvetica", "normal");
-      doc.setTextColor(COLORS.mediumGray.r, COLORS.mediumGray.g, COLORS.mediumGray.b);
+      doc.setTextColor(COLORS.gray.r, COLORS.gray.g, COLORS.gray.b);
       const dateText = `${exp.startDate} - ${exp.endDate}`;
       const dateWidth = doc.getTextWidth(dateText);
       doc.text(dateText, PAGE.width - margins.right - dateWidth, yPos);
@@ -452,20 +451,20 @@ export const generateResumePDF = async (
       // Company - slightly lighter
       doc.setFontSize(FONT_SIZES.company);
       doc.setFont("helvetica", "italic");
-      doc.setTextColor(COLORS.mediumGray.r, COLORS.mediumGray.g, COLORS.mediumGray.b);
+      doc.setTextColor(COLORS.gray.r, COLORS.gray.g, COLORS.gray.b);
       doc.text(exp.company, margins.left, yPos);
       yPos += SPACING.lineHeight + 0.5;
 
       // Achievements with modern bullets
       doc.setFontSize(FONT_SIZES.normal);
       doc.setFont("helvetica", "normal");
-      doc.setTextColor(COLORS.darkGray.r, COLORS.darkGray.g, COLORS.darkGray.b);
+      doc.setTextColor(COLORS.black.r, COLORS.black.g, COLORS.black.b);
 
       for (const achievement of exp.achievements) {
         if (!fitsOnPage(6)) break;
 
         // Modern bullet (small circle)
-        doc.setFillColor(COLORS.primary.r, COLORS.primary.g, COLORS.primary.b);
+        doc.setFillColor(COLORS.black.r, COLORS.black.g, COLORS.black.b);
         doc.circle(margins.left + 1.5, yPos - 1, 0.8, 'F');
 
         const achievementLines = doc.splitTextToSize(
@@ -498,26 +497,26 @@ export const generateResumePDF = async (
 
       doc.setFontSize(FONT_SIZES.jobTitle);
       doc.setFont("helvetica", "bold");
-      doc.setTextColor(COLORS.darkGray.r, COLORS.darkGray.g, COLORS.darkGray.b);
+      doc.setTextColor(COLORS.black.r, COLORS.black.g, COLORS.black.b);
       doc.text(proj.name, margins.left, yPos);
 
       if (proj.date) {
         doc.setFontSize(FONT_SIZES.small);
         doc.setFont("helvetica", "normal");
-        doc.setTextColor(COLORS.mediumGray.r, COLORS.mediumGray.g, COLORS.mediumGray.b);
+        doc.setTextColor(COLORS.gray.r, COLORS.gray.g, COLORS.gray.b);
         const dateWidth = doc.getTextWidth(proj.date);
         doc.text(proj.date, PAGE.width - margins.right - dateWidth, yPos);
       }
 
       yPos += SPACING.tightLineHeight;
 
-      addText(proj.description, margins.left, FONT_SIZES.normal, "normal", COLORS.darkGray);
+      addText(proj.description, margins.left, FONT_SIZES.normal, "normal", COLORS.black);
 
       if (proj.technologies && proj.technologies.length > 0) {
         doc.setFont("helvetica", "italic");
-        doc.setTextColor(COLORS.mediumGray.r, COLORS.mediumGray.g, COLORS.mediumGray.b);
+        doc.setTextColor(COLORS.gray.r, COLORS.gray.g, COLORS.gray.b);
         const techText = `Technologies: ${proj.technologies.join(", ")}`;
-        addText(techText, margins.left, FONT_SIZES.small, "italic", COLORS.mediumGray);
+        addText(techText, margins.left, FONT_SIZES.small, "italic", COLORS.gray);
       }
 
       if (i < workingResume.projects.length - 1) {
@@ -532,12 +531,12 @@ export const generateResumePDF = async (
       const pub = workingResume.publications[i];
       if (!fitsOnPage(8)) break;
 
-      addText(pub.title, margins.left, FONT_SIZES.normal, "bold", COLORS.darkGray);
+      addText(pub.title, margins.left, FONT_SIZES.normal, "bold", COLORS.black);
 
       doc.setFont("helvetica", "normal");
-      doc.setTextColor(COLORS.mediumGray.r, COLORS.mediumGray.g, COLORS.mediumGray.b);
+      doc.setTextColor(COLORS.gray.r, COLORS.gray.g, COLORS.gray.b);
       const pubDetails = `${pub.authors}. ${pub.venue}, ${pub.date}`;
-      addText(pubDetails, margins.left, FONT_SIZES.small, "normal", COLORS.mediumGray);
+      addText(pubDetails, margins.left, FONT_SIZES.small, "normal", COLORS.gray);
 
       if (i < workingResume.publications.length - 1) {
         yPos += SPACING.betweenEducation;
@@ -553,12 +552,12 @@ export const generateResumePDF = async (
 
       doc.setFontSize(FONT_SIZES.normal);
       doc.setFont("helvetica", "bold");
-      doc.setTextColor(COLORS.darkGray.r, COLORS.darkGray.g, COLORS.darkGray.b);
+      doc.setTextColor(COLORS.black.r, COLORS.black.g, COLORS.black.b);
       doc.text(cert.name, margins.left, yPos);
       yPos += SPACING.tightLineHeight;
 
       doc.setFont("helvetica", "normal");
-      doc.setTextColor(COLORS.mediumGray.r, COLORS.mediumGray.g, COLORS.mediumGray.b);
+      doc.setTextColor(COLORS.gray.r, COLORS.gray.g, COLORS.gray.b);
       let certDetails = cert.issuer;
       if (cert.date) {
         certDetails += ` | ${cert.date}`;
@@ -569,7 +568,7 @@ export const generateResumePDF = async (
       if (cert.credentialId) {
         certDetails += ` | ID: ${cert.credentialId}`;
       }
-      addText(certDetails, margins.left, FONT_SIZES.normal, "normal", COLORS.mediumGray);
+      addText(certDetails, margins.left, FONT_SIZES.normal, "normal", COLORS.gray);
 
       if (i < workingResume.certifications.length - 1) {
         yPos += SPACING.betweenEducation;
@@ -585,17 +584,17 @@ export const generateResumePDF = async (
 
       doc.setFontSize(FONT_SIZES.normal);
       doc.setFont("helvetica", "bold");
-      doc.setTextColor(COLORS.darkGray.r, COLORS.darkGray.g, COLORS.darkGray.b);
+      doc.setTextColor(COLORS.black.r, COLORS.black.g, COLORS.black.b);
       doc.text(award.title, margins.left, yPos);
       yPos += SPACING.tightLineHeight;
 
       doc.setFont("helvetica", "normal");
-      doc.setTextColor(COLORS.mediumGray.r, COLORS.mediumGray.g, COLORS.mediumGray.b);
+      doc.setTextColor(COLORS.gray.r, COLORS.gray.g, COLORS.gray.b);
       let awardDetails = `${award.issuer} | ${award.date}`;
       if (award.description) {
         awardDetails += ` - ${award.description}`;
       }
-      addText(awardDetails, margins.left, FONT_SIZES.normal, "normal", COLORS.mediumGray);
+      addText(awardDetails, margins.left, FONT_SIZES.normal, "normal", COLORS.gray);
 
       if (i < workingResume.awards.length - 1) {
         yPos += SPACING.betweenEducation;
@@ -611,22 +610,22 @@ export const generateResumePDF = async (
 
       doc.setFontSize(FONT_SIZES.normal);
       doc.setFont("helvetica", "bold");
-      doc.setTextColor(COLORS.darkGray.r, COLORS.darkGray.g, COLORS.darkGray.b);
+      doc.setTextColor(COLORS.black.r, COLORS.black.g, COLORS.black.b);
       doc.text(edu.degree, margins.left, yPos);
       yPos += SPACING.tightLineHeight;
 
       doc.setFont("helvetica", "italic");
-      doc.setTextColor(COLORS.mediumGray.r, COLORS.mediumGray.g, COLORS.mediumGray.b);
+      doc.setTextColor(COLORS.gray.r, COLORS.gray.g, COLORS.gray.b);
       const eduDetails = `${edu.institution}${
         edu.location ? ", " + edu.location : ""
       } (${edu.graduationYear})`;
-      addText(eduDetails, margins.left, FONT_SIZES.normal, "italic", COLORS.mediumGray);
+      addText(eduDetails, margins.left, FONT_SIZES.normal, "italic", COLORS.gray);
 
       if (edu.coursework && edu.coursework.length > 0) {
         doc.setFont("helvetica", "normal");
-        doc.setTextColor(COLORS.mediumGray.r, COLORS.mediumGray.g, COLORS.mediumGray.b);
+        doc.setTextColor(COLORS.gray.r, COLORS.gray.g, COLORS.gray.b);
         const courseworkText = `Relevant Coursework: ${edu.coursework.join(", ")}`;
-        addText(courseworkText, margins.left, FONT_SIZES.small, "normal", COLORS.mediumGray);
+        addText(courseworkText, margins.left, FONT_SIZES.small, "normal", COLORS.gray);
       }
 
       if (i < workingResume.education.length - 1) {
@@ -643,12 +642,12 @@ export const generateResumePDF = async (
 
       doc.setFontSize(FONT_SIZES.jobTitle);
       doc.setFont("helvetica", "bold");
-      doc.setTextColor(COLORS.darkGray.r, COLORS.darkGray.g, COLORS.darkGray.b);
+      doc.setTextColor(COLORS.black.r, COLORS.black.g, COLORS.black.b);
       doc.text(vol.role, margins.left, yPos);
 
       doc.setFontSize(FONT_SIZES.small);
       doc.setFont("helvetica", "normal");
-      doc.setTextColor(COLORS.mediumGray.r, COLORS.mediumGray.g, COLORS.mediumGray.b);
+      doc.setTextColor(COLORS.gray.r, COLORS.gray.g, COLORS.gray.b);
       const dateText = `${vol.startDate} - ${vol.endDate}`;
       const dateWidth = doc.getTextWidth(dateText);
       doc.text(dateText, PAGE.width - margins.right - dateWidth, yPos);
@@ -662,11 +661,11 @@ export const generateResumePDF = async (
 
       doc.setFontSize(FONT_SIZES.normal);
       doc.setFont("helvetica", "normal");
-      doc.setTextColor(COLORS.darkGray.r, COLORS.darkGray.g, COLORS.darkGray.b);
+      doc.setTextColor(COLORS.black.r, COLORS.black.g, COLORS.black.b);
 
       for (const desc of vol.description) {
         if (!fitsOnPage(6)) break;
-        doc.setFillColor(COLORS.primary.r, COLORS.primary.g, COLORS.primary.b);
+        doc.setFillColor(COLORS.black.r, COLORS.black.g, COLORS.black.b);
         doc.circle(margins.left + 1.5, yPos - 1, 0.8, 'F');
         const descLines = doc.splitTextToSize(
           desc,
@@ -693,12 +692,12 @@ export const generateResumePDF = async (
 
       doc.setFontSize(FONT_SIZES.normal);
       doc.setFont("helvetica", "bold");
-      doc.setTextColor(COLORS.darkGray.r, COLORS.darkGray.g, COLORS.darkGray.b);
+      doc.setTextColor(COLORS.black.r, COLORS.black.g, COLORS.black.b);
       doc.text(memb.organization, margins.left, yPos);
       yPos += SPACING.tightLineHeight;
 
       doc.setFont("helvetica", "normal");
-      doc.setTextColor(COLORS.mediumGray.r, COLORS.mediumGray.g, COLORS.mediumGray.b);
+      doc.setTextColor(COLORS.gray.r, COLORS.gray.g, COLORS.gray.b);
       let membDetails = "";
       if (memb.role) {
         membDetails = memb.role;
@@ -710,7 +709,7 @@ export const generateResumePDF = async (
         }
       }
       if (membDetails) {
-        addText(membDetails, margins.left, FONT_SIZES.normal, "normal", COLORS.mediumGray);
+        addText(membDetails, margins.left, FONT_SIZES.normal, "normal", COLORS.gray);
       }
 
       if (i < workingResume.professionalMemberships.length - 1) {
@@ -723,13 +722,13 @@ export const generateResumePDF = async (
   if (workingResume.languages && workingResume.languages.length > 0 && addSectionHeader("LANGUAGES")) {
     doc.setFontSize(FONT_SIZES.normal);
     doc.setFont("helvetica", "normal");
-    doc.setTextColor(COLORS.darkGray.r, COLORS.darkGray.g, COLORS.darkGray.b);
+    doc.setTextColor(COLORS.black.r, COLORS.black.g, COLORS.black.b);
 
     const langTexts = workingResume.languages.map(
       (lang) => `${lang.language} (${lang.proficiency})`
     );
     const langLine = langTexts.join(" | ");
-    addText(langLine, margins.left, FONT_SIZES.normal, "normal", COLORS.darkGray);
+    addText(langLine, margins.left, FONT_SIZES.normal, "normal", COLORS.black);
   }
 
   // Warn if content was intelligently trimmed or truncated
@@ -782,7 +781,7 @@ export const generateCoverLetterPDF = async (
 
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
-  doc.setTextColor(COLORS.mediumGray.r, COLORS.mediumGray.g, COLORS.mediumGray.b);
+  doc.setTextColor(COLORS.gray.r, COLORS.gray.g, COLORS.gray.b);
   doc.text(contactInfo.email, margins.left, yPos);
   yPos += 5;
   doc.text(contactInfo.phone, margins.left, yPos);
@@ -794,7 +793,7 @@ export const generateCoverLetterPDF = async (
     day: "numeric",
     year: "numeric",
   });
-  doc.setTextColor(COLORS.darkGray.r, COLORS.darkGray.g, COLORS.darkGray.b);
+  doc.setTextColor(COLORS.black.r, COLORS.black.g, COLORS.black.b);
   doc.text(today, margins.left, yPos);
   yPos += 10;
 
