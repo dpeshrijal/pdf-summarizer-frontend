@@ -897,12 +897,11 @@ export const generateCoverLetterPDF = async (
   doc.text(today, margins.left, yPos);
   yPos += 10;
 
-  // Recipient
-  doc.text(
-    `Dear ${coverLetter.companyName} Hiring Team,`,
-    margins.left,
-    yPos
-  );
+  // Recipient - handle null/undefined company name gracefully
+  const greeting = coverLetter.companyName
+    ? `Dear ${coverLetter.companyName} Hiring Team,`
+    : 'Dear Hiring Manager,';
+  doc.text(greeting, margins.left, yPos);
   yPos += 8;
 
   // Paragraphs
