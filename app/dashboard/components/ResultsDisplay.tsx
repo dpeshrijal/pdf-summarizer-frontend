@@ -1,6 +1,7 @@
 "use client";
 
-import { Download, CheckCircle2, FileText } from "lucide-react";
+import { useState } from "react";
+import { Download, CheckCircle2, FileText, Edit2, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
 import { downloadAsPDF } from "@/lib/utils/pdfGenerator";
 import {
   generateResumePDF,
@@ -33,10 +35,19 @@ export function ResultsDisplay({
   // Determine which format we're working with
   const isStructured = !!structured;
 
+  // Editable state - deep clone the structured data
+  const [editableData, setEditableData] = useState<GenerationOutput | null>(
+    structured ? JSON.parse(JSON.stringify(structured)) : null
+  );
+  const [isEditing, setIsEditing] = useState(false);
+
   const handleDownloadResume = () => {
-    if (isStructured && structured) {
-      // New format: use template-based PDF generator
-      generateResumePDF(structured.resume, "Tailored_Resume.pdf");
+    // Use edited data if available, otherwise use original
+    const dataToUse = editableData || structured;
+
+    if (isStructured && dataToUse) {
+      // New format: use template-based PDF generator with edited data
+      generateResumePDF(dataToUse.resume, "Tailored_Resume.pdf");
     } else if (tailoredResume) {
       // Old format: use text-based PDF generator
       downloadAsPDF(tailoredResume, "Tailored_Resume.pdf");
@@ -44,14 +55,17 @@ export function ResultsDisplay({
   };
 
   const handleDownloadCoverLetter = () => {
-    if (isStructured && structured) {
-      // New format: use template-based PDF generator
+    // Use edited data if available, otherwise use original
+    const dataToUse = editableData || structured;
+
+    if (isStructured && dataToUse) {
+      // New format: use template-based PDF generator with edited data
       generateCoverLetterPDF(
-        structured.coverLetter,
+        dataToUse.coverLetter,
         {
-          name: structured.resume.contact.name,
-          email: structured.resume.contact.email,
-          phone: structured.resume.contact.phone || "", // Default to empty string if not provided
+          name: dataToUse.resume.contact.name,
+          email: dataToUse.resume.contact.email,
+          phone: dataToUse.resume.contact.phone || "", // Default to empty string if not provided
         },
         "Cover_Letter.pdf"
       );
@@ -61,11 +75,21 @@ export function ResultsDisplay({
     }
   };
 
+  const handleSaveEdits = () => {
+    setIsEditing(false);
+  };
+
+  const handleCancelEdits = () => {
+    // Revert to original data
+    setEditableData(structured ? JSON.parse(JSON.stringify(structured)) : null);
+    setIsEditing(false);
+  };
+
   // Render structured preview
   const renderStructuredResumePreview = () => {
-    if (!structured) return null;
+    if (!editableData) return null;
 
-    const { resume } = structured;
+    const { resume } = editableData;
     return (
       <div className="space-y-3 text-xs md:text-sm">
         {/* Header */}
@@ -84,7 +108,20 @@ export function ResultsDisplay({
         {resume.summary && (
           <div>
             <div className="font-bold text-sm uppercase mb-1">Summary</div>
-            <div>{resume.summary}</div>
+            {isEditing ? (
+              <Textarea
+                value={resume.summary}
+                onChange={(e) => {
+                  if (!editableData) return;
+                  const newData = JSON.parse(JSON.stringify(editableData));
+                  newData.resume.summary = e.target.value;
+                  setEditableData(newData);
+                }}
+                className="min-h-[80px] text-xs md:text-sm"
+              />
+            ) : (
+              <div>{resume.summary}</div>
+            )}
           </div>
         )}
 
@@ -118,7 +155,20 @@ export function ResultsDisplay({
                 <ul className="list-disc list-inside space-y-0.5">
                   {exp.achievements.map((achievement, i) => (
                     <li key={i} className="text-xs">
-                      {achievement}
+                      {isEditing ? (
+                        <Textarea
+                          value={achievement}
+                          onChange={(e) => {
+                            if (!editableData) return;
+                            const newData = JSON.parse(JSON.stringify(editableData));
+                            newData.resume.experience[idx].achievements[i] = e.target.value;
+                            setEditableData(newData);
+                          }}
+                          className="min-h-[60px] text-xs md:text-sm mb-1"
+                        />
+                      ) : (
+                        achievement
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -274,9 +324,9 @@ export function ResultsDisplay({
   };
 
   const renderStructuredCoverLetterPreview = () => {
-    if (!structured) return null;
+    if (!editableData) return null;
 
-    const { coverLetter: cl, resume } = structured;
+    const { coverLetter: cl, resume } = editableData;
     return (
       <div className="space-y-3 text-xs md:text-sm">
         {/* Header */}
@@ -300,12 +350,25 @@ export function ResultsDisplay({
         </div>
 
         {/* Greeting */}
-        <div>Dear {cl.companyName} Hiring Team,</div>
+        <div>Dear {cl.companyName || "Hiring Manager"} {cl.companyName ? "Hiring Team" : ""},</div>
 
         {/* Paragraphs */}
         {cl.paragraphs.map((para, idx) => (
           <div key={idx} className="text-justify">
-            {para}
+            {isEditing ? (
+              <Textarea
+                value={para}
+                onChange={(e) => {
+                  if (!editableData) return;
+                  const newData = JSON.parse(JSON.stringify(editableData));
+                  newData.coverLetter.paragraphs[idx] = e.target.value;
+                  setEditableData(newData);
+                }}
+                className="min-h-[100px] text-xs md:text-sm"
+              />
+            ) : (
+              para
+            )}
           </div>
         ))}
 
@@ -343,6 +406,43 @@ export function ResultsDisplay({
           {/* Match Score - only for structured format */}
           {isStructured && structured?.matchScore && (
             <MatchScoreDisplay matchScore={structured.matchScore} />
+          )}
+
+          {/* Edit Controls - only for structured format */}
+          {isStructured && (
+            <div className="flex items-center justify-end gap-3">
+              {isEditing ? (
+                <>
+                  <Button
+                    onClick={handleCancelEdits}
+                    variant="outline"
+                    size="sm"
+                    className="gap-2"
+                  >
+                    <X className="h-4 w-4" />
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleSaveEdits}
+                    size="sm"
+                    className="gap-2 bg-green-600 hover:bg-green-700"
+                  >
+                    <Check className="h-4 w-4" />
+                    Save Changes
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  onClick={() => setIsEditing(true)}
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                >
+                  <Edit2 className="h-4 w-4" />
+                  Edit Content
+                </Button>
+              )}
+            </div>
           )}
 
           {/* Download Buttons */}
