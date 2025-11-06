@@ -411,41 +411,40 @@ export const generateResumePDF = async (
   doc.line(underlineMargin, underlineY, PAGE.width - underlineMargin, underlineY);
   yPos += 5; // More spacing before contact info
 
-  // Contact info - centered, clean layout
+  // Contact info - elegant two-line layout
   doc.setFontSize(scaledFontSizes.small);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(COLORS.gray.r, COLORS.gray.g, COLORS.gray.b);
 
-  const contactParts: Array<{ text: string; url?: string }> = [
+  // Line 1: Email, Phone, LinkedIn, GitHub (contact methods)
+  const contactMethods: Array<{ text: string; url?: string }> = [
     { text: workingResume.contact.email, url: `mailto:${workingResume.contact.email}` }
   ];
 
   if (workingResume.contact.phone) {
-    contactParts.push({ text: workingResume.contact.phone });
+    contactMethods.push({ text: workingResume.contact.phone });
   }
   if (workingResume.contact.linkedin) {
-    contactParts.push({
+    contactMethods.push({
       text: cleanUrl(workingResume.contact.linkedin),
       url: workingResume.contact.linkedin.startsWith('http') ? workingResume.contact.linkedin : `https://${workingResume.contact.linkedin}`
     });
   }
   if (workingResume.contact.github) {
-    contactParts.push({
+    contactMethods.push({
       text: cleanUrl(workingResume.contact.github),
       url: workingResume.contact.github.startsWith('http') ? workingResume.contact.github : `https://${workingResume.contact.github}`
     });
   }
-  if (workingResume.contact.location) {
-    contactParts.push({ text: workingResume.contact.location });
-  }
 
-  const contactTexts = contactParts.map(p => p.text);
+  // Render first line centered
+  const contactTexts = contactMethods.map(p => p.text);
   const contactLine = contactTexts.join("  •  ");
   const contactLineWidth = doc.getTextWidth(contactLine);
   const contactX = (PAGE.width - contactLineWidth) / 2;
 
   let currentX = contactX;
-  contactParts.forEach((part, index) => {
+  contactMethods.forEach((part, index) => {
     const textWidth = doc.getTextWidth(part.text);
 
     if (part.url) {
@@ -458,7 +457,7 @@ export const generateResumePDF = async (
 
     currentX += textWidth;
 
-    if (index < contactParts.length - 1) {
+    if (index < contactMethods.length - 1) {
       const separator = "  •  ";
       const separatorWidth = doc.getTextWidth(separator);
       doc.text(separator, currentX, yPos);
@@ -466,7 +465,17 @@ export const generateResumePDF = async (
     }
   });
 
-  yPos += scaledSpacing.afterContactInfo;
+  yPos += scaledSpacing.tightLineHeight;
+
+  // Line 2: Location (if present) - centered below
+  if (workingResume.contact.location) {
+    const locationWidth = doc.getTextWidth(workingResume.contact.location);
+    const locationX = (PAGE.width - locationWidth) / 2;
+    doc.text(workingResume.contact.location, locationX, yPos);
+    yPos += scaledSpacing.tightLineHeight;
+  }
+
+  yPos += scaledSpacing.afterContactInfo - scaledSpacing.tightLineHeight;
 
   // ========== 2. SUMMARY ==========
   if (workingResume.summary && addSectionHeader("PROFESSIONAL SUMMARY")) {
