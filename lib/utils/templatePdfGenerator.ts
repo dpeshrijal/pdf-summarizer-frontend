@@ -447,7 +447,7 @@ export const generateResumePDF = async (
     }
   });
 
-  yPos += scaledSpacing.afterContactInfo * 0.6; // Tighter spacing
+  yPos += scaledSpacing.afterContactInfo * 0.75; // Balanced spacing between contact lines
 
   // Line 3: Secondary Contact - LinkedIn, GitHub, Location (online presence)
   const secondaryContactParts: Array<{ text: string; url?: string }> = [];
