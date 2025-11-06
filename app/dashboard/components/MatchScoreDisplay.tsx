@@ -95,55 +95,68 @@ export function MatchScoreDisplay({ matchScore, compact = false }: MatchScoreDis
 
         {/* Expandable Details Section */}
         {isExpanded && (
-          <div className="px-4 pb-4 space-y-4 border-t">
-            {/* Summary */}
-            <div className="text-sm text-muted-foreground pt-4">
+          <div className="px-6 pb-6 space-y-6 border-t bg-gradient-to-b from-muted/30 to-background">
+            {/* Summary - Elegant typography */}
+            <div className="text-sm text-foreground/70 pt-6 leading-relaxed">
               {matchScore.summary}
             </div>
 
-            {/* Breakdown Scores */}
-            <div className="space-y-3">
-              <div className="text-sm font-semibold">Detailed Breakdown</div>
-              <ScoreBar label="Skills Match" score={matchScore.skillsMatch} />
-              <ScoreBar label="Experience Match" score={matchScore.experienceMatch} />
-              <ScoreBar label="Education Match" score={matchScore.educationMatch} />
+            {/* Breakdown Scores - Modern grid layout */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-semibold text-foreground">Detailed Breakdown</h3>
+              <div className="grid grid-cols-1 gap-4">
+                <ScoreBar label="Skills Match" score={matchScore.skillsMatch} />
+                <ScoreBar label="Experience Match" score={matchScore.experienceMatch} />
+                <ScoreBar label="Education Match" score={matchScore.educationMatch} />
+              </div>
             </div>
 
-            {/* Strengths */}
-            {matchScore.strengths.length > 0 && (
-              <div>
-                <div className="flex items-center gap-2 text-sm font-semibold text-green-700 dark:text-green-400 mb-2">
-                  <CheckCircle2 className="w-4 h-4" />
-                  Key Strengths
+            {/* Two-column layout for strengths and gaps */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Strengths - Modern card design */}
+              {matchScore.strengths.length > 0 && (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center">
+                      <CheckCircle2 className="w-4 h-4 text-green-600 dark:text-green-400" />
+                    </div>
+                    <h3 className="text-sm font-semibold text-foreground">Key Strengths</h3>
+                  </div>
+                  <ul className="space-y-2">
+                    {matchScore.strengths.map((strength, idx) => (
+                      <li key={idx} className="group flex items-start gap-3 p-2.5 rounded-lg hover:bg-green-500/5 transition-colors">
+                        <div className="w-5 h-5 rounded-full bg-green-500/10 flex items-center justify-center flex-shrink-0 mt-0.5 group-hover:bg-green-500/20 transition-colors">
+                          <span className="text-[10px] text-green-600 dark:text-green-400 font-bold">✓</span>
+                        </div>
+                        <span className="text-sm text-foreground/80 leading-relaxed">{strength}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <ul className="space-y-1 text-sm">
-                  {matchScore.strengths.map((strength, idx) => (
-                    <li key={idx} className="flex items-start gap-2">
-                      <span className="text-green-600 dark:text-green-400 mt-0.5">✓</span>
-                      <span>{strength}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+              )}
 
-            {/* Gaps */}
-            {matchScore.gaps.length > 0 && matchScore.gaps[0] !== "none identified" && matchScore.gaps[0] !== "None identified" && (
-              <div>
-                <div className="flex items-center gap-2 text-sm font-semibold text-orange-700 dark:text-orange-400 mb-2">
-                  <AlertCircle className="w-4 h-4" />
-                  Areas for Improvement
+              {/* Gaps - Modern card design */}
+              {matchScore.gaps.length > 0 && matchScore.gaps[0] !== "none identified" && matchScore.gaps[0] !== "None identified" && (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center">
+                      <AlertCircle className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+                    </div>
+                    <h3 className="text-sm font-semibold text-foreground">Areas for Improvement</h3>
+                  </div>
+                  <ul className="space-y-2">
+                    {matchScore.gaps.map((gap, idx) => (
+                      <li key={idx} className="group flex items-start gap-3 p-2.5 rounded-lg hover:bg-orange-500/5 transition-colors">
+                        <div className="w-5 h-5 rounded-full bg-orange-500/10 flex items-center justify-center flex-shrink-0 mt-0.5 group-hover:bg-orange-500/20 transition-colors">
+                          <span className="text-[10px] text-orange-600 dark:text-orange-400 font-bold">•</span>
+                        </div>
+                        <span className="text-sm text-foreground/70 leading-relaxed">{gap}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <ul className="space-y-1 text-sm text-muted-foreground">
-                  {matchScore.gaps.map((gap, idx) => (
-                    <li key={idx} className="flex items-start gap-2">
-                      <span className="text-orange-600 dark:text-orange-400 mt-0.5">•</span>
-                      <span>{gap}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         )}
       </CardContent>
@@ -157,25 +170,59 @@ interface ScoreBarProps {
 }
 
 function ScoreBar({ label, score }: ScoreBarProps) {
-  const getBarColor = (score: number): string => {
-    if (score >= 90) return "bg-green-500";
-    if (score >= 75) return "bg-blue-500";
-    if (score >= 60) return "bg-yellow-500";
-    if (score >= 40) return "bg-orange-500";
-    return "bg-red-500";
+  const getBarGradient = (score: number): string => {
+    if (score >= 90) return "from-emerald-500 to-green-600";
+    if (score >= 75) return "from-blue-500 to-indigo-600";
+    if (score >= 60) return "from-amber-400 to-yellow-600";
+    if (score >= 40) return "from-orange-500 to-red-500";
+    return "from-red-500 to-red-700";
+  };
+
+  const getIconColor = (score: number): string => {
+    if (score >= 90) return "text-emerald-600 dark:text-emerald-400";
+    if (score >= 75) return "text-blue-600 dark:text-blue-400";
+    if (score >= 60) return "text-amber-600 dark:text-amber-400";
+    if (score >= 40) return "text-orange-600 dark:text-orange-400";
+    return "text-red-600 dark:text-red-400";
+  };
+
+  const getBgColor = (score: number): string => {
+    if (score >= 90) return "bg-emerald-500/10";
+    if (score >= 75) return "bg-blue-500/10";
+    if (score >= 60) return "bg-amber-500/10";
+    if (score >= 40) return "bg-orange-500/10";
+    return "bg-red-500/10";
   };
 
   return (
-    <div>
-      <div className="flex justify-between text-xs mb-1">
-        <span className="font-medium">{label}</span>
-        <span className="text-muted-foreground">{score}%</span>
+    <div className="group relative p-4 rounded-xl border border-border/50 hover:border-border transition-all hover:shadow-sm bg-card/50">
+      {/* Header with label and score */}
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <div className={`w-2 h-2 rounded-full ${getBgColor(score)} ${getIconColor(score)} animate-pulse`} />
+          <span className="text-sm font-medium text-foreground">{label}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className={`text-lg font-bold ${getIconColor(score)} tabular-nums`}>{score}</span>
+          <span className="text-xs text-muted-foreground">%</span>
+        </div>
       </div>
-      <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+
+      {/* Modern progress bar with gradient */}
+      <div className="relative h-2.5 bg-muted rounded-full overflow-hidden">
+        {/* Background glow effect */}
         <div
-          className={`h-full ${getBarColor(score)} transition-all duration-500 ease-out`}
+          className={`absolute inset-0 bg-gradient-to-r ${getBarGradient(score)} opacity-20 blur-sm`}
           style={{ width: `${score}%` }}
         />
+        {/* Actual bar */}
+        <div
+          className={`absolute inset-y-0 left-0 bg-gradient-to-r ${getBarGradient(score)} rounded-full transition-all duration-700 ease-out shadow-sm`}
+          style={{ width: `${score}%` }}
+        >
+          {/* Shimmer effect */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
+        </div>
       </div>
     </div>
   );
