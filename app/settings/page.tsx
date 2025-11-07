@@ -219,13 +219,22 @@ export default function SettingsPage() {
               )}
             </div>
 
-            {/* Info Note */}
-            <div className="bg-blue-50 dark:bg-blue-950/50 border-2 border-blue-200 dark:border-blue-800 rounded-lg p-4">
-              <div className="flex gap-3">
-                <CheckCircle2 className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
-                <div className="text-sm">
-                  <p className="font-semibold mb-1 text-blue-900 dark:text-blue-200">7-Day Money-Back Guarantee</p>
-                  <p className="text-blue-800 dark:text-blue-300">
+            {/* 7-Day Money-Back Guarantee - Modern Design */}
+            <div className="relative overflow-hidden rounded-xl border border-emerald-200 dark:border-emerald-800/50 bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 dark:from-emerald-950/30 dark:via-teal-950/30 dark:to-cyan-950/30 p-5">
+              {/* Decorative gradient orb */}
+              <div className="absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-br from-emerald-400/20 to-teal-400/20 rounded-full blur-2xl" />
+
+              <div className="relative flex gap-4">
+                <div className="flex-shrink-0">
+                  <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                    <CheckCircle2 className="h-5 w-5 text-white" />
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-bold text-emerald-900 dark:text-emerald-100 mb-1 text-base">
+                    7-Day Money-Back Guarantee
+                  </h4>
+                  <p className="text-sm text-emerald-800 dark:text-emerald-200/90 leading-relaxed">
                     Not satisfied? Cancel within 7 days for a full refund, no questions asked.
                   </p>
                 </div>
