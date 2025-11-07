@@ -447,7 +447,7 @@ export const generateResumePDF = async (
     }
   });
 
-  yPos += scaledSpacing.afterContactInfo * 0.75; // Balanced spacing between contact lines
+  yPos += scaledSpacing.lineHeight; // Proper line spacing between contact lines
 
   // Line 3: Secondary Contact - LinkedIn, GitHub, Location (online presence)
   const secondaryContactParts: Array<{ text: string; url?: string }> = [];
@@ -472,7 +472,7 @@ export const generateResumePDF = async (
 
   // Render secondary contact (slightly smaller, more subtle)
   if (secondaryContactParts.length > 0) {
-    doc.setFontSize(scaledFontSizes.small * 0.95); // Slightly smaller for hierarchy
+    doc.setFontSize(scaledFontSizes.small * 0.90); // Noticeably smaller for clear hierarchy
 
     const secondaryTexts = secondaryContactParts.map(p => p.text);
     const secondaryLine = secondaryTexts.join(" • ");
@@ -500,9 +500,9 @@ export const generateResumePDF = async (
       }
     });
 
-    yPos += scaledSpacing.afterContactInfo;
+    yPos += scaledSpacing.afterContactInfo; // Full spacing after all contact info
   } else {
-    yPos += scaledSpacing.afterContactInfo * 0.7; // Less space if no secondary info
+    yPos += scaledSpacing.afterContactInfo; // Same spacing even without secondary info
   }
 
   // ========== 2. SUMMARY ==========
