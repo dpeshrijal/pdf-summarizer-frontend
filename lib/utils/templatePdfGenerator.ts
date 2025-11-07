@@ -403,10 +403,48 @@ export const generateResumePDF = async (
   doc.text(workingResume.contact.name, nameX, yPos);
   yPos += scaledSpacing.afterName + 4; // Clean spacing after name
 
-  // Line 2: Online Presence - Email, LinkedIn, GitHub (professional/digital contact)
   doc.setFontSize(scaledFontSizes.small);
   doc.setFont("helvetica", "normal");
+  const separator = "  •  ";
+  let currentX = 0;
 
+  // Line 2: Physical Contact - Phone, Location (if available, show first)
+  const physicalContactParts: Array<{ text: string; url?: string }> = [];
+
+  if (workingResume.contact.phone) {
+    physicalContactParts.push({ text: workingResume.contact.phone });
+  }
+
+  if (workingResume.contact.location) {
+    physicalContactParts.push({ text: workingResume.contact.location });
+  }
+
+  // Render physical contact line (if any info present)
+  if (physicalContactParts.length > 0) {
+    const physicalTexts = physicalContactParts.map(p => p.text);
+    const physicalLine = physicalTexts.join(separator);
+    const physicalWidth = doc.getTextWidth(physicalLine);
+    currentX = (PAGE.width - physicalWidth) / 2;
+
+    physicalContactParts.forEach((part, index) => {
+      const textWidth = doc.getTextWidth(part.text);
+
+      doc.setTextColor(COLORS.gray.r, COLORS.gray.g, COLORS.gray.b);
+      doc.text(part.text, currentX, yPos);
+
+      currentX += textWidth;
+
+      if (index < physicalContactParts.length - 1) {
+        doc.setTextColor(COLORS.gray.r, COLORS.gray.g, COLORS.gray.b);
+        doc.text(separator, currentX, yPos);
+        currentX += doc.getTextWidth(separator);
+      }
+    });
+
+    yPos += scaledSpacing.lineHeight + 0.5; // Spacing between contact lines
+  }
+
+  // Line 3: Online Presence - Email, LinkedIn, GitHub (professional/digital contact)
   const onlineContactParts: Array<{ text: string; url?: string }> = [];
 
   // Email (always present, clickable)
@@ -432,11 +470,10 @@ export const generateResumePDF = async (
   }
 
   // Calculate width and render online contact line
-  const separator = "  •  ";
   const onlineTexts = onlineContactParts.map(p => p.text);
   const onlineLine = onlineTexts.join(separator);
   const onlineWidth = doc.getTextWidth(onlineLine);
-  let currentX = (PAGE.width - onlineWidth) / 2;
+  currentX = (PAGE.width - onlineWidth) / 2;
 
   onlineContactParts.forEach((part, index) => {
     const textWidth = doc.getTextWidth(part.text);
@@ -458,47 +495,7 @@ export const generateResumePDF = async (
     }
   });
 
-  yPos += scaledSpacing.lineHeight + 0.5; // Spacing between contact lines
-
-  // Line 3: Physical Contact - Phone, Location (personal/physical contact)
-  const physicalContactParts: Array<{ text: string; url?: string }> = [];
-
-  if (workingResume.contact.phone) {
-    physicalContactParts.push({ text: workingResume.contact.phone });
-  }
-
-  if (workingResume.contact.location) {
-    physicalContactParts.push({ text: workingResume.contact.location });
-  }
-
-  // Render physical contact line (if any info present)
-  if (physicalContactParts.length > 0) {
-    doc.setFontSize(scaledFontSizes.small);
-
-    const physicalTexts = physicalContactParts.map(p => p.text);
-    const physicalLine = physicalTexts.join(separator);
-    const physicalWidth = doc.getTextWidth(physicalLine);
-    currentX = (PAGE.width - physicalWidth) / 2;
-
-    physicalContactParts.forEach((part, index) => {
-      const textWidth = doc.getTextWidth(part.text);
-
-      doc.setTextColor(COLORS.gray.r, COLORS.gray.g, COLORS.gray.b);
-      doc.text(part.text, currentX, yPos);
-
-      currentX += textWidth;
-
-      if (index < physicalContactParts.length - 1) {
-        doc.setTextColor(COLORS.gray.r, COLORS.gray.g, COLORS.gray.b);
-        doc.text(separator, currentX, yPos);
-        currentX += doc.getTextWidth(separator);
-      }
-    });
-
-    yPos += scaledSpacing.afterContactInfo; // Full spacing after all contact info
-  } else {
-    yPos += scaledSpacing.afterContactInfo; // Same spacing even without physical info
-  }
+  yPos += scaledSpacing.afterContactInfo; // Full spacing after all contact info
 
   // ========== 2. SUMMARY ==========
   if (workingResume.summary && addSectionHeader("SUMMARY")) {
