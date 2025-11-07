@@ -403,30 +403,42 @@ export const generateResumePDF = async (
   doc.text(workingResume.contact.name, nameX, yPos);
   yPos += scaledSpacing.afterName + 4; // Clean spacing after name
 
-  // Line 2: Primary Contact - Email & Phone (essential reach-out info)
+  // Line 2: Online Presence - Email, LinkedIn, GitHub (professional/digital contact)
   doc.setFontSize(scaledFontSizes.small);
   doc.setFont("helvetica", "normal");
 
-  const primaryContactParts: Array<{ text: string; url?: string }> = [];
+  const onlineContactParts: Array<{ text: string; url?: string }> = [];
 
   // Email (always present, clickable)
-  primaryContactParts.push({
+  onlineContactParts.push({
     text: workingResume.contact.email,
     url: `mailto:${workingResume.contact.email}`
   });
 
-  // Phone (if available)
-  if (workingResume.contact.phone) {
-    primaryContactParts.push({ text: workingResume.contact.phone });
+  // LinkedIn (clickable)
+  if (workingResume.contact.linkedin) {
+    onlineContactParts.push({
+      text: cleanUrl(workingResume.contact.linkedin),
+      url: workingResume.contact.linkedin.startsWith('http') ? workingResume.contact.linkedin : `https://${workingResume.contact.linkedin}`
+    });
   }
 
-  // Calculate width and render primary contact
-  const primaryTexts = primaryContactParts.map(p => p.text);
-  const primaryLine = primaryTexts.join(" • ");
-  const primaryWidth = doc.getTextWidth(primaryLine);
-  let currentX = (PAGE.width - primaryWidth) / 2;
+  // GitHub (clickable)
+  if (workingResume.contact.github) {
+    onlineContactParts.push({
+      text: cleanUrl(workingResume.contact.github),
+      url: workingResume.contact.github.startsWith('http') ? workingResume.contact.github : `https://${workingResume.contact.github}`
+    });
+  }
 
-  primaryContactParts.forEach((part, index) => {
+  // Calculate width and render online contact line
+  const separator = "  •  ";
+  const onlineTexts = onlineContactParts.map(p => p.text);
+  const onlineLine = onlineTexts.join(separator);
+  const onlineWidth = doc.getTextWidth(onlineLine);
+  let currentX = (PAGE.width - onlineWidth) / 2;
+
+  onlineContactParts.forEach((part, index) => {
     const textWidth = doc.getTextWidth(part.text);
 
     if (part.url) {
@@ -439,61 +451,44 @@ export const generateResumePDF = async (
 
     currentX += textWidth;
 
-    if (index < primaryContactParts.length - 1) {
+    if (index < onlineContactParts.length - 1) {
       doc.setTextColor(COLORS.gray.r, COLORS.gray.g, COLORS.gray.b);
-      const separator = " • ";
       doc.text(separator, currentX, yPos);
       currentX += doc.getTextWidth(separator);
     }
   });
 
-  yPos += scaledSpacing.lineHeight + 0.5; // Consistent spacing between contact lines
+  yPos += scaledSpacing.lineHeight + 0.5; // Spacing between contact lines
 
-  // Line 3: Secondary Contact - LinkedIn, GitHub, Location (online presence)
-  const secondaryContactParts: Array<{ text: string; url?: string }> = [];
+  // Line 3: Physical Contact - Phone, Location (personal/physical contact)
+  const physicalContactParts: Array<{ text: string; url?: string }> = [];
 
-  if (workingResume.contact.linkedin) {
-    secondaryContactParts.push({
-      text: cleanUrl(workingResume.contact.linkedin),
-      url: workingResume.contact.linkedin.startsWith('http') ? workingResume.contact.linkedin : `https://${workingResume.contact.linkedin}`
-    });
-  }
-
-  if (workingResume.contact.github) {
-    secondaryContactParts.push({
-      text: cleanUrl(workingResume.contact.github),
-      url: workingResume.contact.github.startsWith('http') ? workingResume.contact.github : `https://${workingResume.contact.github}`
-    });
+  if (workingResume.contact.phone) {
+    physicalContactParts.push({ text: workingResume.contact.phone });
   }
 
   if (workingResume.contact.location) {
-    secondaryContactParts.push({ text: workingResume.contact.location });
+    physicalContactParts.push({ text: workingResume.contact.location });
   }
 
-  // Render secondary contact (slightly smaller, more subtle)
-  if (secondaryContactParts.length > 0) {
-    doc.setFontSize(scaledFontSizes.small * 0.90); // Noticeably smaller for clear hierarchy
+  // Render physical contact line (if any info present)
+  if (physicalContactParts.length > 0) {
+    doc.setFontSize(scaledFontSizes.small);
 
-    const separator = "  •  "; // Wider separator for breathing room
-    const secondaryTexts = secondaryContactParts.map(p => p.text);
-    const secondaryLine = secondaryTexts.join(separator);
-    const secondaryWidth = doc.getTextWidth(secondaryLine);
-    currentX = (PAGE.width - secondaryWidth) / 2;
+    const physicalTexts = physicalContactParts.map(p => p.text);
+    const physicalLine = physicalTexts.join(separator);
+    const physicalWidth = doc.getTextWidth(physicalLine);
+    currentX = (PAGE.width - physicalWidth) / 2;
 
-    secondaryContactParts.forEach((part, index) => {
+    physicalContactParts.forEach((part, index) => {
       const textWidth = doc.getTextWidth(part.text);
 
-      if (part.url) {
-        doc.setTextColor(COLORS.gray.r, COLORS.gray.g, COLORS.gray.b);
-        doc.textWithLink(part.text, currentX, yPos, { url: part.url });
-      } else {
-        doc.setTextColor(COLORS.gray.r, COLORS.gray.g, COLORS.gray.b);
-        doc.text(part.text, currentX, yPos);
-      }
+      doc.setTextColor(COLORS.gray.r, COLORS.gray.g, COLORS.gray.b);
+      doc.text(part.text, currentX, yPos);
 
       currentX += textWidth;
 
-      if (index < secondaryContactParts.length - 1) {
+      if (index < physicalContactParts.length - 1) {
         doc.setTextColor(COLORS.gray.r, COLORS.gray.g, COLORS.gray.b);
         doc.text(separator, currentX, yPos);
         currentX += doc.getTextWidth(separator);
@@ -502,7 +497,7 @@ export const generateResumePDF = async (
 
     yPos += scaledSpacing.afterContactInfo; // Full spacing after all contact info
   } else {
-    yPos += scaledSpacing.afterContactInfo; // Same spacing even without secondary info
+    yPos += scaledSpacing.afterContactInfo; // Same spacing even without physical info
   }
 
   // ========== 2. SUMMARY ==========
