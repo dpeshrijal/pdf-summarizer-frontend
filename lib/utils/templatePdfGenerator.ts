@@ -441,7 +441,7 @@ export const generateResumePDF = async (
       }
     });
 
-    yPos += scaledSpacing.lineHeight + 0.5; // Spacing between contact lines
+    yPos += scaledSpacing.lineHeight + 1.5; // Slightly more spacing to match name separation
   }
 
   // Line 3: Online Presence - Email, LinkedIn, GitHub (professional/digital contact)
