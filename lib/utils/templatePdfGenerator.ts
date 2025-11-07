@@ -22,7 +22,7 @@ const FONT_SIZES = {
 // Modern spacing - clean and breathable
 const SPACING = {
   afterName: 4,
-  afterContactInfo: 10,
+  afterContactInfo: 8,  // Reduced from 10 to 8 for tighter header-to-content spacing
   beforeSection: 8,
   afterSectionHeader: 5,
   betweenJobs: 6,
