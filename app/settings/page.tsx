@@ -219,22 +219,22 @@ export default function SettingsPage() {
               )}
             </div>
 
-            {/* 7-Day Money-Back Guarantee - Modern Design */}
-            <div className="relative overflow-hidden rounded-xl border border-emerald-200 dark:border-emerald-800/50 bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 dark:from-emerald-950/30 dark:via-teal-950/30 dark:to-cyan-950/30 p-5">
-              {/* Decorative gradient orb */}
-              <div className="absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-br from-emerald-400/20 to-teal-400/20 rounded-full blur-2xl" />
+            {/* 7-Day Money-Back Guarantee - Brand-aligned Design */}
+            <div className="relative overflow-hidden rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 via-primary/8 to-primary/5 p-5 shadow-sm">
+              {/* Subtle decorative element */}
+              <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full blur-3xl" />
 
               <div className="relative flex gap-4">
                 <div className="flex-shrink-0">
-                  <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
-                    <CheckCircle2 className="h-5 w-5 text-white" />
+                  <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center shadow-md shadow-primary/25">
+                    <CheckCircle2 className="h-5 w-5 text-primary-foreground" />
                   </div>
                 </div>
                 <div className="flex-1">
-                  <h4 className="font-bold text-emerald-900 dark:text-emerald-100 mb-1 text-base">
+                  <h4 className="font-bold text-foreground mb-1.5 text-base">
                     7-Day Money-Back Guarantee
                   </h4>
-                  <p className="text-sm text-emerald-800 dark:text-emerald-200/90 leading-relaxed">
+                  <p className="text-sm text-muted-foreground leading-relaxed">
                     Not satisfied? Cancel within 7 days for a full refund, no questions asked.
                   </p>
                 </div>
