@@ -401,7 +401,7 @@ export const generateResumePDF = async (
   const nameWidth = doc.getTextWidth(workingResume.contact.name);
   const nameX = (PAGE.width - nameWidth) / 2;
   doc.text(workingResume.contact.name, nameX, yPos);
-  yPos += scaledSpacing.afterName + 3; // Increased spacing after name for better separation
+  yPos += scaledSpacing.afterName + 4; // Clean spacing after name
 
   // Line 2: Primary Contact - Email & Phone (essential reach-out info)
   doc.setFontSize(scaledFontSizes.small);
@@ -447,7 +447,7 @@ export const generateResumePDF = async (
     }
   });
 
-  yPos += scaledSpacing.lineHeight; // Proper line spacing between contact lines
+  yPos += scaledSpacing.lineHeight + 0.5; // Consistent spacing between contact lines
 
   // Line 3: Secondary Contact - LinkedIn, GitHub, Location (online presence)
   const secondaryContactParts: Array<{ text: string; url?: string }> = [];
@@ -474,8 +474,9 @@ export const generateResumePDF = async (
   if (secondaryContactParts.length > 0) {
     doc.setFontSize(scaledFontSizes.small * 0.90); // Noticeably smaller for clear hierarchy
 
+    const separator = "  •  "; // Wider separator for breathing room
     const secondaryTexts = secondaryContactParts.map(p => p.text);
-    const secondaryLine = secondaryTexts.join(" • ");
+    const secondaryLine = secondaryTexts.join(separator);
     const secondaryWidth = doc.getTextWidth(secondaryLine);
     currentX = (PAGE.width - secondaryWidth) / 2;
 
@@ -494,7 +495,6 @@ export const generateResumePDF = async (
 
       if (index < secondaryContactParts.length - 1) {
         doc.setTextColor(COLORS.gray.r, COLORS.gray.g, COLORS.gray.b);
-        const separator = " • ";
         doc.text(separator, currentX, yPos);
         currentX += doc.getTextWidth(separator);
       }
