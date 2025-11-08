@@ -25,6 +25,7 @@ export function ResumeUpload({
 }: ResumeUploadProps) {
   const [showUploadNew, setShowUploadNew] = useState(previousResumes.length === 0);
   const [masterResumeFile, setMasterResumeFile] = useState<File | null>(null);
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
 
   // Reset showUploadNew when a previous resume is selected
   useEffect(() => {
@@ -49,13 +50,15 @@ export function ResumeUpload({
       }
 
       setMasterResumeFile(file);
+      setUploadedFileName(null); // Clear previous upload when selecting new file
     }
   };
 
   const handleUpload = async () => {
     if (masterResumeFile) {
+      setUploadedFileName(masterResumeFile.name); // Store the filename before clearing
       await onUpload(masterResumeFile);
-      setMasterResumeFile(null);
+      // Don't clear masterResumeFile immediately - keep it to show the filename
     }
   };
 
@@ -179,7 +182,7 @@ export function ResumeUpload({
                 <label
                   htmlFor="file-upload"
                   className={`flex flex-col items-center justify-center w-full h-44 md:h-48 border-2 border-dashed rounded-xl transition-all duration-300 ${
-                    masterResumeFile
+                    masterResumeFile || uploadedFileName
                       ? "border-primary bg-primary/10 shadow-lg shadow-primary/10 cursor-pointer"
                       : "border-muted-foreground/25 hover:border-primary/50 hover:bg-primary/5 hover:shadow-lg cursor-pointer"
                   }`}
@@ -195,6 +198,18 @@ export function ResumeUpload({
                         </p>
                         <p className="text-xs md:text-sm text-muted-foreground mt-1">
                           {(masterResumeFile.size / 1024 / 1024).toFixed(2)} MB
+                        </p>
+                      </>
+                    ) : uploadedFileName ? (
+                      <>
+                        <div className="h-14 w-14 md:h-16 md:w-16 rounded-xl bg-primary/10 flex items-center justify-center mb-3">
+                          <CheckCircle2 className="h-8 w-8 md:h-10 md:w-10 text-primary" />
+                        </div>
+                        <p className="text-sm md:text-base font-semibold px-4 text-center text-primary">
+                          {uploadedFileName}
+                        </p>
+                        <p className="text-xs md:text-sm text-muted-foreground mt-1">
+                          Uploaded successfully
                         </p>
                       </>
                     ) : (
@@ -222,7 +237,7 @@ export function ResumeUpload({
 
                 <Button
                   onClick={handleUpload}
-                  disabled={!masterResumeFile}
+                  disabled={!masterResumeFile || uploadedFileName !== null}
                   className="w-full mt-auto shadow-lg hover:shadow-xl transition-all text-base md:text-lg"
                   size="lg"
                 >
@@ -237,6 +252,7 @@ export function ResumeUpload({
                 onClick={() => {
                   setShowUploadNew(false);
                   setMasterResumeFile(null);
+                  setUploadedFileName(null);
                 }}
                 variant="ghost"
                 size="sm"
