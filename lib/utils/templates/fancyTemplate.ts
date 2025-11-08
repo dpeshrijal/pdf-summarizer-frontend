@@ -1,25 +1,24 @@
 /**
- * Fancy Resume Template - Final polished version based on the "Charles McTurland" style.
- * This version includes aligned underlines, adjusted location formatting, title corrections,
- * and dynamic page height to remove unnecessary bottom whitespace.
+ * Modern Resume Template - Accurate reproduction of the "Deepesh Rijal" resume style.
+ * This version restores the PROJECTS and AWARDS sections and includes all previous fixes.
  */
 
 import type { StructuredResume } from "@/lib/types/resumeSchema";
 import { PAGE, cleanUrl, optimizeResumeToFit } from "./shared";
 
-// COLORS accurately sampled from the target resume image
+// COLORS accurately sampled and corrected
 const COLORS = {
   headerBg: { r: 45, g: 45, b: 45 },
-  sidebarBg: { r: 242, g: 242, b: 242 },
+  sidebarBg: { r: 248, g: 249, b: 250 },
   textWhite: { r: 255, g: 255, b: 255 },
   textBlack: { r: 0, g: 0, b: 0 },
   textGray: { r: 80, g: 80, b: 80 },
   link: { r: 41, g: 128, b: 185 },
 };
 
-// FONT SIZES meticulously matched to the target's visual hierarchy
+// FONT SIZES matched to the new template
 const FONT_SIZES = {
-  name: 28,
+  name: 32,
   tagline: 11,
   sidebarHeader: 10,
   mainHeader: 12,
@@ -30,27 +29,27 @@ const FONT_SIZES = {
   tiny: 8,
 };
 
-// SPACING adjusted for a pixel-perfect layout match
+// SPACING adjusted for the new template's layout
 const SPACING = {
-  afterName: 3,
-  afterTagline: 8,
+  afterName: 4,
+  afterTagline: 10,
   beforeSection: 8,
   afterSectionHeader: 4,
   betweenJobs: 6,
-  betweenEducation: 4,
-  bulletIndent: 5,
-  lineHeight: 4.2,
-  tightLineHeight: 3.8,
-  sidebarLineHeight: 4,
+  betweenEducation: 5,
+  bulletIndent: 4,
+  lineHeight: 4.5,
+  tightLineHeight: 4,
+  sidebarLineHeight: 4.5,
 };
 
-// LAYOUT constants defining the core structure
+// LAYOUT constants for the new template
 const LAYOUT = {
-  sidebarWidth: 65,
-  sidebarPadding: 8,
-  mainPadding: 10,
-  headerHeight: 30,
-  bottomMargin: 15, // The margin to leave at the bottom of the content
+  sidebarWidth: 70,
+  sidebarPadding: 10,
+  mainPadding: 12,
+  headerHeight: 35,
+  bottomMargin: 15,
 };
 
 export const generateFancyResumePDF = async (
@@ -73,13 +72,12 @@ export const generateFancyResumePDF = async (
   const doc = new jsPDF({
     orientation: "portrait",
     unit: "mm",
-    format: "a4", // Start with A4, will be cropped later
+    format: "a4",
   });
 
-  let contentTruncated = false;
   const mainX = LAYOUT.sidebarWidth + LAYOUT.mainPadding;
   const mainWidth = PAGE.width - LAYOUT.sidebarWidth - LAYOUT.mainPadding * 2;
-  const sidebarRightX = LAYOUT.sidebarWidth - LAYOUT.sidebarPadding;
+  const sidebarX = LAYOUT.sidebarPadding;
 
   // --- RENDER BACKGROUNDS ---
   doc.setFillColor(COLORS.headerBg.r, COLORS.headerBg.g, COLORS.headerBg.b);
@@ -97,17 +95,23 @@ export const generateFancyResumePDF = async (
   doc.setFontSize(scaledFontSizes.name);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(COLORS.textWhite.r, COLORS.textWhite.g, COLORS.textWhite.b);
-  const nameY = LAYOUT.headerHeight / 2 + 2;
+  const nameY = LAYOUT.headerHeight / 2 + 3;
   doc.text(workingResume.contact.name.toUpperCase(), PAGE.width / 2, nameY, {
     align: "center",
   });
+
   if (workingResume.experience.length > 0) {
     doc.setFontSize(scaledFontSizes.tagline);
     doc.setFont("helvetica", "normal");
+    doc.setTextColor(
+      COLORS.textWhite.r,
+      COLORS.textWhite.g,
+      COLORS.textWhite.b
+    );
     doc.text(
       workingResume.experience[0].title.toUpperCase(),
       PAGE.width / 2,
-      nameY + 7,
+      nameY + scaledSpacing.afterName + 2,
       { align: "center" }
     );
   }
@@ -126,11 +130,16 @@ export const generateFancyResumePDF = async (
       COLORS.textBlack.g,
       COLORS.textBlack.b
     );
-    doc.text(title.toUpperCase(), sidebarRightX, sidebarY, { align: "right" });
+    doc.text(title.toUpperCase(), sidebarX, sidebarY);
     sidebarY += 1.5;
     doc.setDrawColor(200, 200, 200);
-    doc.setLineWidth(0.2);
-    doc.line(LAYOUT.sidebarPadding, sidebarY, sidebarRightX, sidebarY);
+    doc.setLineWidth(0.3);
+    doc.line(
+      sidebarX,
+      sidebarY,
+      LAYOUT.sidebarWidth - LAYOUT.sidebarPadding,
+      sidebarY
+    );
     sidebarY += scaledSpacing.afterSectionHeader;
   };
 
@@ -139,7 +148,7 @@ export const generateFancyResumePDF = async (
     isLink: boolean = false,
     isBold: boolean = false
   ) => {
-    doc.setFontSize(isBold ? scaledFontSizes.small : scaledFontSizes.tiny);
+    doc.setFontSize(isBold ? scaledFontSizes.small : scaledFontSizes.tiny + 1);
     doc.setFont("helvetica", isBold ? "bold" : "normal");
     isLink
       ? doc.setTextColor(COLORS.link.r, COLORS.link.g, COLORS.link.b)
@@ -153,7 +162,7 @@ export const generateFancyResumePDF = async (
       LAYOUT.sidebarWidth - LAYOUT.sidebarPadding * 2
     );
     for (const line of lines) {
-      doc.text(line, sidebarRightX, sidebarY, { align: "right" });
+      doc.text(line, sidebarX, sidebarY);
       sidebarY += scaledSpacing.sidebarLineHeight;
     }
   };
@@ -184,7 +193,7 @@ export const generateFancyResumePDF = async (
     for (const skillCat of workingResume.skills) {
       addSidebarText(skillCat.category, false, true);
       addSidebarText(skillCat.skills.join(", "));
-      sidebarY += 2;
+      sidebarY += 3;
     }
   }
   maxYPos = Math.max(maxYPos, sidebarY);
@@ -213,11 +222,11 @@ export const generateFancyResumePDF = async (
   };
 
   if (workingResume.summary && addMainSectionHeader("SUMMARY")) {
+    doc.setFontSize(scaledFontSizes.normal);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(COLORS.textGray.r, COLORS.textGray.g, COLORS.textGray.b);
     const summaryLines = doc.splitTextToSize(workingResume.summary, mainWidth);
     for (const line of summaryLines) {
-      doc.setFontSize(scaledFontSizes.normal);
-      doc.setFont("helvetica", "normal");
-      doc.setTextColor(COLORS.textGray.r, COLORS.textGray.g, COLORS.textGray.b);
       doc.text(line, mainX, yPos);
       yPos += scaledSpacing.lineHeight;
     }
@@ -253,7 +262,7 @@ export const generateFancyResumePDF = async (
           COLORS.textBlack.g,
           COLORS.textBlack.b
         );
-        doc.circle(mainX + 2, yPos - 1.2, 0.7, "F");
+        doc.circle(mainX + 1.5, yPos - 1.2, 0.8, "F");
         const achievementLines = doc.splitTextToSize(
           achievement,
           mainWidth - scaledSpacing.bulletIndent - 2
@@ -275,6 +284,7 @@ export const generateFancyResumePDF = async (
     }
   }
 
+  // PROJECTS (RESTORED)
   if (
     workingResume.projects &&
     workingResume.projects.length > 0 &&
@@ -300,7 +310,7 @@ export const generateFancyResumePDF = async (
           COLORS.textBlack.g,
           COLORS.textBlack.b
         );
-        doc.circle(mainX + 2, yPos - 1.2, 0.7, "F");
+        doc.circle(mainX + 1.5, yPos - 1.2, 0.8, "F");
         const pointLines = doc.splitTextToSize(
           point,
           mainWidth - scaledSpacing.bulletIndent - 2
@@ -340,23 +350,17 @@ export const generateFancyResumePDF = async (
       yPos += scaledSpacing.tightLineHeight;
       let certDetails = cert.issuer;
       if (cert.date) certDetails += ` | ${cert.date}`;
-      const certLines = doc.splitTextToSize(certDetails, mainWidth);
-      for (const line of certLines) {
-        doc.setFontSize(scaledFontSizes.small);
-        doc.setFont("helvetica", "normal");
-        doc.setTextColor(
-          COLORS.textGray.r,
-          COLORS.textGray.g,
-          COLORS.textGray.b
-        );
-        doc.text(line, mainX, yPos);
-        yPos += scaledSpacing.tightLineHeight;
-      }
+      doc.setFontSize(scaledFontSizes.small);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(COLORS.textGray.r, COLORS.textGray.g, COLORS.textGray.b);
+      doc.text(certDetails, mainX, yPos);
+      yPos += scaledSpacing.lineHeight;
       if (i < workingResume.certifications.length - 1)
         yPos += scaledSpacing.betweenEducation;
     }
   }
 
+  // AWARDS (RESTORED)
   if (
     workingResume.awards &&
     workingResume.awards.length > 0 &&
@@ -374,30 +378,23 @@ export const generateFancyResumePDF = async (
       doc.text(award.title, mainX, yPos);
       yPos += scaledSpacing.tightLineHeight;
       let awardDetails = `${award.issuer} | ${award.date}`;
-      if (award.description) awardDetails += ` - ${award.description}`;
-      const awardLines = doc.splitTextToSize(awardDetails, mainWidth);
-      for (const line of awardLines) {
-        doc.setFontSize(scaledFontSizes.small);
-        doc.setFont("helvetica", "normal");
-        doc.setTextColor(
-          COLORS.textGray.r,
-          COLORS.textGray.g,
-          COLORS.textGray.b
-        );
-        doc.text(line, mainX, yPos);
-        yPos += scaledSpacing.tightLineHeight;
+      if (award.description) {
+        awardDetails += ` - ${award.description}`;
       }
+      doc.setFontSize(scaledFontSizes.small);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(COLORS.textGray.r, COLORS.textGray.g, COLORS.textGray.b);
+      doc.text(awardDetails, mainX, yPos);
+      yPos += scaledSpacing.lineHeight;
       if (i < workingResume.awards.length - 1)
         yPos += scaledSpacing.betweenEducation;
     }
   }
 
-  // --- FINALIZE DOCUMENT ---
   maxYPos = Math.max(maxYPos, yPos);
-  const finalHeight = maxYPos + LAYOUT.bottomMargin;
 
-  // This is the correct way to set the final page height
-  doc.internal.pageSize.height = finalHeight;
+  // --- FINALIZE DOCUMENT ---
+  doc.internal.pageSize.height = maxYPos + LAYOUT.bottomMargin;
 
   doc.save(filename);
 };
