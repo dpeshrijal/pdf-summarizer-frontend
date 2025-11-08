@@ -397,174 +397,43 @@ export function ResultsDisplay({
             <MatchScoreDisplay matchScore={structured.matchScore} />
           )}
 
-          {/* Template Selector - Premium Card Grid */}
+          {/* Template Selector - Compact */}
           {isStructured && (
-            <div className="w-full space-y-4">
-              <h3 className="text-sm font-semibold text-muted-foreground text-center uppercase tracking-wider">
-                Choose Your Resume Style
-              </h3>
-
-              {/* 2-Column Premium Card Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
-                {/* Classic Template Card */}
+            <div className="flex items-center justify-center gap-3">
+              <span className="text-sm text-muted-foreground">Style:</span>
+              <div className="inline-flex gap-2 p-1 bg-muted/50 rounded-lg border border-border/50">
                 <button
                   onClick={() => setSelectedTemplate('classic')}
-                  className={`group relative flex flex-col items-center gap-3 p-5 rounded-2xl transition-all duration-300 ${
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
                     selectedTemplate === 'classic'
-                      ? 'bg-gradient-to-br from-primary/10 via-primary/5 to-background border-2 border-primary shadow-lg shadow-primary/20'
-                      : 'bg-muted/30 border-2 border-border/50 hover:border-primary/50 hover:shadow-md'
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/80'
                   }`}
                 >
-                  {/* Selected Badge */}
-                  {selectedTemplate === 'classic' && (
-                    <div className="absolute top-3 right-3 bg-primary text-primary-foreground rounded-full p-1.5">
-                      <CheckCircle2 className="w-4 h-4" />
-                    </div>
-                  )}
-
-                  {/* Visual Preview - Larger with accurate layout mockup */}
-                  <div className="relative w-full aspect-[8.5/11] bg-white rounded-lg shadow-md overflow-hidden border border-border/30">
-                    <div className="absolute inset-0 p-4 space-y-2">
-                      {/* Header - Centered name and contact */}
-                      <div className="space-y-1">
-                        <div className="h-2.5 w-24 bg-foreground/80 rounded mx-auto" />
-                        <div className="h-1 w-32 bg-foreground/40 rounded mx-auto" />
-                      </div>
-
-                      {/* Section with underline */}
-                      <div className="pt-2 space-y-1">
-                        <div className="h-1.5 w-16 bg-foreground/70 rounded" />
-                        <div className="h-px w-full bg-foreground/30" />
-                        <div className="space-y-1 pt-1">
-                          <div className="h-1 w-full bg-foreground/25 rounded" />
-                          <div className="h-1 w-full bg-foreground/25 rounded" />
-                          <div className="h-1 w-5/6 bg-foreground/25 rounded" />
-                        </div>
-                      </div>
-
-                      {/* Another section */}
-                      <div className="pt-1 space-y-1">
-                        <div className="h-1.5 w-20 bg-foreground/70 rounded" />
-                        <div className="h-px w-full bg-foreground/30" />
-                        <div className="flex gap-1 pt-1">
-                          <div className="h-1 w-1 bg-foreground/40 rounded-full mt-0.5" />
-                          <div className="flex-1 space-y-0.5">
-                            <div className="h-1 w-full bg-foreground/25 rounded" />
-                            <div className="h-1 w-4/5 bg-foreground/25 rounded" />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Label and Description */}
-                  <div className="text-center space-y-1">
-                    <div className={`text-base font-bold transition-colors ${
-                      selectedTemplate === 'classic' ? 'text-foreground' : 'text-muted-foreground'
-                    }`}>
-                      Classic
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      Traditional & Clean
-                    </div>
-                  </div>
+                  Classic
                 </button>
-
-                {/* Fancy Template Card */}
                 <button
                   onClick={() => setSelectedTemplate('fancy')}
-                  className={`group relative flex flex-col items-center gap-3 p-5 rounded-2xl transition-all duration-300 ${
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
                     selectedTemplate === 'fancy'
-                      ? 'bg-gradient-to-br from-primary/10 via-primary/5 to-background border-2 border-primary shadow-lg shadow-primary/20'
-                      : 'bg-muted/30 border-2 border-border/50 hover:border-primary/50 hover:shadow-md'
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/80'
                   }`}
                 >
-                  {/* Selected Badge */}
-                  {selectedTemplate === 'fancy' && (
-                    <div className="absolute top-3 right-3 bg-primary text-primary-foreground rounded-full p-1.5">
-                      <CheckCircle2 className="w-4 h-4" />
-                    </div>
-                  )}
-
-                  {/* Visual Preview - Two-column sidebar layout */}
-                  <div className="relative w-full aspect-[8.5/11] bg-white rounded-lg shadow-md overflow-hidden border border-border/30">
-                    <div className="absolute inset-0 flex">
-                      {/* Dark Sidebar */}
-                      <div className="w-[35%] bg-foreground/90 p-2 space-y-2">
-                        {/* Contact section */}
-                        <div className="space-y-1">
-                          <div className="h-1 w-10 bg-white/90 rounded" />
-                          <div className="h-0.5 w-full bg-white/50 rounded" />
-                          <div className="h-0.5 w-full bg-white/50 rounded" />
-                          <div className="h-0.5 w-4/5 bg-white/50 rounded" />
-                        </div>
-
-                        {/* Skills section */}
-                        <div className="space-y-1 pt-1">
-                          <div className="h-1 w-8 bg-white/90 rounded" />
-                          <div className="h-0.5 w-full bg-white/50 rounded" />
-                          <div className="h-0.5 w-3/4 bg-white/50 rounded" />
-                        </div>
-
-                        {/* Education section */}
-                        <div className="space-y-1 pt-1">
-                          <div className="h-1 w-12 bg-white/90 rounded" />
-                          <div className="h-0.5 w-full bg-white/50 rounded" />
-                          <div className="h-0.5 w-5/6 bg-white/50 rounded" />
-                        </div>
-                      </div>
-
-                      {/* Main Content Area */}
-                      <div className="flex-1 p-2 space-y-2">
-                        {/* Name and title */}
-                        <div className="space-y-1">
-                          <div className="h-2 w-20 bg-foreground/80 rounded" />
-                          <div className="h-1 w-16 bg-foreground/40 rounded" />
-                        </div>
-
-                        {/* Experience section */}
-                        <div className="space-y-1">
-                          <div className="h-1.5 w-16 bg-foreground/70 rounded" />
-                          <div className="h-px w-full bg-foreground/30" />
-                          <div className="space-y-0.5 pt-1">
-                            <div className="h-1 w-full bg-foreground/25 rounded" />
-                            <div className="h-1 w-full bg-foreground/25 rounded" />
-                            <div className="h-1 w-4/5 bg-foreground/25 rounded" />
-                          </div>
-                        </div>
-
-                        {/* Projects section */}
-                        <div className="space-y-1">
-                          <div className="h-1.5 w-14 bg-foreground/70 rounded" />
-                          <div className="h-px w-full bg-foreground/30" />
-                          <div className="space-y-0.5 pt-1">
-                            <div className="h-1 w-full bg-foreground/25 rounded" />
-                            <div className="h-1 w-5/6 bg-foreground/25 rounded" />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Label and Description */}
-                  <div className="text-center space-y-1">
-                    <div className={`text-base font-bold transition-colors ${
-                      selectedTemplate === 'fancy' ? 'text-foreground' : 'text-muted-foreground'
-                    }`}>
-                      Fancy
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      Modern Sidebar Layout
-                    </div>
-                  </div>
+                  Fancy
                 </button>
-              </div>
-
-              {/* Coming Soon Notice */}
-              <div className="text-center">
-                <p className="text-xs text-muted-foreground">
-                  More stunning templates coming soon
-                </p>
+                <button
+                  onClick={() => setSelectedTemplate('artistic')}
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-all opacity-50 cursor-not-allowed ${
+                    selectedTemplate === 'artistic'
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'text-muted-foreground'
+                  }`}
+                  disabled
+                >
+                  Artistic
+                  <span className="ml-1.5 text-[10px] opacity-75">(Soon)</span>
+                </button>
               </div>
             </div>
           )}
