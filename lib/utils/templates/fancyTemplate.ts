@@ -76,8 +76,8 @@ export const generateFancyResumePDF = async (
 
   const mainX = LAYOUT.sidebarWidth + LAYOUT.mainPadding;
   const mainWidth = PAGE.width - LAYOUT.sidebarWidth - LAYOUT.mainPadding * 2;
-  // For left-aligned text in sidebar
-  const sidebarTextX = LAYOUT.sidebarPadding;
+  // For right-aligned text in sidebar
+  const sidebarTextX = LAYOUT.sidebarWidth - LAYOUT.sidebarPadding;
 
   // --- RENDER BACKGROUNDS ---
   doc.setFillColor(COLORS.headerBg.r, COLORS.headerBg.g, COLORS.headerBg.b);
@@ -124,7 +124,7 @@ export const generateFancyResumePDF = async (
   let yPos = LAYOUT.headerHeight + 12;
   let sidebarY = LAYOUT.headerHeight + 12;
 
-  // --- SIDEBAR (LEFT ALIGNED) ---
+  // --- SIDEBAR (RIGHT ALIGNED) ---
   const addSidebarSection = (title: string) => {
     sidebarY += scaledSpacing.beforeSection;
     doc.setFontSize(scaledFontSizes.sidebarHeader);
@@ -134,7 +134,7 @@ export const generateFancyResumePDF = async (
       COLORS.textBlack.g,
       COLORS.textBlack.b
     );
-    doc.text(title.toUpperCase(), sidebarTextX, sidebarY);
+    doc.text(title.toUpperCase(), sidebarTextX, sidebarY, { align: "right" });
     sidebarY += 1.5;
     doc.setDrawColor(200, 200, 200);
     doc.setLineWidth(0.3);
@@ -166,7 +166,7 @@ export const generateFancyResumePDF = async (
       LAYOUT.sidebarWidth - LAYOUT.sidebarPadding * 2
     );
     for (const line of lines) {
-      doc.text(line, sidebarTextX, sidebarY);
+      doc.text(line, sidebarTextX, sidebarY, { align: "right" });
       sidebarY += scaledSpacing.sidebarLineHeight;
     }
   };
