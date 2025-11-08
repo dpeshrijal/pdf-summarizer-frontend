@@ -504,17 +504,17 @@ export function ResultsDisplay({
               }`}
             >
               {/* Radio Button Indicator */}
-              <div className="absolute top-4 right-4 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all">
+              <div className="absolute top-4 right-4 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all z-10">
                 {selectedTemplate === 'classic' ? (
                   <div className="w-6 h-6 rounded-full border-2 border-primary bg-primary flex items-center justify-center">
                     <CheckCircle2 className="w-4 h-4 text-primary-foreground" />
                   </div>
                 ) : (
-                  <div className="w-6 h-6 rounded-full border-2 border-muted-foreground/30" />
+                  <div className="w-6 h-6 rounded-full border-2 border-muted-foreground/30 bg-background" />
                 )}
               </div>
               {/* Preview Image Placeholder */}
-              <div className="relative w-full aspect-[8.5/11] bg-white rounded-lg shadow-lg overflow-hidden border border-border/50">
+              <div className="relative w-full aspect-[8.5/11] bg-white rounded-lg shadow-lg overflow-hidden border border-border/50 z-0">
                 <div className="absolute inset-0 p-6 space-y-3">
                   {/* Header - Centered */}
                   <div className="space-y-2">
@@ -572,17 +572,17 @@ export function ResultsDisplay({
               }`}
             >
               {/* Radio Button Indicator */}
-              <div className="absolute top-4 right-4 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all">
+              <div className="absolute top-4 right-4 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all z-10">
                 {selectedTemplate === 'fancy' ? (
                   <div className="w-6 h-6 rounded-full border-2 border-primary bg-primary flex items-center justify-center">
                     <CheckCircle2 className="w-4 h-4 text-primary-foreground" />
                   </div>
                 ) : (
-                  <div className="w-6 h-6 rounded-full border-2 border-muted-foreground/30" />
+                  <div className="w-6 h-6 rounded-full border-2 border-muted-foreground/30 bg-background" />
                 )}
               </div>
               {/* Preview Image Placeholder */}
-              <div className="relative w-full aspect-[8.5/11] bg-white rounded-lg shadow-lg overflow-hidden border border-border/50">
+              <div className="relative w-full aspect-[8.5/11] bg-white rounded-lg shadow-lg overflow-hidden border border-border/50 z-0">
                 <div className="absolute inset-0 flex">
                   {/* Dark Sidebar */}
                   <div className="w-[35%] bg-foreground/90 p-3 space-y-3">
