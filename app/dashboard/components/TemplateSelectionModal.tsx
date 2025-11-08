@@ -61,16 +61,16 @@ export function TemplateSelectionModal({
                   <div className="text-foreground/60 text-[4.5px]">linkedin.com/in/johndoe • github.com/johndoe</div>
                 </div>
 
-                {/* Summary */}
-                <div className="pt-1 space-y-0.5">
+                {/* Summary - LEFT ALIGNED */}
+                <div className="pt-1 space-y-0.5 text-left">
                   <div className="font-semibold text-foreground border-b border-foreground/30 pb-0.5 text-[5.5px]">SUMMARY</div>
                   <div className="text-foreground/60 leading-tight text-[4.5px]">
                     Experienced Software Engineer with 5+ years building scalable web applications. Proficient in full-stack development, cloud technologies, and agile methodologies.
                   </div>
                 </div>
 
-                {/* Experience */}
-                <div className="space-y-1">
+                {/* Experience - LEFT ALIGNED */}
+                <div className="space-y-1 text-left">
                   <div className="font-semibold text-foreground border-b border-foreground/30 pb-0.5 text-[5.5px]">WORK EXPERIENCE</div>
                   <div className="space-y-0.5">
                     <div className="font-medium text-foreground text-[5px]">Senior Software Engineer</div>
@@ -104,24 +104,24 @@ export function TemplateSelectionModal({
                   </div>
                 </div>
 
-                {/* Skills */}
-                <div className="space-y-0.5">
+                {/* Skills - LEFT ALIGNED */}
+                <div className="space-y-0.5 text-left">
                   <div className="font-semibold text-foreground border-b border-foreground/30 pb-0.5 text-[5.5px]">SKILLS</div>
                   <div className="text-foreground/60 text-[4.5px]"><span className="font-medium text-foreground">Languages:</span> Python, JavaScript, TypeScript, Java, Go</div>
                   <div className="text-foreground/60 text-[4.5px]"><span className="font-medium text-foreground">Technologies:</span> React, Node.js, AWS, Docker, Kubernetes</div>
                   <div className="text-foreground/60 text-[4.5px]"><span className="font-medium text-foreground">Databases:</span> PostgreSQL, MongoDB, Redis</div>
                 </div>
 
-                {/* Education */}
-                <div className="space-y-0.5">
+                {/* Education - LEFT ALIGNED */}
+                <div className="space-y-0.5 text-left">
                   <div className="font-semibold text-foreground border-b border-foreground/30 pb-0.5 text-[5.5px]">EDUCATION</div>
                   <div className="font-medium text-foreground text-[4.5px]">Bachelor of Science in Computer Science</div>
                   <div className="text-foreground/60 text-[4.5px]">University of Technology</div>
                   <div className="text-foreground/60 italic text-[4.5px]">Graduated: May 2018 • GPA: 3.8/4.0</div>
                 </div>
 
-                {/* Certifications */}
-                <div className="space-y-0.5">
+                {/* Certifications - LEFT ALIGNED */}
+                <div className="space-y-0.5 text-left">
                   <div className="font-semibold text-foreground border-b border-foreground/30 pb-0.5 text-[5.5px]">CERTIFICATIONS</div>
                   <div className="font-medium text-foreground text-[4.5px]">AWS Certified Solutions Architect</div>
                   <div className="text-foreground/60 text-[4.5px]">Amazon Web Services • 2022</div>
@@ -210,8 +210,8 @@ export function TemplateSelectionModal({
                     </div>
                   </div>
 
-                  {/* Main Content */}
-                  <div className="flex-1 p-2 space-y-1.5 pl-1.5">
+                  {/* Main Content - LEFT ALIGNED */}
+                  <div className="flex-1 p-2 space-y-1.5 pl-1.5 text-left">
                     {/* Summary */}
                     <div className="space-y-0.5">
                       <div className="font-semibold text-foreground text-[5px]">SUMMARY</div>
