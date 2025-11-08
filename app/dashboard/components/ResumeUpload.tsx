@@ -86,7 +86,13 @@ export function ResumeUpload({
                 Select a previously uploaded resume:
               </p>
               <div className="space-y-2 max-h-60 overflow-y-auto">
-                {previousResumes.map((resume) => (
+                {[...previousResumes]
+                  .sort((a, b) => {
+                    const timeA = a.uploadedAt ? new Date(a.uploadedAt).getTime() : 0;
+                    const timeB = b.uploadedAt ? new Date(b.uploadedAt).getTime() : 0;
+                    return timeB - timeA; // Sort descending (newest first)
+                  })
+                  .map((resume) => (
                   <button
                     key={resume.fileId}
                     onClick={() => onSelectResume(resume.fileId)}
