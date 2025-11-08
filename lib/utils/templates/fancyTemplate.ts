@@ -1,6 +1,6 @@
 /**
- * Modern Resume Template - Accurate reproduction of the "Deepesh Rijal" resume style.
- * This version restores the PROJECTS and AWARDS sections and includes all previous fixes.
+ * Modern Resume Template - Final version with sidebar text right-aligned as requested.
+ * No other changes have been made.
  */
 
 import type { StructuredResume } from "@/lib/types/resumeSchema";
@@ -78,6 +78,8 @@ export const generateFancyResumePDF = async (
   const mainX = LAYOUT.sidebarWidth + LAYOUT.mainPadding;
   const mainWidth = PAGE.width - LAYOUT.sidebarWidth - LAYOUT.mainPadding * 2;
   const sidebarX = LAYOUT.sidebarPadding;
+  // Define the right edge for sidebar text alignment
+  const sidebarRightX = LAYOUT.sidebarWidth - LAYOUT.sidebarPadding;
 
   // --- RENDER BACKGROUNDS ---
   doc.setFillColor(COLORS.headerBg.r, COLORS.headerBg.g, COLORS.headerBg.b);
@@ -120,7 +122,7 @@ export const generateFancyResumePDF = async (
   let sidebarY = LAYOUT.headerHeight + 12;
   let maxYPos = 0;
 
-  // --- SIDEBAR ---
+  // --- SIDEBAR (TEXT ALIGNMENT CORRECTED) ---
   const addSidebarSection = (title: string) => {
     sidebarY += scaledSpacing.beforeSection;
     doc.setFontSize(scaledFontSizes.sidebarHeader);
@@ -130,10 +132,12 @@ export const generateFancyResumePDF = async (
       COLORS.textBlack.g,
       COLORS.textBlack.b
     );
-    doc.text(title.toUpperCase(), sidebarX, sidebarY);
+    // CHANGED: Aligned text to the right
+    doc.text(title.toUpperCase(), sidebarRightX, sidebarY, { align: "right" });
     sidebarY += 1.5;
     doc.setDrawColor(200, 200, 200);
     doc.setLineWidth(0.3);
+    // Underline position is unchanged and correct
     doc.line(
       sidebarX,
       sidebarY,
@@ -162,7 +166,8 @@ export const generateFancyResumePDF = async (
       LAYOUT.sidebarWidth - LAYOUT.sidebarPadding * 2
     );
     for (const line of lines) {
-      doc.text(line, sidebarX, sidebarY);
+      // CHANGED: Aligned text to the right
+      doc.text(line, sidebarRightX, sidebarY, { align: "right" });
       sidebarY += scaledSpacing.sidebarLineHeight;
     }
   };
@@ -198,7 +203,7 @@ export const generateFancyResumePDF = async (
   }
   maxYPos = Math.max(maxYPos, sidebarY);
 
-  // --- MAIN CONTENT ---
+  // --- MAIN CONTENT (UNCHANGED) ---
   const addMainSectionHeader = (title: string) => {
     yPos += scaledSpacing.beforeSection;
     doc.setFontSize(scaledFontSizes.mainHeader);
@@ -284,7 +289,6 @@ export const generateFancyResumePDF = async (
     }
   }
 
-  // PROJECTS (RESTORED)
   if (
     workingResume.projects &&
     workingResume.projects.length > 0 &&
@@ -360,7 +364,6 @@ export const generateFancyResumePDF = async (
     }
   }
 
-  // AWARDS (RESTORED)
   if (
     workingResume.awards &&
     workingResume.awards.length > 0 &&
