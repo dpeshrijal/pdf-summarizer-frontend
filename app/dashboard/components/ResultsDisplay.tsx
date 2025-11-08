@@ -65,10 +65,13 @@ export function ResultsDisplay({
   };
 
   const handleTemplateSelect = (template: TemplateType) => {
+    setSelectedTemplate(template);
+  };
+
+  const handleConfirmDownload = () => {
     const dataToUse = editableData || structured;
     if (dataToUse) {
-      generateResumePDF(dataToUse.resume, "Tailored_Resume.pdf", template);
-      setSelectedTemplate(template);
+      generateResumePDF(dataToUse.resume, "Tailored_Resume.pdf", selectedTemplate);
       setIsTemplateModalOpen(false);
     }
   };
@@ -494,8 +497,22 @@ export function ResultsDisplay({
             {/* Classic Template */}
             <button
               onClick={() => handleTemplateSelect('classic')}
-              className="group relative flex flex-col gap-4 p-6 rounded-2xl border-2 border-border hover:border-primary transition-all duration-300 hover:shadow-xl bg-gradient-to-br from-background to-muted/30"
+              className={`group relative flex flex-col gap-4 p-6 rounded-2xl border-2 transition-all duration-300 bg-gradient-to-br from-background to-muted/30 ${
+                selectedTemplate === 'classic'
+                  ? 'border-primary shadow-xl ring-2 ring-primary/20'
+                  : 'border-border hover:border-primary/50 hover:shadow-lg'
+              }`}
             >
+              {/* Radio Button Indicator */}
+              <div className="absolute top-4 right-4 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all">
+                {selectedTemplate === 'classic' ? (
+                  <div className="w-6 h-6 rounded-full border-2 border-primary bg-primary flex items-center justify-center">
+                    <CheckCircle2 className="w-4 h-4 text-primary-foreground" />
+                  </div>
+                ) : (
+                  <div className="w-6 h-6 rounded-full border-2 border-muted-foreground/30" />
+                )}
+              </div>
               {/* Preview Image Placeholder */}
               <div className="relative w-full aspect-[8.5/11] bg-white rounded-lg shadow-lg overflow-hidden border border-border/50">
                 <div className="absolute inset-0 p-6 space-y-3">
@@ -548,8 +565,22 @@ export function ResultsDisplay({
             {/* Fancy Template */}
             <button
               onClick={() => handleTemplateSelect('fancy')}
-              className="group relative flex flex-col gap-4 p-6 rounded-2xl border-2 border-border hover:border-primary transition-all duration-300 hover:shadow-xl bg-gradient-to-br from-background to-muted/30"
+              className={`group relative flex flex-col gap-4 p-6 rounded-2xl border-2 transition-all duration-300 bg-gradient-to-br from-background to-muted/30 ${
+                selectedTemplate === 'fancy'
+                  ? 'border-primary shadow-xl ring-2 ring-primary/20'
+                  : 'border-border hover:border-primary/50 hover:shadow-lg'
+              }`}
             >
+              {/* Radio Button Indicator */}
+              <div className="absolute top-4 right-4 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all">
+                {selectedTemplate === 'fancy' ? (
+                  <div className="w-6 h-6 rounded-full border-2 border-primary bg-primary flex items-center justify-center">
+                    <CheckCircle2 className="w-4 h-4 text-primary-foreground" />
+                  </div>
+                ) : (
+                  <div className="w-6 h-6 rounded-full border-2 border-muted-foreground/30" />
+                )}
+              </div>
               {/* Preview Image Placeholder */}
               <div className="relative w-full aspect-[8.5/11] bg-white rounded-lg shadow-lg overflow-hidden border border-border/50">
                 <div className="absolute inset-0 flex">
@@ -630,6 +661,25 @@ export function ResultsDisplay({
             <p className="text-sm text-muted-foreground">
               More stunning templates coming soon
             </p>
+          </div>
+
+          {/* Download Button */}
+          <div className="mt-8 flex justify-center gap-4">
+            <Button
+              variant="outline"
+              onClick={() => setIsTemplateModalOpen(false)}
+              className="px-6"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleConfirmDownload}
+              className="px-8 shadow-lg hover:shadow-xl transition-all"
+              size="lg"
+            >
+              <Download className="mr-2 h-5 w-5" />
+              Download Resume
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
