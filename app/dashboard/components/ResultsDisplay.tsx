@@ -397,143 +397,174 @@ export function ResultsDisplay({
             <MatchScoreDisplay matchScore={structured.matchScore} />
           )}
 
-          {/* Template Selector - Elegant & Compact */}
+          {/* Template Selector - Premium Card Grid */}
           {isStructured && (
-            <div className="flex flex-col items-center gap-3">
-              <h3 className="text-sm font-semibold text-muted-foreground">Resume Style</h3>
+            <div className="w-full space-y-4">
+              <h3 className="text-sm font-semibold text-muted-foreground text-center uppercase tracking-wider">
+                Choose Your Resume Style
+              </h3>
 
-              {/* Segmented Control with Visual Previews */}
-              <div className="inline-flex items-center gap-2 p-1.5 bg-muted/50 rounded-xl border border-border/50 shadow-sm">
-                {/* Classic Template */}
+              {/* 2-Column Premium Card Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
+                {/* Classic Template Card */}
                 <button
                   onClick={() => setSelectedTemplate('classic')}
-                  className={`group relative flex items-center gap-2.5 px-4 py-2.5 rounded-lg transition-all duration-200 ${
+                  className={`group relative flex flex-col items-center gap-3 p-5 rounded-2xl transition-all duration-300 ${
                     selectedTemplate === 'classic'
-                      ? 'bg-background shadow-md border border-border/50'
-                      : 'hover:bg-background/50'
+                      ? 'bg-gradient-to-br from-primary/10 via-primary/5 to-background border-2 border-primary shadow-lg shadow-primary/20'
+                      : 'bg-muted/30 border-2 border-border/50 hover:border-primary/50 hover:shadow-md'
                   }`}
                 >
-                  {/* Mini Visual Preview */}
-                  <div className="relative w-8 h-10 bg-background rounded border border-border/50 overflow-hidden flex-shrink-0">
-                    <div className="absolute inset-0 p-1 space-y-0.5">
-                      <div className="h-1 w-5 bg-foreground/70 rounded mx-auto" />
-                      <div className="h-0.5 w-3 bg-foreground/30 rounded mx-auto" />
-                      <div className="mt-1 space-y-0.5">
-                        <div className="h-0.5 w-full bg-foreground/20 rounded" />
-                        <div className="h-0.5 w-full bg-foreground/20 rounded" />
-                        <div className="h-0.5 w-4/5 bg-foreground/20 rounded" />
+                  {/* Selected Badge */}
+                  {selectedTemplate === 'classic' && (
+                    <div className="absolute top-3 right-3 bg-primary text-primary-foreground rounded-full p-1.5">
+                      <CheckCircle2 className="w-4 h-4" />
+                    </div>
+                  )}
+
+                  {/* Visual Preview - Larger with accurate layout mockup */}
+                  <div className="relative w-full aspect-[8.5/11] bg-white rounded-lg shadow-md overflow-hidden border border-border/30">
+                    <div className="absolute inset-0 p-4 space-y-2">
+                      {/* Header - Centered name and contact */}
+                      <div className="space-y-1">
+                        <div className="h-2.5 w-24 bg-foreground/80 rounded mx-auto" />
+                        <div className="h-1 w-32 bg-foreground/40 rounded mx-auto" />
+                      </div>
+
+                      {/* Section with underline */}
+                      <div className="pt-2 space-y-1">
+                        <div className="h-1.5 w-16 bg-foreground/70 rounded" />
+                        <div className="h-px w-full bg-foreground/30" />
+                        <div className="space-y-1 pt-1">
+                          <div className="h-1 w-full bg-foreground/25 rounded" />
+                          <div className="h-1 w-full bg-foreground/25 rounded" />
+                          <div className="h-1 w-5/6 bg-foreground/25 rounded" />
+                        </div>
+                      </div>
+
+                      {/* Another section */}
+                      <div className="pt-1 space-y-1">
+                        <div className="h-1.5 w-20 bg-foreground/70 rounded" />
+                        <div className="h-px w-full bg-foreground/30" />
+                        <div className="flex gap-1 pt-1">
+                          <div className="h-1 w-1 bg-foreground/40 rounded-full mt-0.5" />
+                          <div className="flex-1 space-y-0.5">
+                            <div className="h-1 w-full bg-foreground/25 rounded" />
+                            <div className="h-1 w-4/5 bg-foreground/25 rounded" />
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Label */}
-                  <div className="text-left">
-                    <div className={`text-sm font-semibold transition-colors ${
+                  {/* Label and Description */}
+                  <div className="text-center space-y-1">
+                    <div className={`text-base font-bold transition-colors ${
                       selectedTemplate === 'classic' ? 'text-foreground' : 'text-muted-foreground'
                     }`}>
                       Classic
                     </div>
-                    <div className="text-[10px] text-muted-foreground leading-tight">Clean</div>
-                  </div>
-
-                  {/* Selected Indicator */}
-                  {selectedTemplate === 'classic' && (
-                    <div className="absolute -top-1 -right-1">
-                      <div className="w-4 h-4 bg-primary rounded-full flex items-center justify-center">
-                        <CheckCircle2 className="w-2.5 h-2.5 text-primary-foreground" />
-                      </div>
+                    <div className="text-xs text-muted-foreground">
+                      Traditional & Clean
                     </div>
-                  )}
+                  </div>
                 </button>
 
-                {/* Fancy Template */}
+                {/* Fancy Template Card */}
                 <button
                   onClick={() => setSelectedTemplate('fancy')}
-                  className={`group relative flex items-center gap-2.5 px-4 py-2.5 rounded-lg transition-all duration-200 ${
+                  className={`group relative flex flex-col items-center gap-3 p-5 rounded-2xl transition-all duration-300 ${
                     selectedTemplate === 'fancy'
-                      ? 'bg-background shadow-md border border-border/50'
-                      : 'hover:bg-background/50'
+                      ? 'bg-gradient-to-br from-primary/10 via-primary/5 to-background border-2 border-primary shadow-lg shadow-primary/20'
+                      : 'bg-muted/30 border-2 border-border/50 hover:border-primary/50 hover:shadow-md'
                   }`}
                 >
-                  {/* Mini Visual Preview - Sidebar Layout */}
-                  <div className="relative w-8 h-10 bg-background rounded border border-border/50 overflow-hidden flex-shrink-0">
+                  {/* Selected Badge */}
+                  {selectedTemplate === 'fancy' && (
+                    <div className="absolute top-3 right-3 bg-primary text-primary-foreground rounded-full p-1.5">
+                      <CheckCircle2 className="w-4 h-4" />
+                    </div>
+                  )}
+
+                  {/* Visual Preview - Two-column sidebar layout */}
+                  <div className="relative w-full aspect-[8.5/11] bg-white rounded-lg shadow-md overflow-hidden border border-border/30">
                     <div className="absolute inset-0 flex">
-                      {/* Dark sidebar */}
-                      <div className="w-2.5 bg-foreground/80" />
-                      {/* Main content */}
-                      <div className="flex-1 p-0.5 space-y-0.5">
-                        <div className="h-1 w-full bg-foreground/60 rounded" />
-                        <div className="h-0.5 w-3/4 bg-foreground/30 rounded" />
-                        <div className="mt-0.5 space-y-0.5">
-                          <div className="h-0.5 w-full bg-foreground/20 rounded" />
-                          <div className="h-0.5 w-full bg-foreground/20 rounded" />
+                      {/* Dark Sidebar */}
+                      <div className="w-[35%] bg-foreground/90 p-2 space-y-2">
+                        {/* Contact section */}
+                        <div className="space-y-1">
+                          <div className="h-1 w-10 bg-white/90 rounded" />
+                          <div className="h-0.5 w-full bg-white/50 rounded" />
+                          <div className="h-0.5 w-full bg-white/50 rounded" />
+                          <div className="h-0.5 w-4/5 bg-white/50 rounded" />
+                        </div>
+
+                        {/* Skills section */}
+                        <div className="space-y-1 pt-1">
+                          <div className="h-1 w-8 bg-white/90 rounded" />
+                          <div className="h-0.5 w-full bg-white/50 rounded" />
+                          <div className="h-0.5 w-3/4 bg-white/50 rounded" />
+                        </div>
+
+                        {/* Education section */}
+                        <div className="space-y-1 pt-1">
+                          <div className="h-1 w-12 bg-white/90 rounded" />
+                          <div className="h-0.5 w-full bg-white/50 rounded" />
+                          <div className="h-0.5 w-5/6 bg-white/50 rounded" />
+                        </div>
+                      </div>
+
+                      {/* Main Content Area */}
+                      <div className="flex-1 p-2 space-y-2">
+                        {/* Name and title */}
+                        <div className="space-y-1">
+                          <div className="h-2 w-20 bg-foreground/80 rounded" />
+                          <div className="h-1 w-16 bg-foreground/40 rounded" />
+                        </div>
+
+                        {/* Experience section */}
+                        <div className="space-y-1">
+                          <div className="h-1.5 w-16 bg-foreground/70 rounded" />
+                          <div className="h-px w-full bg-foreground/30" />
+                          <div className="space-y-0.5 pt-1">
+                            <div className="h-1 w-full bg-foreground/25 rounded" />
+                            <div className="h-1 w-full bg-foreground/25 rounded" />
+                            <div className="h-1 w-4/5 bg-foreground/25 rounded" />
+                          </div>
+                        </div>
+
+                        {/* Projects section */}
+                        <div className="space-y-1">
+                          <div className="h-1.5 w-14 bg-foreground/70 rounded" />
+                          <div className="h-px w-full bg-foreground/30" />
+                          <div className="space-y-0.5 pt-1">
+                            <div className="h-1 w-full bg-foreground/25 rounded" />
+                            <div className="h-1 w-5/6 bg-foreground/25 rounded" />
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Label */}
-                  <div className="text-left">
-                    <div className={`text-sm font-semibold transition-colors ${
+                  {/* Label and Description */}
+                  <div className="text-center space-y-1">
+                    <div className={`text-base font-bold transition-colors ${
                       selectedTemplate === 'fancy' ? 'text-foreground' : 'text-muted-foreground'
                     }`}>
                       Fancy
                     </div>
-                    <div className="text-[10px] text-muted-foreground leading-tight">Modern</div>
-                  </div>
-
-                  {/* Selected Indicator */}
-                  {selectedTemplate === 'fancy' && (
-                    <div className="absolute -top-1 -right-1">
-                      <div className="w-4 h-4 bg-primary rounded-full flex items-center justify-center">
-                        <CheckCircle2 className="w-2.5 h-2.5 text-primary-foreground" />
-                      </div>
+                    <div className="text-xs text-muted-foreground">
+                      Modern Sidebar Layout
                     </div>
-                  )}
-                </button>
-
-                {/* Artistic Template */}
-                <button
-                  onClick={() => setSelectedTemplate('artistic')}
-                  className={`group relative flex items-center gap-2.5 px-4 py-2.5 rounded-lg transition-all duration-200 opacity-60 cursor-not-allowed ${
-                    selectedTemplate === 'artistic'
-                      ? 'bg-background shadow-md border border-border/50'
-                      : 'hover:bg-background/30'
-                  }`}
-                  disabled
-                >
-                  {/* Mini Visual Preview */}
-                  <div className="relative w-8 h-10 bg-background rounded border border-border/50 overflow-hidden flex-shrink-0">
-                    <div className="absolute inset-0 p-1 space-y-0.5">
-                      <div className="flex gap-0.5 items-center">
-                        <div className="h-2 w-2 bg-foreground/70 rounded" />
-                        <div className="flex-1 space-y-0.5">
-                          <div className="h-0.5 w-full bg-foreground/50 rounded" />
-                          <div className="h-0.5 w-2/3 bg-foreground/30 rounded" />
-                        </div>
-                      </div>
-                      <div className="mt-1 space-y-0.5">
-                        <div className="h-0.5 w-full bg-foreground/20 rounded" />
-                        <div className="h-0.5 w-4/5 bg-foreground/20 rounded ml-1" />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Label */}
-                  <div className="text-left">
-                    <div className="text-sm font-semibold text-muted-foreground">
-                      Artistic
-                    </div>
-                    <div className="text-[10px] text-muted-foreground leading-tight">Soon</div>
-                  </div>
-
-                  {/* Coming Soon Badge */}
-                  <div className="absolute -top-1.5 -right-1">
-                    <span className="text-[9px] font-bold px-1.5 py-0.5 bg-primary/20 text-primary rounded-md">
-                      SOON
-                    </span>
                   </div>
                 </button>
+              </div>
+
+              {/* Coming Soon Notice */}
+              <div className="text-center">
+                <p className="text-xs text-muted-foreground">
+                  More stunning templates coming soon
+                </p>
               </div>
             </div>
           )}
