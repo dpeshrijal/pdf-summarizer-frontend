@@ -1,6 +1,6 @@
 /**
- * Fancy Resume Template - Accurate reproduction of the Charles McTurland resume style.
- * This version corrects all previous layout, font, and alignment issues, and includes all original sections.
+ * Fancy Resume Template - Final polished version based on the "Charles McTurland" style.
+ * This version includes aligned underlines and adjusted location formatting as requested.
  */
 
 import type { StructuredResume } from "@/lib/types/resumeSchema";
@@ -125,6 +125,11 @@ export const generateFancyResumePDF = async (
       COLORS.textBlack.b
     );
     doc.text(title.toUpperCase(), sidebarRightX, sidebarY, { align: "right" });
+    // Underline added for alignment with main section
+    sidebarY += 1.5;
+    doc.setDrawColor(200, 200, 200); // Lighter line for sidebar
+    doc.setLineWidth(0.2);
+    doc.line(LAYOUT.sidebarPadding, sidebarY, sidebarRightX, sidebarY);
     sidebarY += scaledSpacing.afterSectionHeader;
   };
 
@@ -201,7 +206,7 @@ export const generateFancyResumePDF = async (
       COLORS.textBlack.b
     );
     doc.text(title.toUpperCase(), mainX, yPos);
-    yPos += 1.5;
+    yPos += 1.5; // Same spacing as sidebar for alignment
     doc.setDrawColor(
       COLORS.textBlack.r,
       COLORS.textBlack.g,
@@ -230,15 +235,18 @@ export const generateFancyResumePDF = async (
         break;
       }
       doc.text(line, x, yPos);
-      // Custom line height for this function as it's used for smaller text
       yPos += scaledSpacing.tightLineHeight;
     }
   };
 
-  // SUMMARY (RESTORED)
+  // SUMMARY
   if (workingResume.summary && addMainSectionHeader("PROFESSIONAL SUMMARY")) {
     const summaryLines = doc.splitTextToSize(workingResume.summary, mainWidth);
     for (const line of summaryLines) {
+      if (!fitsOnPage(5)) {
+        contentTruncated = true;
+        break;
+      }
       doc.setFontSize(scaledFontSizes.normal);
       doc.setFont("helvetica", "normal");
       doc.setTextColor(COLORS.textGray.r, COLORS.textGray.g, COLORS.textGray.b);
@@ -247,7 +255,7 @@ export const generateFancyResumePDF = async (
     }
   }
 
-  // WORK EXPERIENCE
+  // WORK EXPERIENCE (Location format changed)
   if (
     workingResume.experience.length > 0 &&
     addMainSectionHeader("WORK EXPERIENCE")
@@ -264,15 +272,20 @@ export const generateFancyResumePDF = async (
       );
       doc.text(exp.title, mainX, yPos);
       yPos += scaledSpacing.tightLineHeight;
+
+      // Company and Location together
       doc.setFontSize(scaledFontSizes.company);
       doc.setFont("helvetica", "normal");
       doc.setTextColor(COLORS.textGray.r, COLORS.textGray.g, COLORS.textGray.b);
-      doc.text(exp.company, mainX, yPos);
-      const dateText = `${exp.startDate} - ${exp.endDate} / ${exp.location}`;
+      doc.text(`${exp.company} / ${exp.location}`, mainX, yPos);
+
+      // Date only on the right
+      const dateText = `${exp.startDate} - ${exp.endDate}`;
       doc.setFont("helvetica", "italic");
       const dateWidth = doc.getTextWidth(dateText);
       doc.text(dateText, PAGE.width - LAYOUT.mainPadding - dateWidth, yPos);
       yPos += scaledSpacing.lineHeight;
+
       for (const achievement of exp.achievements) {
         if (!fitsOnPage(6)) break;
         doc.setFillColor(
@@ -354,7 +367,7 @@ export const generateFancyResumePDF = async (
     }
   }
 
-  // CERTIFICATIONS (RESTORED)
+  // CERTIFICATIONS
   if (
     workingResume.certifications &&
     workingResume.certifications.length > 0 &&
@@ -363,7 +376,7 @@ export const generateFancyResumePDF = async (
     for (let i = 0; i < workingResume.certifications.length; i++) {
       const cert = workingResume.certifications[i];
       if (!fitsOnPage(8)) break;
-      doc.setFontSize(scaledFontSizes.jobTitle); // A bit larger like a job title
+      doc.setFontSize(scaledFontSizes.jobTitle);
       doc.setFont("helvetica", "bold");
       doc.setTextColor(
         COLORS.textBlack.r,
@@ -388,7 +401,7 @@ export const generateFancyResumePDF = async (
     }
   }
 
-  // AWARDS (RESTORED)
+  // AWARDS
   if (
     workingResume.awards &&
     workingResume.awards.length > 0 &&
