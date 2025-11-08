@@ -132,24 +132,34 @@ const estimateContentHeight = (resume: StructuredResume): number => {
 };
 
 /**
- * Remove one bullet from work experience (oldest job first)
+ * Remove one bullet from work experience in a balanced round-robin fashion
+ * Finds the job with the MOST bullets and removes one from it
+ * This ensures bullets are removed evenly across all jobs
  * Returns a NEW resume object with the bullet removed
  */
 const removeOneBullet = (resume: StructuredResume): { success: boolean; resume: StructuredResume } => {
   // Create a deep clone
   const newResume = JSON.parse(JSON.stringify(resume)) as StructuredResume;
 
-  // Work backwards through experience (remove from older jobs first)
-  for (let i = newResume.experience.length - 1; i >= 0; i--) {
-    const exp = newResume.experience[i];
+  // Find the job with the most bullets (prioritizing older jobs in case of tie)
+  let maxBullets = 0;
+  let targetIndex = -1;
 
-    // Keep at least 1 bullet per job
-    if (exp.achievements.length > 1) {
-      exp.achievements.pop();
-      return { success: true, resume: newResume };
+  for (let i = newResume.experience.length - 1; i >= 0; i--) {
+    const bulletCount = newResume.experience[i].achievements.length;
+    if (bulletCount > maxBullets && bulletCount > 1) {
+      maxBullets = bulletCount;
+      targetIndex = i;
     }
   }
 
+  // If we found a job with >1 bullets, remove the last bullet
+  if (targetIndex !== -1) {
+    newResume.experience[targetIndex].achievements.pop();
+    return { success: true, resume: newResume };
+  }
+
+  // No more bullets can be removed (all jobs have exactly 1 bullet)
   return { success: false, resume };
 };
 
