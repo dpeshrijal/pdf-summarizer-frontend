@@ -76,8 +76,8 @@ export const generateFancyResumePDF = async (
 
   const mainX = LAYOUT.sidebarWidth + LAYOUT.mainPadding;
   const mainWidth = PAGE.width - LAYOUT.sidebarWidth - LAYOUT.mainPadding * 2;
-  // For centered text in sidebar
-  const sidebarCenterX = LAYOUT.sidebarWidth / 2;
+  // For left-aligned text in sidebar
+  const sidebarTextX = LAYOUT.sidebarPadding;
 
   // --- RENDER BACKGROUNDS ---
   doc.setFillColor(COLORS.headerBg.r, COLORS.headerBg.g, COLORS.headerBg.b);
@@ -90,6 +90,11 @@ export const generateFancyResumePDF = async (
     PAGE.height - LAYOUT.headerHeight,
     "F"
   );
+
+  // Add a subtle bottom border line to header for clean separation
+  doc.setDrawColor(COLORS.headerBg.r, COLORS.headerBg.g, COLORS.headerBg.b);
+  doc.setLineWidth(0.5);
+  doc.line(0, LAYOUT.headerHeight, PAGE.width, LAYOUT.headerHeight);
 
   // --- RENDER HEADER ---
   doc.setFontSize(scaledFontSizes.name);
@@ -119,7 +124,7 @@ export const generateFancyResumePDF = async (
   let yPos = LAYOUT.headerHeight + 12;
   let sidebarY = LAYOUT.headerHeight + 12;
 
-  // --- SIDEBAR (CENTER ALIGNED) ---
+  // --- SIDEBAR (LEFT ALIGNED) ---
   const addSidebarSection = (title: string) => {
     sidebarY += scaledSpacing.beforeSection;
     doc.setFontSize(scaledFontSizes.sidebarHeader);
@@ -129,9 +134,7 @@ export const generateFancyResumePDF = async (
       COLORS.textBlack.g,
       COLORS.textBlack.b
     );
-    doc.text(title.toUpperCase(), sidebarCenterX, sidebarY, {
-      align: "center",
-    });
+    doc.text(title.toUpperCase(), sidebarTextX, sidebarY);
     sidebarY += 1.5;
     doc.setDrawColor(200, 200, 200);
     doc.setLineWidth(0.3);
@@ -163,7 +166,7 @@ export const generateFancyResumePDF = async (
       LAYOUT.sidebarWidth - LAYOUT.sidebarPadding * 2
     );
     for (const line of lines) {
-      doc.text(line, sidebarCenterX, sidebarY, { align: "center" });
+      doc.text(line, sidebarTextX, sidebarY);
       sidebarY += scaledSpacing.sidebarLineHeight;
     }
   };
