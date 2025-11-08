@@ -38,7 +38,7 @@ const LAYOUT = {
   sidebarWidth: 65,      // Left sidebar width
   sidebarPadding: 8,     // Padding inside sidebar
   mainPadding: 10,       // Padding for main content
-  headerHeight: 35,      // Height of top header section
+  headerHeight: 22,      // Height of top dark header section
 };
 
 export const generateFancyResumePDF = async (
@@ -87,40 +87,41 @@ export const generateFancyResumePDF = async (
   const mainX = LAYOUT.sidebarWidth + LAYOUT.mainPadding;
   const mainWidth = PAGE.width - LAYOUT.sidebarWidth - LAYOUT.mainPadding - 10;
 
-  // ========== SIDEBAR BACKGROUND ==========
-  doc.setFillColor(45, 45, 45); // Dark gray sidebar
-  doc.rect(0, 0, LAYOUT.sidebarWidth, PAGE.height, 'F');
+  // ========== DARK HEADER BACKGROUND (Top of page) ==========
+  doc.setFillColor(45, 45, 45); // Dark gray/black header
+  doc.rect(0, 0, PAGE.width, LAYOUT.headerHeight, 'F');
 
-  // ========== HEADER SECTION ==========
-  let yPos = 15;
+  // ========== LIGHT SIDEBAR BACKGROUND (Below header, left side) ==========
+  doc.setFillColor(220, 220, 220); // Light gray sidebar
+  doc.rect(0, LAYOUT.headerHeight, LAYOUT.sidebarWidth, PAGE.height - LAYOUT.headerHeight, 'F');
 
-  // Name in header area (spanning across top)
+  // ========== NAME IN HEADER ==========
   doc.setFontSize(scaledFontSizes.name);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(255, 255, 255); // White text
-  doc.text(workingResume.contact.name.toUpperCase(), mainX, yPos);
+  const nameY = LAYOUT.headerHeight / 2 + 2; // Center vertically in header
+  doc.text(workingResume.contact.name.toUpperCase(), PAGE.width / 2, nameY, { align: 'center' });
 
-  yPos += scaledSpacing.afterName;
-
-  // Professional tagline/title (if we can infer from first job)
+  // Professional title below name in header
   if (workingResume.experience.length > 0) {
     doc.setFontSize(scaledFontSizes.tagline);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(200, 200, 200);
-    doc.text(workingResume.experience[0].title, mainX, yPos);
+    doc.text(workingResume.experience[0].title, PAGE.width / 2, nameY + 5, { align: 'center' });
   }
 
-  yPos += scaledSpacing.afterTagline;
+  // Start main content below header
+  let yPos = LAYOUT.headerHeight + 12;
 
   // ========== SIDEBAR CONTENT ==========
-  let sidebarY = 15;
+  let sidebarY = LAYOUT.headerHeight + 12; // Start below header
 
   // Helper for sidebar sections
   const addSidebarSection = (title: string) => {
     sidebarY += scaledSpacing.beforeSection;
     doc.setFontSize(scaledFontSizes.sidebarHeader);
     doc.setFont("helvetica", "bold");
-    doc.setTextColor(255, 255, 255);
+    doc.setTextColor(0, 0, 0); // Black text on light gray sidebar
     doc.text(title.toUpperCase(), sidebarX, sidebarY);
     sidebarY += scaledSpacing.afterSectionHeader;
   };
@@ -128,7 +129,7 @@ export const generateFancyResumePDF = async (
   const addSidebarText = (text: string, indent: number = 0) => {
     doc.setFontSize(scaledFontSizes.small);
     doc.setFont("helvetica", "normal");
-    doc.setTextColor(220, 220, 220);
+    doc.setTextColor(40, 40, 40); // Dark gray text on light gray sidebar
     const lines = doc.splitTextToSize(text, LAYOUT.sidebarWidth - LAYOUT.sidebarPadding * 2 - indent);
     for (const line of lines) {
       doc.text(line, sidebarX + indent, sidebarY);
