@@ -76,8 +76,8 @@ export const generateFancyResumePDF = async (
 
   const mainX = LAYOUT.sidebarWidth + LAYOUT.mainPadding;
   const mainWidth = PAGE.width - LAYOUT.sidebarWidth - LAYOUT.mainPadding * 2;
-  // For right-aligned text in sidebar
-  const sidebarTextX = LAYOUT.sidebarWidth - LAYOUT.sidebarPadding;
+  // For right-aligned text in sidebar (with half padding)
+  const sidebarTextX = LAYOUT.sidebarWidth - (LAYOUT.sidebarPadding / 2);
 
   // --- RENDER BACKGROUNDS ---
   doc.setFillColor(COLORS.headerBg.r, COLORS.headerBg.g, COLORS.headerBg.b);
