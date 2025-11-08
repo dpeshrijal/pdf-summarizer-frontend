@@ -8,6 +8,9 @@ import { downloadAsPDF } from "@/lib/utils/pdfGenerator";
 import { generateResumePDF, generateCoverLetterPDF } from "@/lib/utils/templatePdfGenerator";
 import type { Generation } from "@/lib/utils/dashboardApi";
 import type { GenerationOutput } from "@/lib/types/resumeSchema";
+import { TemplateSelectionModal } from "./TemplateSelectionModal";
+
+type TemplateType = 'classic' | 'fancy' | 'artistic';
 
 interface GenerationHistoryProps {
   history: Generation[];
@@ -17,6 +20,14 @@ export function GenerationHistory({ history }: GenerationHistoryProps) {
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+
+  // Template modal state
+  const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<TemplateType>('classic');
+  const [pendingGeneration, setPendingGeneration] = useState<{
+    resume: any;
+    fileName: string;
+  } | null>(null);
 
   // Calculate pagination
   const totalPages = Math.ceil(history.length / itemsPerPage);
@@ -134,10 +145,12 @@ export function GenerationHistory({ history }: GenerationHistoryProps) {
                       if (generation.structuredData) {
                         try {
                           const parsed: GenerationOutput = JSON.parse(generation.structuredData);
-                          generateResumePDF(
-                            parsed.resume,
-                            `${generation.companyName}_Resume_${formattedDate.replace(/\s/g, "_")}.pdf`
-                          );
+                          // Open modal for template selection
+                          setPendingGeneration({
+                            resume: parsed.resume,
+                            fileName: `${generation.companyName}_Resume_${formattedDate.replace(/\s/g, "_")}.pdf`
+                          });
+                          setIsTemplateModalOpen(true);
                         } catch (e) {
                           console.error("Failed to parse structured data:", e);
                           // Fallback to old format
@@ -284,6 +297,25 @@ export function GenerationHistory({ history }: GenerationHistoryProps) {
           </div>
         </div>
       )}
+
+      {/* Template Selection Modal */}
+      <TemplateSelectionModal
+        isOpen={isTemplateModalOpen}
+        onClose={() => setIsTemplateModalOpen(false)}
+        selectedTemplate={selectedTemplate}
+        onTemplateSelect={setSelectedTemplate}
+        onConfirmDownload={() => {
+          if (pendingGeneration) {
+            generateResumePDF(
+              pendingGeneration.resume,
+              pendingGeneration.fileName,
+              selectedTemplate
+            );
+            setIsTemplateModalOpen(false);
+            setPendingGeneration(null);
+          }
+        }}
+      />
     </section>
   );
 }
