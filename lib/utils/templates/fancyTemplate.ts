@@ -47,8 +47,8 @@ const SPACING = {
 const LAYOUT = {
   sidebarWidth: 70,
   sidebarPadding: 10,
-  sidebarRightPadding: 8,  // Reduced padding for sidebar right alignment
-  mainPadding: 8,           // Matching padding for main section
+  sidebarRightPadding: 6.5,  // Reduced padding for sidebar right alignment
+  mainPadding: 6.5,           // Matching padding for main section
   headerHeight: 35,
 };
 
