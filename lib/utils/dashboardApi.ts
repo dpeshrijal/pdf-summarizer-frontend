@@ -21,7 +21,7 @@ export interface Resume {
   fileId: string;
   originalFilename: string;
   processingStatus: string;
-  uploadedAt?: string; // Timestamp from backend
+  createdAt?: number; // Unix timestamp from backend
 }
 
 export interface GenerationStatusResponse {

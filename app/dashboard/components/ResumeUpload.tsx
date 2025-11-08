@@ -88,9 +88,10 @@ export function ResumeUpload({
               <div className="space-y-2 max-h-60 overflow-y-auto">
                 {[...previousResumes]
                   .sort((a, b) => {
-                    // Sort by fileId in descending order (backend already returns sorted, but ensure it's correct)
-                    // fileId is a string that can be compared lexicographically for chronological order
-                    return b.fileId.localeCompare(a.fileId);
+                    // Sort by createdAt timestamp in descending order (newest first)
+                    const timeA = a.createdAt || 0;
+                    const timeB = b.createdAt || 0;
+                    return timeB - timeA;
                   })
                   .map((resume) => (
                   <button
