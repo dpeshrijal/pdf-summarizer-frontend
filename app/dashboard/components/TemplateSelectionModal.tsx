@@ -53,35 +53,51 @@ export function TemplateSelectionModal({
             </div>
             {/* Preview Image Placeholder */}
             <div className="relative w-full aspect-[8.5/11] bg-white rounded-lg shadow-lg overflow-hidden border border-border/50 z-0">
-              <div className="absolute inset-0 p-6 space-y-3">
+              <div className="absolute inset-0 p-4 space-y-2 text-[6px]">
                 {/* Header - Centered */}
-                <div className="space-y-2">
-                  <div className="h-4 w-32 bg-foreground/80 rounded mx-auto" />
-                  <div className="h-2 w-40 bg-foreground/40 rounded mx-auto" />
+                <div className="space-y-0.5 text-center">
+                  <div className="font-bold text-foreground">JOHN DOE</div>
+                  <div className="text-foreground/60">john.doe@email.com • (555) 123-4567 • New York, NY</div>
+                  <div className="text-foreground/60">linkedin.com/in/johndoe • github.com/johndoe</div>
                 </div>
 
-                {/* Section 1 */}
-                <div className="pt-3 space-y-2">
-                  <div className="h-3 w-24 bg-foreground/70 rounded" />
-                  <div className="h-px w-full bg-foreground/30" />
-                  <div className="space-y-1.5 pt-2">
-                    <div className="h-2 w-full bg-foreground/25 rounded" />
-                    <div className="h-2 w-full bg-foreground/25 rounded" />
-                    <div className="h-2 w-5/6 bg-foreground/25 rounded" />
+                {/* Summary */}
+                <div className="pt-1 space-y-0.5">
+                  <div className="font-semibold text-foreground border-b border-foreground/30 pb-0.5">SUMMARY</div>
+                  <div className="text-foreground/60 leading-tight">
+                    Experienced Software Engineer with 5+ years building scalable applications. Proficient in full-stack development and cloud technologies.
                   </div>
                 </div>
 
-                {/* Section 2 */}
-                <div className="space-y-2">
-                  <div className="h-3 w-28 bg-foreground/70 rounded" />
-                  <div className="h-px w-full bg-foreground/30" />
-                  <div className="flex gap-2 pt-2">
-                    <div className="h-1.5 w-1.5 bg-foreground/40 rounded-full mt-1" />
-                    <div className="flex-1 space-y-1">
-                      <div className="h-2 w-full bg-foreground/25 rounded" />
-                      <div className="h-2 w-4/5 bg-foreground/25 rounded" />
+                {/* Experience */}
+                <div className="space-y-1">
+                  <div className="font-semibold text-foreground border-b border-foreground/30 pb-0.5">EXPERIENCE</div>
+                  <div className="space-y-0.5">
+                    <div className="font-medium text-foreground">Senior Software Engineer</div>
+                    <div className="text-foreground/60 italic text-[5px]">Tech Corp • 2020 - Present</div>
+                    <div className="flex gap-1">
+                      <div className="text-foreground/60">•</div>
+                      <div className="text-foreground/60 leading-tight flex-1 text-[5px]">Led development of microservices architecture</div>
+                    </div>
+                    <div className="flex gap-1">
+                      <div className="text-foreground/60">•</div>
+                      <div className="text-foreground/60 leading-tight flex-1 text-[5px]">Improved system performance by 40%</div>
                     </div>
                   </div>
+                </div>
+
+                {/* Skills */}
+                <div className="space-y-0.5">
+                  <div className="font-semibold text-foreground border-b border-foreground/30 pb-0.5">SKILLS</div>
+                  <div className="text-foreground/60 text-[5px]"><span className="font-medium text-foreground">Languages:</span> Python, JavaScript, TypeScript, Java</div>
+                  <div className="text-foreground/60 text-[5px]"><span className="font-medium text-foreground">Technologies:</span> React, Node.js, AWS, Docker</div>
+                </div>
+
+                {/* Education */}
+                <div className="space-y-0.5">
+                  <div className="font-semibold text-foreground border-b border-foreground/30 pb-0.5">EDUCATION</div>
+                  <div className="font-medium text-foreground text-[5px]">B.S. Computer Science</div>
+                  <div className="text-foreground/60 italic text-[5px]">University of Technology, 2018</div>
                 </div>
               </div>
             </div>
@@ -121,73 +137,84 @@ export function TemplateSelectionModal({
             </div>
             {/* Preview Image Placeholder */}
             <div className="relative w-full aspect-[8.5/11] bg-white rounded-lg shadow-lg overflow-hidden border border-border/50 z-0">
-              <div className="absolute inset-0 flex flex-col">
+              <div className="absolute inset-0 flex flex-col text-[6px]">
                 {/* Dark Header */}
                 <div className="h-[12%] bg-foreground/90 flex items-center justify-center">
-                  <div className="space-y-1 text-center">
-                    <div className="h-2.5 w-24 bg-white/90 rounded mx-auto" />
-                    <div className="h-1.5 w-20 bg-white/60 rounded mx-auto" />
+                  <div className="space-y-0.5 text-center">
+                    <div className="font-bold text-white text-[8px]">JOHN DOE</div>
+                    <div className="text-white/80 text-[5px]">SOFTWARE ENGINEER</div>
                   </div>
                 </div>
 
                 <div className="flex flex-1">
                   {/* Light Sidebar with right-aligned text */}
-                  <div className="w-[33%] bg-gray-100 p-2 space-y-2.5 flex flex-col items-end pr-1.5">
+                  <div className="w-[33%] bg-gray-100 p-2 space-y-2 flex flex-col items-end pr-1.5">
                     {/* Contact */}
-                    <div className="space-y-1 text-right w-full">
-                      <div className="h-1.5 w-12 bg-foreground/70 rounded ml-auto" />
+                    <div className="space-y-0.5 text-right w-full">
+                      <div className="font-semibold text-foreground text-[5px]">CONTACT</div>
                       <div className="h-px w-10 bg-foreground/30 ml-auto" />
-                      <div className="h-1 w-16 bg-foreground/40 rounded ml-auto" />
-                      <div className="h-1 w-14 bg-foreground/40 rounded ml-auto" />
+                      <div className="text-foreground/60 text-[4.5px] leading-tight">john.doe@email.com</div>
+                      <div className="text-foreground/60 text-[4.5px] leading-tight">(555) 123-4567</div>
+                      <div className="text-foreground/60 text-[4.5px] leading-tight">New York, NY</div>
+                      <div className="text-blue-600 text-[4.5px] leading-tight">linkedin.com/in/johndoe</div>
                     </div>
 
                     {/* Education */}
-                    <div className="space-y-1 text-right w-full pt-1">
-                      <div className="h-1.5 w-14 bg-foreground/70 rounded ml-auto" />
+                    <div className="space-y-0.5 text-right w-full pt-0.5">
+                      <div className="font-semibold text-foreground text-[5px]">EDUCATION</div>
                       <div className="h-px w-10 bg-foreground/30 ml-auto" />
-                      <div className="h-1 w-16 bg-foreground/40 rounded ml-auto" />
-                      <div className="h-1 w-12 bg-foreground/40 rounded ml-auto" />
+                      <div className="font-medium text-foreground text-[4.5px] leading-tight">B.S. Computer Science</div>
+                      <div className="text-foreground/60 text-[4.5px] leading-tight">University of Technology</div>
+                      <div className="text-foreground/60 text-[4.5px] leading-tight">2018</div>
                     </div>
 
                     {/* Skills */}
-                    <div className="space-y-1 text-right w-full pt-1">
-                      <div className="h-1.5 w-10 bg-foreground/70 rounded ml-auto" />
+                    <div className="space-y-0.5 text-right w-full pt-0.5">
+                      <div className="font-semibold text-foreground text-[5px]">SKILLS</div>
                       <div className="h-px w-10 bg-foreground/30 ml-auto" />
-                      <div className="h-1 w-14 bg-foreground/40 rounded ml-auto" />
+                      <div className="font-medium text-foreground text-[4.5px] leading-tight">Languages</div>
+                      <div className="text-foreground/60 text-[4.5px] leading-tight">Python, JavaScript</div>
+                      <div className="font-medium text-foreground text-[4.5px] leading-tight pt-0.5">Technologies</div>
+                      <div className="text-foreground/60 text-[4.5px] leading-tight">React, Node.js, AWS</div>
                     </div>
                   </div>
 
                   {/* Main Content */}
-                  <div className="flex-1 p-2.5 space-y-2.5 pl-2">
+                  <div className="flex-1 p-2.5 space-y-2 pl-2">
                     {/* Summary */}
-                    <div className="space-y-1">
-                      <div className="h-2 w-16 bg-foreground/70 rounded" />
+                    <div className="space-y-0.5">
+                      <div className="font-semibold text-foreground text-[5.5px]">SUMMARY</div>
                       <div className="h-px w-full bg-foreground/30" />
-                      <div className="h-1 w-full bg-foreground/25 rounded" />
-                      <div className="h-1 w-5/6 bg-foreground/25 rounded" />
+                      <div className="text-foreground/60 text-[5px] leading-tight">Experienced Software Engineer with 5+ years building scalable applications. Proficient in full-stack development and cloud technologies.</div>
                     </div>
 
                     {/* Experience */}
-                    <div className="space-y-1.5">
-                      <div className="h-2 w-20 bg-foreground/70 rounded" />
+                    <div className="space-y-1">
+                      <div className="font-semibold text-foreground text-[5.5px]">WORK EXPERIENCE</div>
                       <div className="h-px w-full bg-foreground/30" />
                       <div className="space-y-0.5">
-                        <div className="h-1.5 w-20 bg-foreground/60 rounded" />
-                        <div className="flex gap-1">
-                          <div className="h-0.5 w-0.5 bg-foreground/40 rounded-full mt-0.5" />
-                          <div className="flex-1 space-y-0.5">
-                            <div className="h-1 w-full bg-foreground/25 rounded" />
-                            <div className="h-1 w-4/5 bg-foreground/25 rounded" />
-                          </div>
+                        <div className="font-medium text-foreground text-[5px]">Senior Software Engineer</div>
+                        <div className="text-foreground/60 text-[4.5px] italic">Tech Corp, San Francisco • 2020 - Present</div>
+                        <div className="flex gap-0.5 items-start">
+                          <div className="text-foreground/60 text-[4.5px]">•</div>
+                          <div className="text-foreground/60 text-[4.5px] leading-tight flex-1">Led development of microservices architecture</div>
+                        </div>
+                        <div className="flex gap-0.5 items-start">
+                          <div className="text-foreground/60 text-[4.5px]">•</div>
+                          <div className="text-foreground/60 text-[4.5px] leading-tight flex-1">Improved system performance by 40%</div>
                         </div>
                       </div>
                     </div>
 
                     {/* Projects */}
-                    <div className="space-y-1">
-                      <div className="h-2 w-16 bg-foreground/70 rounded" />
+                    <div className="space-y-0.5">
+                      <div className="font-semibold text-foreground text-[5.5px]">PROJECTS</div>
                       <div className="h-px w-full bg-foreground/30" />
-                      <div className="h-1 w-full bg-foreground/25 rounded" />
+                      <div className="font-medium text-foreground text-[5px]">E-Commerce Platform</div>
+                      <div className="flex gap-0.5 items-start">
+                        <div className="text-foreground/60 text-[4.5px]">•</div>
+                        <div className="text-foreground/60 text-[4.5px] leading-tight flex-1">Built scalable platform serving 100K+ users</div>
+                      </div>
                     </div>
                   </div>
                 </div>
