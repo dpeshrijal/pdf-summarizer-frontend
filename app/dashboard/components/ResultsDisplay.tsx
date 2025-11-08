@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Download, CheckCircle2, FileText, Sparkles, Palette } from "lucide-react";
+import { Download, CheckCircle2, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -397,171 +397,141 @@ export function ResultsDisplay({
             <MatchScoreDisplay matchScore={structured.matchScore} />
           )}
 
-          {/* Template Selector - Stunning Design */}
+          {/* Template Selector - Elegant & Compact */}
           {isStructured && (
-            <div className="space-y-4">
-              <div className="text-center">
-                <h3 className="text-lg font-bold text-foreground mb-1">Choose Your Style</h3>
-                <p className="text-sm text-muted-foreground">Select a template that best represents you</p>
-              </div>
+            <div className="flex flex-col items-center gap-3">
+              <h3 className="text-sm font-semibold text-muted-foreground">Resume Style</h3>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Segmented Control with Visual Previews */}
+              <div className="inline-flex items-center gap-2 p-1.5 bg-muted/50 rounded-xl border border-border/50 shadow-sm">
                 {/* Classic Template */}
                 <button
                   onClick={() => setSelectedTemplate('classic')}
-                  className={`group relative overflow-hidden rounded-xl border-2 transition-all duration-300 ${
+                  className={`group relative flex items-center gap-2.5 px-4 py-2.5 rounded-lg transition-all duration-200 ${
                     selectedTemplate === 'classic'
-                      ? 'border-primary bg-primary/10 shadow-lg shadow-primary/25'
-                      : 'border-border hover:border-primary/50 hover:shadow-md'
+                      ? 'bg-background shadow-md border border-border/50'
+                      : 'hover:bg-background/50'
                   }`}
                 >
-                  <div className="p-6 space-y-3">
-                    {/* Icon */}
-                    <div className={`mx-auto w-12 h-12 rounded-lg flex items-center justify-center transition-all ${
-                      selectedTemplate === 'classic'
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted text-muted-foreground group-hover:bg-primary/20 group-hover:text-primary'
-                    }`}>
-                      <FileText className="w-6 h-6" />
-                    </div>
-
-                    {/* Template Name */}
-                    <div className="space-y-1">
-                      <h4 className="font-bold text-base">Classic</h4>
-                      <p className="text-xs text-muted-foreground">Clean & Professional</p>
-                    </div>
-
-                    {/* Mini Preview */}
-                    <div className="relative h-24 bg-muted/30 rounded border border-border/50 overflow-hidden">
-                      <div className="absolute inset-0 p-2 space-y-1">
-                        <div className="h-2 w-3/4 bg-foreground/80 rounded mx-auto" />
-                        <div className="h-1 w-1/2 bg-foreground/40 rounded mx-auto" />
-                        <div className="mt-2 space-y-0.5">
-                          <div className="h-1 w-full bg-foreground/20 rounded" />
-                          <div className="h-1 w-full bg-foreground/20 rounded" />
-                          <div className="h-1 w-4/5 bg-foreground/20 rounded" />
-                        </div>
+                  {/* Mini Visual Preview */}
+                  <div className="relative w-8 h-10 bg-background rounded border border-border/50 overflow-hidden flex-shrink-0">
+                    <div className="absolute inset-0 p-1 space-y-0.5">
+                      <div className="h-1 w-5 bg-foreground/70 rounded mx-auto" />
+                      <div className="h-0.5 w-3 bg-foreground/30 rounded mx-auto" />
+                      <div className="mt-1 space-y-0.5">
+                        <div className="h-0.5 w-full bg-foreground/20 rounded" />
+                        <div className="h-0.5 w-full bg-foreground/20 rounded" />
+                        <div className="h-0.5 w-4/5 bg-foreground/20 rounded" />
                       </div>
                     </div>
-
-                    {/* Selected Indicator */}
-                    {selectedTemplate === 'classic' && (
-                      <div className="absolute top-3 right-3">
-                        <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
-                          <CheckCircle2 className="w-4 h-4 text-primary-foreground" />
-                        </div>
-                      </div>
-                    )}
                   </div>
+
+                  {/* Label */}
+                  <div className="text-left">
+                    <div className={`text-sm font-semibold transition-colors ${
+                      selectedTemplate === 'classic' ? 'text-foreground' : 'text-muted-foreground'
+                    }`}>
+                      Classic
+                    </div>
+                    <div className="text-[10px] text-muted-foreground leading-tight">Clean</div>
+                  </div>
+
+                  {/* Selected Indicator */}
+                  {selectedTemplate === 'classic' && (
+                    <div className="absolute -top-1 -right-1">
+                      <div className="w-4 h-4 bg-primary rounded-full flex items-center justify-center">
+                        <CheckCircle2 className="w-2.5 h-2.5 text-primary-foreground" />
+                      </div>
+                    </div>
+                  )}
                 </button>
 
                 {/* Fancy Template */}
                 <button
                   onClick={() => setSelectedTemplate('fancy')}
-                  className={`group relative overflow-hidden rounded-xl border-2 transition-all duration-300 ${
+                  className={`group relative flex items-center gap-2.5 px-4 py-2.5 rounded-lg transition-all duration-200 ${
                     selectedTemplate === 'fancy'
-                      ? 'border-primary bg-primary/10 shadow-lg shadow-primary/25'
-                      : 'border-border hover:border-primary/50 hover:shadow-md'
+                      ? 'bg-background shadow-md border border-border/50'
+                      : 'hover:bg-background/50'
                   }`}
                 >
-                  <div className="p-6 space-y-3">
-                    {/* Icon */}
-                    <div className={`mx-auto w-12 h-12 rounded-lg flex items-center justify-center transition-all ${
-                      selectedTemplate === 'fancy'
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted text-muted-foreground group-hover:bg-primary/20 group-hover:text-primary'
-                    }`}>
-                      <Sparkles className="w-6 h-6" />
-                    </div>
-
-                    {/* Template Name */}
-                    <div className="space-y-1">
-                      <h4 className="font-bold text-base">Fancy</h4>
-                      <p className="text-xs text-muted-foreground">Stylish & Modern</p>
-                    </div>
-
-                    {/* Mini Preview - More stylized */}
-                    <div className="relative h-24 bg-muted/30 rounded border border-border/50 overflow-hidden">
-                      <div className="absolute inset-0 p-2 space-y-1">
-                        <div className="h-2.5 w-3/4 bg-foreground/80 rounded-r-full mx-auto" />
-                        <div className="h-1 w-1/2 bg-foreground/40 rounded mx-auto" />
-                        <div className="mt-2 space-y-0.5 border-l-2 border-foreground/40 pl-1">
-                          <div className="h-1 w-full bg-foreground/20 rounded" />
-                          <div className="h-1 w-full bg-foreground/20 rounded" />
-                          <div className="h-1 w-4/5 bg-foreground/20 rounded" />
+                  {/* Mini Visual Preview - Sidebar Layout */}
+                  <div className="relative w-8 h-10 bg-background rounded border border-border/50 overflow-hidden flex-shrink-0">
+                    <div className="absolute inset-0 flex">
+                      {/* Dark sidebar */}
+                      <div className="w-2.5 bg-foreground/80" />
+                      {/* Main content */}
+                      <div className="flex-1 p-0.5 space-y-0.5">
+                        <div className="h-1 w-full bg-foreground/60 rounded" />
+                        <div className="h-0.5 w-3/4 bg-foreground/30 rounded" />
+                        <div className="mt-0.5 space-y-0.5">
+                          <div className="h-0.5 w-full bg-foreground/20 rounded" />
+                          <div className="h-0.5 w-full bg-foreground/20 rounded" />
                         </div>
                       </div>
                     </div>
-
-                    {/* Selected Indicator */}
-                    {selectedTemplate === 'fancy' && (
-                      <div className="absolute top-3 right-3">
-                        <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
-                          <CheckCircle2 className="w-4 h-4 text-primary-foreground" />
-                        </div>
-                      </div>
-                    )}
                   </div>
+
+                  {/* Label */}
+                  <div className="text-left">
+                    <div className={`text-sm font-semibold transition-colors ${
+                      selectedTemplate === 'fancy' ? 'text-foreground' : 'text-muted-foreground'
+                    }`}>
+                      Fancy
+                    </div>
+                    <div className="text-[10px] text-muted-foreground leading-tight">Modern</div>
+                  </div>
+
+                  {/* Selected Indicator */}
+                  {selectedTemplate === 'fancy' && (
+                    <div className="absolute -top-1 -right-1">
+                      <div className="w-4 h-4 bg-primary rounded-full flex items-center justify-center">
+                        <CheckCircle2 className="w-2.5 h-2.5 text-primary-foreground" />
+                      </div>
+                    </div>
+                  )}
                 </button>
 
                 {/* Artistic Template */}
                 <button
                   onClick={() => setSelectedTemplate('artistic')}
-                  className={`group relative overflow-hidden rounded-xl border-2 transition-all duration-300 ${
+                  className={`group relative flex items-center gap-2.5 px-4 py-2.5 rounded-lg transition-all duration-200 opacity-60 cursor-not-allowed ${
                     selectedTemplate === 'artistic'
-                      ? 'border-primary bg-primary/10 shadow-lg shadow-primary/25'
-                      : 'border-border hover:border-primary/50 hover:shadow-md'
+                      ? 'bg-background shadow-md border border-border/50'
+                      : 'hover:bg-background/30'
                   }`}
+                  disabled
                 >
-                  <div className="p-6 space-y-3">
-                    {/* Icon */}
-                    <div className={`mx-auto w-12 h-12 rounded-lg flex items-center justify-center transition-all ${
-                      selectedTemplate === 'artistic'
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted text-muted-foreground group-hover:bg-primary/20 group-hover:text-primary'
-                    }`}>
-                      <Palette className="w-6 h-6" />
-                    </div>
-
-                    {/* Template Name */}
-                    <div className="space-y-1">
-                      <h4 className="font-bold text-base">Artistic</h4>
-                      <p className="text-xs text-muted-foreground">Creative & Bold</p>
-                    </div>
-
-                    {/* Mini Preview - Creative layout */}
-                    <div className="relative h-24 bg-muted/30 rounded border border-border/50 overflow-hidden">
-                      <div className="absolute inset-0 p-2 space-y-1">
-                        <div className="flex gap-1 items-center">
-                          <div className="h-8 w-8 bg-foreground/80 rounded" />
-                          <div className="flex-1 space-y-1">
-                            <div className="h-1 w-full bg-foreground/60 rounded" />
-                            <div className="h-1 w-2/3 bg-foreground/40 rounded" />
-                          </div>
-                        </div>
-                        <div className="mt-2 space-y-0.5">
-                          <div className="h-1 w-full bg-foreground/20 rounded" />
-                          <div className="h-1 w-4/5 bg-foreground/20 rounded ml-2" />
-                          <div className="h-1 w-3/5 bg-foreground/20 rounded ml-4" />
+                  {/* Mini Visual Preview */}
+                  <div className="relative w-8 h-10 bg-background rounded border border-border/50 overflow-hidden flex-shrink-0">
+                    <div className="absolute inset-0 p-1 space-y-0.5">
+                      <div className="flex gap-0.5 items-center">
+                        <div className="h-2 w-2 bg-foreground/70 rounded" />
+                        <div className="flex-1 space-y-0.5">
+                          <div className="h-0.5 w-full bg-foreground/50 rounded" />
+                          <div className="h-0.5 w-2/3 bg-foreground/30 rounded" />
                         </div>
                       </div>
-                    </div>
-
-                    {/* Coming Soon Badge */}
-                    <div className="absolute top-3 left-3">
-                      <span className="text-[10px] font-semibold px-2 py-0.5 bg-primary/20 text-primary rounded">
-                        Coming Soon
-                      </span>
-                    </div>
-
-                    {/* Selected Indicator */}
-                    {selectedTemplate === 'artistic' && (
-                      <div className="absolute top-3 right-3">
-                        <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
-                          <CheckCircle2 className="w-4 h-4 text-primary-foreground" />
-                        </div>
+                      <div className="mt-1 space-y-0.5">
+                        <div className="h-0.5 w-full bg-foreground/20 rounded" />
+                        <div className="h-0.5 w-4/5 bg-foreground/20 rounded ml-1" />
                       </div>
-                    )}
+                    </div>
+                  </div>
+
+                  {/* Label */}
+                  <div className="text-left">
+                    <div className="text-sm font-semibold text-muted-foreground">
+                      Artistic
+                    </div>
+                    <div className="text-[10px] text-muted-foreground leading-tight">Soon</div>
+                  </div>
+
+                  {/* Coming Soon Badge */}
+                  <div className="absolute -top-1.5 -right-1">
+                    <span className="text-[9px] font-bold px-1.5 py-0.5 bg-primary/20 text-primary rounded-md">
+                      SOON
+                    </span>
                   </div>
                 </button>
               </div>
