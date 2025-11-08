@@ -1,12 +1,12 @@
 /**
- * Modern Resume Template - Final version with sidebar text right-aligned as requested.
- * No other changes have been made.
+ * Modern Resume Template - Accurate reproduction of the latest "Deepesh Rijal" resume style.
+ * This version fixes the critical header clipping bug and implements the new centered sidebar design.
  */
 
 import type { StructuredResume } from "@/lib/types/resumeSchema";
 import { PAGE, cleanUrl, optimizeResumeToFit } from "./shared";
 
-// COLORS accurately sampled and corrected
+// COLORS accurately sampled from the new target resume image
 const COLORS = {
   headerBg: { r: 45, g: 45, b: 45 },
   sidebarBg: { r: 248, g: 249, b: 250 },
@@ -49,7 +49,6 @@ const LAYOUT = {
   sidebarPadding: 10,
   mainPadding: 12,
   headerHeight: 35,
-  bottomMargin: 15,
 };
 
 export const generateFancyResumePDF = async (
@@ -77,9 +76,8 @@ export const generateFancyResumePDF = async (
 
   const mainX = LAYOUT.sidebarWidth + LAYOUT.mainPadding;
   const mainWidth = PAGE.width - LAYOUT.sidebarWidth - LAYOUT.mainPadding * 2;
-  const sidebarX = LAYOUT.sidebarPadding;
-  // Define the right edge for sidebar text alignment
-  const sidebarRightX = LAYOUT.sidebarWidth - LAYOUT.sidebarPadding;
+  // For centered text in sidebar
+  const sidebarCenterX = LAYOUT.sidebarWidth / 2;
 
   // --- RENDER BACKGROUNDS ---
   doc.setFillColor(COLORS.headerBg.r, COLORS.headerBg.g, COLORS.headerBg.b);
@@ -120,9 +118,8 @@ export const generateFancyResumePDF = async (
 
   let yPos = LAYOUT.headerHeight + 12;
   let sidebarY = LAYOUT.headerHeight + 12;
-  let maxYPos = 0;
 
-  // --- SIDEBAR (TEXT ALIGNMENT CORRECTED) ---
+  // --- SIDEBAR (CENTER ALIGNED) ---
   const addSidebarSection = (title: string) => {
     sidebarY += scaledSpacing.beforeSection;
     doc.setFontSize(scaledFontSizes.sidebarHeader);
@@ -132,14 +129,14 @@ export const generateFancyResumePDF = async (
       COLORS.textBlack.g,
       COLORS.textBlack.b
     );
-    // CHANGED: Aligned text to the right
-    doc.text(title.toUpperCase(), sidebarRightX, sidebarY, { align: "right" });
+    doc.text(title.toUpperCase(), sidebarCenterX, sidebarY, {
+      align: "center",
+    });
     sidebarY += 1.5;
     doc.setDrawColor(200, 200, 200);
     doc.setLineWidth(0.3);
-    // Underline position is unchanged and correct
     doc.line(
-      sidebarX,
+      LAYOUT.sidebarPadding,
       sidebarY,
       LAYOUT.sidebarWidth - LAYOUT.sidebarPadding,
       sidebarY
@@ -166,8 +163,7 @@ export const generateFancyResumePDF = async (
       LAYOUT.sidebarWidth - LAYOUT.sidebarPadding * 2
     );
     for (const line of lines) {
-      // CHANGED: Aligned text to the right
-      doc.text(line, sidebarRightX, sidebarY, { align: "right" });
+      doc.text(line, sidebarCenterX, sidebarY, { align: "center" });
       sidebarY += scaledSpacing.sidebarLineHeight;
     }
   };
@@ -201,9 +197,8 @@ export const generateFancyResumePDF = async (
       sidebarY += 3;
     }
   }
-  maxYPos = Math.max(maxYPos, sidebarY);
 
-  // --- MAIN CONTENT (UNCHANGED) ---
+  // --- MAIN CONTENT ---
   const addMainSectionHeader = (title: string) => {
     yPos += scaledSpacing.beforeSection;
     doc.setFontSize(scaledFontSizes.mainHeader);
@@ -393,11 +388,6 @@ export const generateFancyResumePDF = async (
         yPos += scaledSpacing.betweenEducation;
     }
   }
-
-  maxYPos = Math.max(maxYPos, yPos);
-
-  // --- FINALIZE DOCUMENT ---
-  doc.internal.pageSize.height = maxYPos + LAYOUT.bottomMargin;
 
   doc.save(filename);
 };
