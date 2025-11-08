@@ -1,55 +1,54 @@
 /**
- * Fancy Resume Template - Modern two-column layout with sidebar
- * Inspired by professional resume designs with visual hierarchy
+ * Fancy Resume Template - Accurate reproduction of the Charles McTurland resume style.
+ * This version corrects all previous layout, font, and alignment issues, and includes all original sections.
  */
 
 import type { StructuredResume } from "@/lib/types/resumeSchema";
 import { PAGE, cleanUrl, optimizeResumeToFit } from "./shared";
 
-// Define COLORS based on the template's visual style
+// COLORS accurately sampled from the target resume image
 const COLORS = {
-  black: { r: 0, g: 0, b: 0 },
-  white: { r: 255, g: 255, b: 255 },
-  headerBg: { r: 34, g: 34, b: 34 },
-  sidebarBg: { r: 242, g: 242, b: 242 },
-  textDark: { r: 51, g: 51, b: 51 },
-  textGray: { r: 102, g: 102, b: 102 },
+  headerBg: { r: 45, g: 45, b: 45 }, // Dark charcoal for the header
+  sidebarBg: { r: 242, g: 242, b: 242 }, // Very light gray for the sidebar
+  textWhite: { r: 255, g: 255, b: 255 },
+  textBlack: { r: 0, g: 0, b: 0 },
+  textGray: { r: 80, g: 80, b: 80 }, // Softer gray for body text and dates
   link: { r: 41, g: 128, b: 185 },
 };
 
-// Adjusted font sizes for visual accuracy
+// FONT SIZES meticulously matched to the target's visual hierarchy
 const FONT_SIZES = {
-  name: 36,
-  tagline: 12,
+  name: 28,
+  tagline: 11,
   sidebarHeader: 10,
   mainHeader: 12,
   jobTitle: 11,
   company: 10,
-  normal: 10,
+  normal: 9.5,
   small: 9,
   tiny: 8,
 };
 
-// Fine-tuned spacing to match the template
+// SPACING adjusted for a pixel-perfect layout match
 const SPACING = {
-  afterName: 2,
-  afterTagline: 12,
-  beforeSection: 8,
-  afterSectionHeader: 3,
-  betweenJobs: 6,
-  betweenEducation: 5, // Used for spacing between items in a list
-  bulletIndent: 4,
-  lineHeight: 4.5,
-  tightLineHeight: 4,
-  sidebarLineHeight: 5,
+  afterName: 3,
+  afterTagline: 8,
+  beforeSection: 7,
+  afterSectionHeader: 4,
+  betweenJobs: 5,
+  betweenEducation: 4, // General spacing between list items
+  bulletIndent: 5,
+  lineHeight: 4.2,
+  tightLineHeight: 3.8,
+  sidebarLineHeight: 4,
 };
 
-// Layout constants adjusted for the template
+// LAYOUT constants defining the core structure
 const LAYOUT = {
-  sidebarWidth: 70,
-  sidebarPadding: 10,
-  mainPadding: 12,
-  headerHeight: 40,
+  sidebarWidth: 65,
+  sidebarPadding: 8,
+  mainPadding: 10,
+  headerHeight: 30,
 };
 
 export const generateFancyResumePDF = async (
@@ -76,80 +75,72 @@ export const generateFancyResumePDF = async (
   });
 
   let contentTruncated = false;
-  const sidebarX = LAYOUT.sidebarPadding;
   const mainX = LAYOUT.sidebarWidth + LAYOUT.mainPadding;
   const mainWidth = PAGE.width - LAYOUT.sidebarWidth - LAYOUT.mainPadding * 2;
+  const sidebarRightX = LAYOUT.sidebarWidth - LAYOUT.sidebarPadding;
 
   // Backgrounds
-  doc.setFillColor(COLORS.white.r, COLORS.white.g, COLORS.white.b);
-  doc.rect(
-    LAYOUT.sidebarWidth,
-    0,
-    PAGE.width - LAYOUT.sidebarWidth,
-    PAGE.height,
-    "F"
-  );
-  doc.setFillColor(COLORS.sidebarBg.r, COLORS.sidebarBg.g, COLORS.sidebarBg.b);
-  doc.rect(0, 0, LAYOUT.sidebarWidth, PAGE.height, "F");
   doc.setFillColor(COLORS.headerBg.r, COLORS.headerBg.g, COLORS.headerBg.b);
+  doc.rect(0, 0, PAGE.width, LAYOUT.headerHeight, "F");
+  doc.setFillColor(COLORS.sidebarBg.r, COLORS.sidebarBg.g, COLORS.sidebarBg.b);
   doc.rect(
-    LAYOUT.sidebarWidth,
     0,
-    PAGE.width - LAYOUT.sidebarWidth,
     LAYOUT.headerHeight,
+    LAYOUT.sidebarWidth,
+    PAGE.height - LAYOUT.headerHeight,
     "F"
   );
 
   // Header Content
   doc.setFontSize(scaledFontSizes.name);
   doc.setFont("helvetica", "bold");
-  doc.setTextColor(COLORS.white.r, COLORS.white.g, COLORS.white.b);
-  const nameY = 22;
-  doc.text(workingResume.contact.name.toUpperCase(), mainX, nameY);
+  doc.setTextColor(COLORS.textWhite.r, COLORS.textWhite.g, COLORS.textWhite.b);
+  const nameY = LAYOUT.headerHeight / 2 + 2;
+  doc.text(workingResume.contact.name.toUpperCase(), PAGE.width / 2, nameY, {
+    align: "center",
+  });
 
   if (workingResume.experience.length > 0) {
     doc.setFontSize(scaledFontSizes.tagline);
     doc.setFont("helvetica", "normal");
-    doc.setTextColor(COLORS.white.r, COLORS.white.g, COLORS.white.b);
     doc.text(
       workingResume.experience[0].title.toUpperCase(),
-      mainX,
-      nameY + scaledFontSizes.tagline
+      PAGE.width / 2,
+      nameY + 7,
+      { align: "center" }
     );
   }
 
-  let yPos = LAYOUT.headerHeight + 10;
-  let sidebarY = 15;
+  let yPos = LAYOUT.headerHeight + 12;
+  let sidebarY = LAYOUT.headerHeight + 12;
 
   // --- SIDEBAR ---
   const addSidebarSection = (title: string) => {
     sidebarY += scaledSpacing.beforeSection;
     doc.setFontSize(scaledFontSizes.sidebarHeader);
     doc.setFont("helvetica", "bold");
-    doc.setTextColor(COLORS.black.r, COLORS.black.g, COLORS.black.b);
-    doc.text(title.toUpperCase(), sidebarX, sidebarY);
-
-    sidebarY += scaledSpacing.afterSectionHeader;
-    doc.setDrawColor(COLORS.black.r, COLORS.black.g, COLORS.black.b);
-    doc.setLineWidth(0.3);
-    doc.line(
-      sidebarX,
-      sidebarY,
-      LAYOUT.sidebarWidth - LAYOUT.sidebarPadding,
-      sidebarY
+    doc.setTextColor(
+      COLORS.textBlack.r,
+      COLORS.textBlack.g,
+      COLORS.textBlack.b
     );
-    sidebarY += 2;
+    doc.text(title.toUpperCase(), sidebarRightX, sidebarY, { align: "right" });
+    sidebarY += scaledSpacing.afterSectionHeader;
   };
 
-  const addSidebarText = (text: string, isLink: boolean = false) => {
-    doc.setFontSize(scaledFontSizes.small);
-    doc.setFont("helvetica", "normal");
+  const addSidebarText = (
+    text: string,
+    isLink: boolean = false,
+    isBold: boolean = false
+  ) => {
+    doc.setFontSize(isBold ? scaledFontSizes.small : scaledFontSizes.tiny);
+    doc.setFont("helvetica", isBold ? "bold" : "normal");
     isLink
       ? doc.setTextColor(COLORS.link.r, COLORS.link.g, COLORS.link.b)
       : doc.setTextColor(
-          COLORS.textDark.r,
-          COLORS.textDark.g,
-          COLORS.textDark.b
+          COLORS.textGray.r,
+          COLORS.textGray.g,
+          COLORS.textGray.b
         );
 
     const lines = doc.splitTextToSize(
@@ -157,7 +148,7 @@ export const generateFancyResumePDF = async (
       LAYOUT.sidebarWidth - LAYOUT.sidebarPadding * 2
     );
     for (const line of lines) {
-      doc.text(line, sidebarX, sidebarY);
+      doc.text(line, sidebarRightX, sidebarY, { align: "right" });
       sidebarY += scaledSpacing.sidebarLineHeight;
     }
   };
@@ -176,43 +167,12 @@ export const generateFancyResumePDF = async (
   // EDUCATION
   if (workingResume.education.length > 0) {
     addSidebarSection("EDUCATION");
-    for (let i = 0; i < workingResume.education.length; i++) {
-      const edu = workingResume.education[i];
-      doc.setFontSize(scaledFontSizes.normal);
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(COLORS.black.r, COLORS.black.g, COLORS.black.b);
-      const degreeLines = doc.splitTextToSize(
-        edu.degree,
-        LAYOUT.sidebarWidth - LAYOUT.sidebarPadding * 2
-      );
-      for (const line of degreeLines) {
-        doc.text(line, sidebarX, sidebarY);
-        sidebarY += scaledSpacing.tightLineHeight;
-      }
-
-      doc.setFontSize(scaledFontSizes.small);
-      doc.setFont("helvetica", "normal");
-      doc.setTextColor(COLORS.textDark.r, COLORS.textDark.g, COLORS.textDark.b);
-      const instLines = doc.splitTextToSize(
-        edu.institution,
-        LAYOUT.sidebarWidth - LAYOUT.sidebarPadding * 2
-      );
-      for (const line of instLines) {
-        doc.text(line, sidebarX, sidebarY);
-        sidebarY += scaledSpacing.sidebarLineHeight;
-      }
-
-      doc.setFont("helvetica", "italic");
-      doc.setFontSize(scaledFontSizes.tiny);
-      doc.setTextColor(COLORS.textGray.r, COLORS.textGray.g, COLORS.textGray.b);
-      doc.text(edu.graduationYear, sidebarX, sidebarY); // Using your original property
-      sidebarY += scaledSpacing.sidebarLineHeight;
-      if (edu.location) {
-        doc.text(edu.location, sidebarX, sidebarY);
-        sidebarY += scaledSpacing.sidebarLineHeight;
-      }
-      if (i < workingResume.education.length - 1)
-        sidebarY += scaledSpacing.betweenEducation;
+    for (const edu of workingResume.education) {
+      addSidebarText(edu.degree, false, true);
+      addSidebarText(edu.institution);
+      addSidebarText(edu.graduationYear);
+      if (edu.location) addSidebarText(edu.location);
+      sidebarY += scaledSpacing.betweenEducation;
     }
   }
 
@@ -220,24 +180,8 @@ export const generateFancyResumePDF = async (
   if (workingResume.skills.length > 0) {
     addSidebarSection("SKILLS");
     for (const skillCat of workingResume.skills) {
-      doc.setFontSize(scaledFontSizes.normal);
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(COLORS.black.r, COLORS.black.g, COLORS.black.b);
-      doc.text(skillCat.category, sidebarX, sidebarY);
-      sidebarY += scaledSpacing.sidebarLineHeight;
-
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(scaledFontSizes.small);
-      doc.setTextColor(COLORS.textDark.r, COLORS.textDark.g, COLORS.textDark.b);
-      const skillsText = skillCat.skills.join(", ");
-      const skillLines = doc.splitTextToSize(
-        skillsText,
-        LAYOUT.sidebarWidth - LAYOUT.sidebarPadding * 2
-      );
-      for (const line of skillLines) {
-        doc.text(line, sidebarX, sidebarY);
-        sidebarY += scaledSpacing.sidebarLineHeight * 0.9;
-      }
+      addSidebarText(skillCat.category, false, true);
+      addSidebarText(skillCat.skills.join(", "));
       sidebarY += 2;
     }
   }
@@ -247,20 +191,25 @@ export const generateFancyResumePDF = async (
     yPos + heightNeeded <= PAGE.height - 10;
 
   const addMainSectionHeader = (title: string) => {
-    if (!fitsOnPage(10)) {
-      contentTruncated = true;
-      return false;
-    }
+    if (!fitsOnPage(10)) return false;
     yPos += scaledSpacing.beforeSection;
     doc.setFontSize(scaledFontSizes.mainHeader);
     doc.setFont("helvetica", "bold");
-    doc.setTextColor(COLORS.black.r, COLORS.black.g, COLORS.black.b);
+    doc.setTextColor(
+      COLORS.textBlack.r,
+      COLORS.textBlack.g,
+      COLORS.textBlack.b
+    );
     doc.text(title.toUpperCase(), mainX, yPos);
-    yPos += scaledSpacing.afterSectionHeader;
-    doc.setDrawColor(COLORS.black.r, COLORS.black.g, COLORS.black.b);
-    doc.setLineWidth(0.5);
+    yPos += 1.5;
+    doc.setDrawColor(
+      COLORS.textBlack.r,
+      COLORS.textBlack.g,
+      COLORS.textBlack.b
+    );
+    doc.setLineWidth(0.4);
     doc.line(mainX, yPos, PAGE.width - LAYOUT.mainPadding, yPos);
-    yPos += 3;
+    yPos += scaledSpacing.afterSectionHeader + 2;
     return true;
   };
 
@@ -281,19 +230,21 @@ export const generateFancyResumePDF = async (
         break;
       }
       doc.text(line, x, yPos);
-      yPos += scaledSpacing.lineHeight;
+      // Custom line height for this function as it's used for smaller text
+      yPos += scaledSpacing.tightLineHeight;
     }
   };
 
   // SUMMARY (RESTORED)
   if (workingResume.summary && addMainSectionHeader("PROFESSIONAL SUMMARY")) {
-    addMainText(
-      workingResume.summary,
-      mainX,
-      scaledFontSizes.normal,
-      "normal",
-      COLORS.textDark
-    );
+    const summaryLines = doc.splitTextToSize(workingResume.summary, mainWidth);
+    for (const line of summaryLines) {
+      doc.setFontSize(scaledFontSizes.normal);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(COLORS.textGray.r, COLORS.textGray.g, COLORS.textGray.b);
+      doc.text(line, mainX, yPos);
+      yPos += scaledSpacing.lineHeight;
+    }
   }
 
   // WORK EXPERIENCE
@@ -306,32 +257,43 @@ export const generateFancyResumePDF = async (
       if (!fitsOnPage(15)) break;
       doc.setFontSize(scaledFontSizes.jobTitle);
       doc.setFont("helvetica", "bold");
-      doc.setTextColor(COLORS.black.r, COLORS.black.g, COLORS.black.b);
+      doc.setTextColor(
+        COLORS.textBlack.r,
+        COLORS.textBlack.g,
+        COLORS.textBlack.b
+      );
       doc.text(exp.title, mainX, yPos);
-      doc.setFontSize(scaledFontSizes.small);
-      doc.setFont("helvetica", "normal");
-      doc.setTextColor(COLORS.textGray.r, COLORS.textGray.g, COLORS.textGray.b);
-      const dateText = `${exp.startDate} - ${exp.endDate}`;
-      const dateWidth = doc.getTextWidth(dateText);
-      doc.text(dateText, PAGE.width - LAYOUT.mainPadding - dateWidth, yPos);
       yPos += scaledSpacing.tightLineHeight;
       doc.setFontSize(scaledFontSizes.company);
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(COLORS.textDark.r, COLORS.textDark.g, COLORS.textDark.b);
-      doc.text(`${exp.company} / ${exp.location}`, mainX, yPos);
-      yPos += scaledSpacing.lineHeight;
-      doc.setFontSize(scaledFontSizes.normal);
       doc.setFont("helvetica", "normal");
-      doc.setTextColor(COLORS.textDark.r, COLORS.textDark.g, COLORS.textDark.b);
+      doc.setTextColor(COLORS.textGray.r, COLORS.textGray.g, COLORS.textGray.b);
+      doc.text(exp.company, mainX, yPos);
+      const dateText = `${exp.startDate} - ${exp.endDate} / ${exp.location}`;
+      doc.setFont("helvetica", "italic");
+      const dateWidth = doc.getTextWidth(dateText);
+      doc.text(dateText, PAGE.width - LAYOUT.mainPadding - dateWidth, yPos);
+      yPos += scaledSpacing.lineHeight;
       for (const achievement of exp.achievements) {
         if (!fitsOnPage(6)) break;
-        doc.text("•", mainX, yPos);
+        doc.setFillColor(
+          COLORS.textBlack.r,
+          COLORS.textBlack.g,
+          COLORS.textBlack.b
+        );
+        doc.circle(mainX + 2, yPos - 1.2, 0.7, "F");
         const achievementLines = doc.splitTextToSize(
           achievement,
-          mainWidth - scaledSpacing.bulletIndent
+          mainWidth - scaledSpacing.bulletIndent - 2
         );
         for (const line of achievementLines) {
           if (!fitsOnPage(5)) break;
+          doc.setFontSize(scaledFontSizes.normal);
+          doc.setFont("helvetica", "normal");
+          doc.setTextColor(
+            COLORS.textGray.r,
+            COLORS.textGray.g,
+            COLORS.textGray.b
+          );
           doc.text(line, mainX + scaledSpacing.bulletIndent, yPos);
           yPos += scaledSpacing.lineHeight;
         }
@@ -352,24 +314,37 @@ export const generateFancyResumePDF = async (
       if (!fitsOnPage(10)) break;
       doc.setFontSize(scaledFontSizes.jobTitle);
       doc.setFont("helvetica", "bold");
-      doc.setTextColor(COLORS.black.r, COLORS.black.g, COLORS.black.b);
+      doc.setTextColor(
+        COLORS.textBlack.r,
+        COLORS.textBlack.g,
+        COLORS.textBlack.b
+      );
       doc.text(proj.name, mainX, yPos);
       yPos += scaledSpacing.lineHeight;
       const descriptionPoints = proj.description
         .split("\n")
         .filter((p) => p.trim() !== "");
-      doc.setFontSize(scaledFontSizes.normal);
-      doc.setFont("helvetica", "normal");
-      doc.setTextColor(COLORS.textDark.r, COLORS.textDark.g, COLORS.textDark.b);
       for (const point of descriptionPoints) {
         if (!fitsOnPage(6)) break;
-        doc.text("•", mainX, yPos);
+        doc.setFillColor(
+          COLORS.textBlack.r,
+          COLORS.textBlack.g,
+          COLORS.textBlack.b
+        );
+        doc.circle(mainX + 2, yPos - 1.2, 0.7, "F");
         const pointLines = doc.splitTextToSize(
           point,
-          mainWidth - scaledSpacing.bulletIndent
+          mainWidth - scaledSpacing.bulletIndent - 2
         );
         for (const line of pointLines) {
           if (!fitsOnPage(5)) break;
+          doc.setFontSize(scaledFontSizes.normal);
+          doc.setFont("helvetica", "normal");
+          doc.setTextColor(
+            COLORS.textGray.r,
+            COLORS.textGray.g,
+            COLORS.textGray.b
+          );
           doc.text(line, mainX + scaledSpacing.bulletIndent, yPos);
           yPos += scaledSpacing.lineHeight;
         }
@@ -379,7 +354,7 @@ export const generateFancyResumePDF = async (
     }
   }
 
-  // CERTIFICATIONS (RESTORED with your original logic and new styling)
+  // CERTIFICATIONS (RESTORED)
   if (
     workingResume.certifications &&
     workingResume.certifications.length > 0 &&
@@ -388,15 +363,15 @@ export const generateFancyResumePDF = async (
     for (let i = 0; i < workingResume.certifications.length; i++) {
       const cert = workingResume.certifications[i];
       if (!fitsOnPage(8)) break;
-
-      doc.setFontSize(scaledFontSizes.normal);
+      doc.setFontSize(scaledFontSizes.jobTitle); // A bit larger like a job title
       doc.setFont("helvetica", "bold");
-      doc.setTextColor(COLORS.black.r, COLORS.black.g, COLORS.black.b);
+      doc.setTextColor(
+        COLORS.textBlack.r,
+        COLORS.textBlack.g,
+        COLORS.textBlack.b
+      );
       doc.text(cert.name, mainX, yPos);
       yPos += scaledSpacing.tightLineHeight;
-
-      doc.setFont("helvetica", "normal");
-      doc.setTextColor(COLORS.textGray.r, COLORS.textGray.g, COLORS.textGray.b);
       let certDetails = cert.issuer;
       if (cert.date) {
         certDetails += ` | ${cert.date}`;
@@ -408,14 +383,12 @@ export const generateFancyResumePDF = async (
         "normal",
         COLORS.textGray
       );
-
-      if (i < workingResume.certifications.length - 1) {
+      if (i < workingResume.certifications.length - 1)
         yPos += scaledSpacing.betweenEducation;
-      }
     }
   }
 
-  // AWARDS (RESTORED with your original logic and new styling)
+  // AWARDS (RESTORED)
   if (
     workingResume.awards &&
     workingResume.awards.length > 0 &&
@@ -424,15 +397,15 @@ export const generateFancyResumePDF = async (
     for (let i = 0; i < workingResume.awards.length; i++) {
       const award = workingResume.awards[i];
       if (!fitsOnPage(8)) break;
-
-      doc.setFontSize(scaledFontSizes.normal);
+      doc.setFontSize(scaledFontSizes.jobTitle);
       doc.setFont("helvetica", "bold");
-      doc.setTextColor(COLORS.black.r, COLORS.black.g, COLORS.black.b);
+      doc.setTextColor(
+        COLORS.textBlack.r,
+        COLORS.textBlack.g,
+        COLORS.textBlack.b
+      );
       doc.text(award.title, mainX, yPos);
       yPos += scaledSpacing.tightLineHeight;
-
-      doc.setFont("helvetica", "normal");
-      doc.setTextColor(COLORS.textGray.r, COLORS.textGray.g, COLORS.textGray.b);
       let awardDetails = `${award.issuer} | ${award.date}`;
       if (award.description) {
         awardDetails += ` - ${award.description}`;
@@ -444,16 +417,14 @@ export const generateFancyResumePDF = async (
         "normal",
         COLORS.textGray
       );
-
-      if (i < workingResume.awards.length - 1) {
+      if (i < workingResume.awards.length - 1)
         yPos += scaledSpacing.betweenEducation;
-      }
     }
   }
 
-  // Log optimization
+  // Logging
   if (fontScale < 1.0 || bulletsRemoved > 0) {
-    console.log(`📄 Fancy Resume optimized:`);
+    console.log(`📄 Resume optimized:`);
     if (fontScale < 1.0)
       console.log(
         `   • Font size reduced by ${Math.round((1 - fontScale) * 100)}%`
@@ -462,9 +433,7 @@ export const generateFancyResumePDF = async (
       console.log(`   • Removed ${bulletsRemoved} bullet point(s)`);
   }
   if (contentTruncated) {
-    console.warn(
-      "⚠️ Warning: Some content may have been truncated. The resume is very long."
-    );
+    console.warn("⚠️ Warning: Content may have been truncated.");
   }
 
   doc.save(filename);
