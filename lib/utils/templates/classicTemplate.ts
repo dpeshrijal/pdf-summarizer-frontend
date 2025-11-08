@@ -265,8 +265,9 @@ export const generateClassicResumePDF = async (
 
   // ========== WORK EXPERIENCE ==========
   if (workingResume.experience.length > 0 && addSectionHeader("WORK EXPERIENCE")) {
-    for (let i = 0; i < workingResume.experience.length; i++) {
-      const exp = workingResume.experience[i];
+    const reversedExperience = [...workingResume.experience].reverse();
+    for (let i = 0; i < reversedExperience.length; i++) {
+      const exp = reversedExperience[i];
       if (!fitsOnPage(15)) break;
 
       doc.setFontSize(scaledFontSizes.jobTitle);
@@ -315,7 +316,7 @@ export const generateClassicResumePDF = async (
         }
       }
 
-      if (i < workingResume.experience.length - 1) {
+      if (i < reversedExperience.length - 1) {
         yPos += scaledSpacing.betweenJobs;
       }
     }
