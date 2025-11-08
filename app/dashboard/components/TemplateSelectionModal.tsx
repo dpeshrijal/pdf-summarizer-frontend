@@ -65,7 +65,7 @@ export function TemplateSelectionModal({
                 <div className="pt-1 space-y-0.5 text-left">
                   <div className="font-semibold text-foreground border-b border-foreground/30 pb-0.5 text-[5.5px]">SUMMARY</div>
                   <div className="text-foreground/60 leading-tight text-[4.5px]">
-                    Experienced Software Engineer with 5+ years building scalable web applications. Proficient in full-stack development, cloud technologies, and agile methodologies.
+                    Results-driven Senior Software Engineer with 7+ years of experience designing and implementing scalable, high-performance web applications. Proven track record of leading cross-functional teams, architecting microservices solutions, and delivering products that serve millions of users. Expertise in full-stack development, cloud infrastructure, and modern DevOps practices.
                   </div>
                 </div>
 
@@ -75,31 +75,39 @@ export function TemplateSelectionModal({
                   <div className="space-y-0.5">
                     <div className="font-medium text-foreground text-[5px]">Senior Software Engineer</div>
                     <div className="text-foreground/60 text-[4.5px]">Tech Corp, San Francisco, CA</div>
-                    <div className="text-foreground/60 italic text-[4.5px]">Jan 2020 - Present</div>
+                    <div className="text-foreground/60 italic text-[4.5px]">January 2020 - Present</div>
                     <div className="flex gap-1 items-start">
                       <div className="text-foreground/60 text-[4.5px]">•</div>
-                      <div className="text-foreground/60 leading-tight flex-1 text-[4.5px]">Led development of microservices architecture serving 2M+ users</div>
+                      <div className="text-foreground/60 leading-tight flex-1 text-[4.5px]">Led development of microservices architecture using Node.js and Docker, successfully migrating monolithic application to serve 2M+ daily active users with 99.9% uptime</div>
                     </div>
                     <div className="flex gap-1 items-start">
                       <div className="text-foreground/60 text-[4.5px]">•</div>
-                      <div className="text-foreground/60 leading-tight flex-1 text-[4.5px]">Improved system performance by 40% through optimization</div>
+                      <div className="text-foreground/60 leading-tight flex-1 text-[4.5px]">Architected and implemented real-time data processing pipeline using Apache Kafka and Redis, reducing latency by 65% and improving user experience across platform</div>
                     </div>
                     <div className="flex gap-1 items-start">
                       <div className="text-foreground/60 text-[4.5px]">•</div>
-                      <div className="text-foreground/60 leading-tight flex-1 text-[4.5px]">Mentored team of 5 junior developers</div>
+                      <div className="text-foreground/60 leading-tight flex-1 text-[4.5px]">Mentored team of 5 junior developers through code reviews, pair programming sessions, and technical workshops, resulting in 40% improvement in code quality metrics</div>
+                    </div>
+                    <div className="flex gap-1 items-start">
+                      <div className="text-foreground/60 text-[4.5px]">•</div>
+                      <div className="text-foreground/60 leading-tight flex-1 text-[4.5px]">Optimized database queries and implemented caching strategies that improved application response time by 45% and reduced infrastructure costs by $50K annually</div>
                     </div>
                   </div>
                   <div className="space-y-0.5 pt-0.5">
                     <div className="font-medium text-foreground text-[5px]">Software Engineer</div>
                     <div className="text-foreground/60 text-[4.5px]">StartUp Inc, New York, NY</div>
-                    <div className="text-foreground/60 italic text-[4.5px]">Jun 2018 - Dec 2019</div>
+                    <div className="text-foreground/60 italic text-[4.5px]">June 2018 - December 2019</div>
                     <div className="flex gap-1 items-start">
                       <div className="text-foreground/60 text-[4.5px]">•</div>
-                      <div className="text-foreground/60 leading-tight flex-1 text-[4.5px]">Built RESTful APIs and responsive web interfaces</div>
+                      <div className="text-foreground/60 leading-tight flex-1 text-[4.5px]">Developed RESTful APIs and responsive web interfaces using React and Python Django framework, serving 500K+ users and handling 10M+ API requests daily</div>
                     </div>
                     <div className="flex gap-1 items-start">
                       <div className="text-foreground/60 text-[4.5px]">•</div>
-                      <div className="text-foreground/60 leading-tight flex-1 text-[4.5px]">Implemented CI/CD pipelines reducing deployment time by 60%</div>
+                      <div className="text-foreground/60 leading-tight flex-1 text-[4.5px]">Implemented comprehensive CI/CD pipelines with Jenkins and Docker, reducing deployment time from 2 hours to 15 minutes and enabling daily production releases</div>
+                    </div>
+                    <div className="flex gap-1 items-start">
+                      <div className="text-foreground/60 text-[4.5px]">•</div>
+                      <div className="text-foreground/60 leading-tight flex-1 text-[4.5px]">Collaborated with product and design teams to build customer-facing features that increased user engagement by 30% and contributed to $2M revenue growth</div>
                     </div>
                   </div>
                 </div>
@@ -216,7 +224,7 @@ export function TemplateSelectionModal({
                     <div className="space-y-0.5">
                       <div className="font-semibold text-foreground text-[5px]">SUMMARY</div>
                       <div className="h-px w-full bg-foreground/40" />
-                      <div className="text-foreground/60 text-[4px] leading-tight">Experienced Software Engineer with 5+ years building scalable web applications. Proficient in full-stack development, cloud technologies, and agile methodologies. Passionate about creating efficient solutions.</div>
+                      <div className="text-foreground/60 text-[4px] leading-tight">Results-driven Senior Software Engineer with 7+ years of experience designing and implementing scalable, high-performance web applications. Proven track record of leading cross-functional teams, architecting microservices solutions, and delivering products that serve millions of users. Expertise in full-stack development, cloud infrastructure, and modern DevOps practices.</div>
                     </div>
 
                     {/* Experience */}
@@ -231,15 +239,15 @@ export function TemplateSelectionModal({
                         </div>
                         <div className="flex gap-0.5 items-start">
                           <div className="text-foreground/60 text-[4px] mt-0.5">•</div>
-                          <div className="text-foreground/60 text-[4px] leading-tight flex-1">Led development of microservices architecture serving 2M+ users</div>
+                          <div className="text-foreground/60 text-[4px] leading-tight flex-1">Led development of microservices architecture using Node.js and Docker, successfully migrating monolithic application to serve 2M+ daily active users</div>
                         </div>
                         <div className="flex gap-0.5 items-start">
                           <div className="text-foreground/60 text-[4px] mt-0.5">•</div>
-                          <div className="text-foreground/60 text-[4px] leading-tight flex-1">Improved system performance by 40% through optimization</div>
+                          <div className="text-foreground/60 text-[4px] leading-tight flex-1">Architected real-time data processing pipeline using Apache Kafka and Redis, reducing latency by 65% and improving user experience</div>
                         </div>
                         <div className="flex gap-0.5 items-start">
                           <div className="text-foreground/60 text-[4px] mt-0.5">•</div>
-                          <div className="text-foreground/60 text-[4px] leading-tight flex-1">Mentored team of 5 junior developers</div>
+                          <div className="text-foreground/60 text-[4px] leading-tight flex-1">Mentored team of 5 junior developers through code reviews and technical workshops, resulting in 40% improvement in code quality</div>
                         </div>
                       </div>
                       <div className="space-y-0.5 pt-0.5">
@@ -250,11 +258,11 @@ export function TemplateSelectionModal({
                         </div>
                         <div className="flex gap-0.5 items-start">
                           <div className="text-foreground/60 text-[4px] mt-0.5">•</div>
-                          <div className="text-foreground/60 text-[4px] leading-tight flex-1">Built RESTful APIs and responsive web interfaces</div>
+                          <div className="text-foreground/60 text-[4px] leading-tight flex-1">Developed RESTful APIs and responsive web interfaces using React and Django, serving 500K+ users and handling 10M+ daily requests</div>
                         </div>
                         <div className="flex gap-0.5 items-start">
                           <div className="text-foreground/60 text-[4px] mt-0.5">•</div>
-                          <div className="text-foreground/60 text-[4px] leading-tight flex-1">Implemented CI/CD pipelines reducing deployment by 60%</div>
+                          <div className="text-foreground/60 text-[4px] leading-tight flex-1">Implemented CI/CD pipelines with Jenkins and Docker, reducing deployment time from 2 hours to 15 minutes</div>
                         </div>
                       </div>
                     </div>
@@ -266,7 +274,11 @@ export function TemplateSelectionModal({
                       <div className="font-medium text-foreground text-[4.5px]">E-Commerce Platform</div>
                       <div className="flex gap-0.5 items-start">
                         <div className="text-foreground/60 text-[4px] mt-0.5">•</div>
-                        <div className="text-foreground/60 text-[4px] leading-tight flex-1">Built scalable platform serving 100K+ users with React and Node.js</div>
+                        <div className="text-foreground/60 text-[4px] leading-tight flex-1">Built full-stack e-commerce platform with React, Node.js, and PostgreSQL serving 100K+ users with real-time inventory management</div>
+                      </div>
+                      <div className="flex gap-0.5 items-start">
+                        <div className="text-foreground/60 text-[4px] mt-0.5">•</div>
+                        <div className="text-foreground/60 text-[4px] leading-tight flex-1">Integrated payment processing with Stripe and implemented secure authentication with JWT and OAuth 2.0</div>
                       </div>
                     </div>
 
@@ -274,7 +286,7 @@ export function TemplateSelectionModal({
                     <div className="space-y-0.5">
                       <div className="font-semibold text-foreground text-[5px]">CERTIFICATIONS</div>
                       <div className="h-px w-full bg-foreground/40" />
-                      <div className="font-medium text-foreground text-[4.5px]">AWS Certified Solutions Architect</div>
+                      <div className="font-medium text-foreground text-[4.5px]">AWS Certified Solutions Architect - Professional</div>
                       <div className="text-foreground/60 text-[4px]">Amazon Web Services | 2022</div>
                     </div>
                   </div>
