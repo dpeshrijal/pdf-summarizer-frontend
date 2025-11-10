@@ -9,6 +9,7 @@ import { generateResumePDF, generateCoverLetterPDF } from "@/lib/utils/templateP
 import type { Generation } from "@/lib/utils/dashboardApi";
 import type { GenerationOutput } from "@/lib/types/resumeSchema";
 import { TemplateSelectionModal } from "./TemplateSelectionModal";
+import { MatchScoreDisplay } from "./MatchScoreDisplay";
 
 type TemplateType = 'classic' | 'fancy' | 'artistic';
 
@@ -28,6 +29,9 @@ export function GenerationHistory({ history }: GenerationHistoryProps) {
     resume: any;
     fileName: string;
   } | null>(null);
+
+  // Expanded match score state
+  const [expandedJobId, setExpandedJobId] = useState<string | null>(null);
 
   // Calculate pagination
   const totalPages = Math.ceil(history.length / itemsPerPage);
@@ -94,51 +98,59 @@ export function GenerationHistory({ history }: GenerationHistoryProps) {
               return "Low Match";
             };
 
+            const isExpanded = expandedJobId === generation.jobId;
+
             return (
-              <div
-                key={generation.jobId}
-                className="group flex items-center gap-4 md:gap-6 p-4 md:p-5 hover:bg-muted/30 transition-all duration-200 cursor-pointer"
-              >
-                {/* Match Score Circle - Primary Visual */}
-                {matchScore && (
-                  <div className="flex-shrink-0">
-                    <div className="relative w-14 h-14 md:w-16 md:h-16">
-                      <div className={`absolute inset-0 rounded-full bg-gradient-to-br ${getScoreColor(matchScore.overallScore)} opacity-10 blur-md`} />
-                      <div className={`relative w-full h-full rounded-full bg-gradient-to-br ${getScoreColor(matchScore.overallScore)} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}>
-                        <div className="text-center">
-                          <div className="text-lg md:text-xl font-bold text-white">{matchScore.overallScore}</div>
+              <div key={generation.jobId} className="border-b border-border/50 last:border-0">
+                {/* Clickable Row */}
+                <div
+                  onClick={() => {
+                    if (matchScore) {
+                      setExpandedJobId(isExpanded ? null : generation.jobId);
+                    }
+                  }}
+                  className={`group flex items-center gap-4 md:gap-6 p-4 md:p-5 hover:bg-muted/30 transition-all duration-200 ${matchScore ? 'cursor-pointer' : ''}`}
+                >
+                  {/* Match Score Circle - Primary Visual */}
+                  {matchScore && (
+                    <div className="flex-shrink-0">
+                      <div className="relative w-14 h-14 md:w-16 md:h-16">
+                        <div className={`absolute inset-0 rounded-full bg-gradient-to-br ${getScoreColor(matchScore.overallScore)} opacity-10 blur-md`} />
+                        <div className={`relative w-full h-full rounded-full bg-gradient-to-br ${getScoreColor(matchScore.overallScore)} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}>
+                          <div className="text-center">
+                            <div className="text-lg md:text-xl font-bold text-white">{matchScore.overallScore}</div>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {/* Company & Position Info */}
-                <div className="flex-1 min-w-0 space-y-1">
-                  <div className="flex flex-col gap-1">
-                    <h3 className="font-bold text-base md:text-lg truncate group-hover:text-primary transition-colors">
-                      {generation.companyName}
-                    </h3>
-                    <p className="text-sm text-muted-foreground truncate">
-                      {generation.jobTitle}
-                    </p>
+                  {/* Company & Position Info */}
+                  <div className="flex-1 min-w-0 space-y-1">
+                    <div className="flex flex-col gap-1">
+                      <h3 className="font-bold text-base md:text-lg truncate group-hover:text-primary transition-colors">
+                        {generation.companyName}
+                      </h3>
+                      <p className="text-sm text-muted-foreground truncate">
+                        {generation.jobTitle}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Clock className="h-3 w-3" />
+                      <span>{formattedDate}</span>
+                      {matchScore && (
+                        <>
+                          <span className="hidden sm:inline">•</span>
+                          <span className="hidden sm:inline text-primary font-medium">
+                            {getScoreRating(matchScore.overallScore)}
+                          </span>
+                        </>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Clock className="h-3 w-3" />
-                    <span>{formattedDate}</span>
-                    {matchScore && (
-                      <>
-                        <span className="hidden sm:inline">•</span>
-                        <span className="hidden sm:inline text-primary font-medium">
-                          {getScoreRating(matchScore.overallScore)}
-                        </span>
-                      </>
-                    )}
-                  </div>
-                </div>
 
-                {/* Action Buttons */}
-                <div className="flex items-center gap-2 flex-shrink-0">
+                  {/* Action Buttons */}
+                  <div className="flex items-center gap-2 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
                   <Button
                     onClick={() => {
                       // Handle both structured and old format
@@ -218,6 +230,14 @@ export function GenerationHistory({ history }: GenerationHistoryProps) {
                     <span className="hidden md:inline">Cover Letter</span>
                   </Button>
                 </div>
+                </div>
+
+                {/* Expanded Match Score Details */}
+                {isExpanded && matchScore && (
+                  <div className="px-4 md:px-6 pb-5 bg-muted/20">
+                    <MatchScoreDisplay matchScore={matchScore} />
+                  </div>
+                )}
               </div>
             );
           })}
