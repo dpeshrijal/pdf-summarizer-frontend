@@ -9,7 +9,6 @@ import { generateResumePDF, generateCoverLetterPDF } from "@/lib/utils/templateP
 import type { Generation } from "@/lib/utils/dashboardApi";
 import type { GenerationOutput } from "@/lib/types/resumeSchema";
 import { TemplateSelectionModal } from "./TemplateSelectionModal";
-import { MatchScoreDisplay } from "./MatchScoreDisplay";
 
 type TemplateType = 'classic' | 'fancy' | 'artistic';
 
@@ -109,135 +108,220 @@ export function GenerationHistory({ history }: GenerationHistoryProps) {
                       setExpandedJobId(isExpanded ? null : generation.jobId);
                     }
                   }}
-                  className={`group flex items-center gap-4 md:gap-6 p-4 md:p-5 hover:bg-muted/30 transition-all duration-200 ${matchScore ? 'cursor-pointer' : ''}`}
+                  className={`group p-4 md:p-5 hover:bg-muted/30 transition-all duration-200 ${matchScore ? 'cursor-pointer' : ''}`}
                 >
-                  {/* Match Score Circle - Primary Visual */}
-                  {matchScore && (
-                    <div className="flex-shrink-0">
-                      <div className="relative w-14 h-14 md:w-16 md:h-16">
-                        <div className={`absolute inset-0 rounded-full bg-gradient-to-br ${getScoreColor(matchScore.overallScore)} opacity-10 blur-md`} />
-                        <div className={`relative w-full h-full rounded-full bg-gradient-to-br ${getScoreColor(matchScore.overallScore)} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}>
-                          <div className="text-center">
-                            <div className="text-lg md:text-xl font-bold text-white">{matchScore.overallScore}</div>
+                  <div className="flex items-center gap-4 md:gap-6">
+                    {/* Match Score Circle - Primary Visual */}
+                    {matchScore && (
+                      <div className="flex-shrink-0">
+                        <div className="relative w-14 h-14 md:w-16 md:h-16">
+                          <div className={`absolute inset-0 rounded-full bg-gradient-to-br ${getScoreColor(matchScore.overallScore)} opacity-10 blur-md`} />
+                          <div className={`relative w-full h-full rounded-full bg-gradient-to-br ${getScoreColor(matchScore.overallScore)} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}>
+                            <div className="text-center">
+                              <div className="text-lg md:text-xl font-bold text-white">{matchScore.overallScore}</div>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  {/* Company & Position Info */}
-                  <div className="flex-1 min-w-0 space-y-1">
-                    <div className="flex flex-col gap-1">
-                      <h3 className="font-bold text-base md:text-lg truncate group-hover:text-primary transition-colors">
-                        {generation.companyName}
-                      </h3>
-                      <p className="text-sm text-muted-foreground truncate">
-                        {generation.jobTitle}
-                      </p>
+                    {/* Company & Position Info */}
+                    <div className="flex-1 min-w-0 space-y-1">
+                      <div className="flex flex-col gap-1">
+                        <h3 className="font-bold text-base md:text-lg truncate group-hover:text-primary transition-colors">
+                          {generation.companyName}
+                        </h3>
+                        <p className="text-sm text-muted-foreground truncate">
+                          {generation.jobTitle}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <Clock className="h-3 w-3" />
+                        <span>{formattedDate}</span>
+                        {matchScore && (
+                          <>
+                            <span className="hidden sm:inline">•</span>
+                            <span className="hidden sm:inline text-primary font-medium">
+                              {getScoreRating(matchScore.overallScore)}
+                            </span>
+                          </>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <Clock className="h-3 w-3" />
-                      <span>{formattedDate}</span>
-                      {matchScore && (
-                        <>
-                          <span className="hidden sm:inline">•</span>
-                          <span className="hidden sm:inline text-primary font-medium">
-                            {getScoreRating(matchScore.overallScore)}
-                          </span>
-                        </>
-                      )}
-                    </div>
-                  </div>
 
-                  {/* Action Buttons */}
-                  <div className="flex items-center gap-2 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
-                  <Button
-                    onClick={() => {
-                      // Handle both structured and old format
-                      if (generation.structuredData) {
-                        try {
-                          const parsed: GenerationOutput = JSON.parse(generation.structuredData);
-                          // Open modal for template selection
-                          setPendingGeneration({
-                            resume: parsed.resume,
-                            fileName: `${generation.companyName}_Resume_${formattedDate.replace(/\s/g, "_")}.pdf`
-                          });
-                          setIsTemplateModalOpen(true);
-                        } catch (e) {
-                          console.error("Failed to parse structured data:", e);
-                          // Fallback to old format
-                          if (generation.tailoredResume) {
+                    {/* Action Buttons */}
+                    <div className="flex items-center gap-2 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                      <Button
+                        onClick={() => {
+                          // Handle both structured and old format
+                          if (generation.structuredData) {
+                            try {
+                              const parsed: GenerationOutput = JSON.parse(generation.structuredData);
+                              // Open modal for template selection
+                              setPendingGeneration({
+                                resume: parsed.resume,
+                                fileName: `${generation.companyName}_Resume_${formattedDate.replace(/\s/g, "_")}.pdf`
+                              });
+                              setIsTemplateModalOpen(true);
+                            } catch (e) {
+                              console.error("Failed to parse structured data:", e);
+                              // Fallback to old format
+                              if (generation.tailoredResume) {
+                                downloadAsPDF(
+                                  generation.tailoredResume,
+                                  `${generation.companyName}_Resume_${formattedDate.replace(/\s/g, "_")}.pdf`
+                                );
+                              }
+                            }
+                          } else if (generation.tailoredResume) {
+                            // Old format
                             downloadAsPDF(
                               generation.tailoredResume,
                               `${generation.companyName}_Resume_${formattedDate.replace(/\s/g, "_")}.pdf`
                             );
                           }
-                        }
-                      } else if (generation.tailoredResume) {
-                        // Old format
-                        downloadAsPDF(
-                          generation.tailoredResume,
-                          `${generation.companyName}_Resume_${formattedDate.replace(/\s/g, "_")}.pdf`
-                        );
-                      }
-                    }}
-                    variant="outline"
-                    size="sm"
-                    className="group/btn hover:bg-primary/10 hover:text-primary hover:border-primary/50 whitespace-nowrap"
-                  >
-                    <Download className="h-4 w-4 md:mr-2 group-hover/btn:animate-bounce" />
-                    <span className="hidden md:inline">Resume</span>
-                  </Button>
+                        }}
+                        variant="outline"
+                        size="sm"
+                        className="group/btn hover:bg-primary/10 hover:text-primary hover:border-primary/50 whitespace-nowrap"
+                      >
+                        <Download className="h-4 w-4 md:mr-2 group-hover/btn:animate-bounce" />
+                        <span className="hidden md:inline">Resume</span>
+                      </Button>
 
-                  <Button
-                    onClick={() => {
-                      // Handle both structured and old format
-                      if (generation.structuredData) {
-                        try {
-                          const parsed: GenerationOutput = JSON.parse(generation.structuredData);
-                          generateCoverLetterPDF(
-                            parsed.coverLetter,
-                            {
-                              name: parsed.resume.contact.name,
-                              email: parsed.resume.contact.email,
-                              phone: parsed.resume.contact.phone || "", // Default to empty string if not provided
-                            },
-                            `${generation.companyName}_CoverLetter_${formattedDate.replace(/\s/g, "_")}.pdf`
-                          );
-                        } catch (e) {
-                          console.error("Failed to parse structured data:", e);
-                          // Fallback to old format
-                          if (generation.coverLetter) {
+                      <Button
+                        onClick={() => {
+                          // Handle both structured and old format
+                          if (generation.structuredData) {
+                            try {
+                              const parsed: GenerationOutput = JSON.parse(generation.structuredData);
+                              generateCoverLetterPDF(
+                                parsed.coverLetter,
+                                {
+                                  name: parsed.resume.contact.name,
+                                  email: parsed.resume.contact.email,
+                                  phone: parsed.resume.contact.phone || "", // Default to empty string if not provided
+                                },
+                                `${generation.companyName}_CoverLetter_${formattedDate.replace(/\s/g, "_")}.pdf`
+                              );
+                            } catch (e) {
+                              console.error("Failed to parse structured data:", e);
+                              // Fallback to old format
+                              if (generation.coverLetter) {
+                                downloadAsPDF(
+                                  generation.coverLetter,
+                                  `${generation.companyName}_CoverLetter_${formattedDate.replace(/\s/g, "_")}.pdf`
+                                );
+                              }
+                            }
+                          } else if (generation.coverLetter) {
+                            // Old format
                             downloadAsPDF(
                               generation.coverLetter,
                               `${generation.companyName}_CoverLetter_${formattedDate.replace(/\s/g, "_")}.pdf`
                             );
                           }
-                        }
-                      } else if (generation.coverLetter) {
-                        // Old format
-                        downloadAsPDF(
-                          generation.coverLetter,
-                          `${generation.companyName}_CoverLetter_${formattedDate.replace(/\s/g, "_")}.pdf`
-                        );
-                      }
-                    }}
-                    variant="outline"
-                    size="sm"
-                    className="group/btn hover:bg-blue-500/10 hover:text-blue-600 hover:border-blue-500/50 whitespace-nowrap"
-                  >
-                    <Download className="h-4 w-4 md:mr-2 group-hover/btn:animate-bounce" />
-                    <span className="hidden md:inline">Cover Letter</span>
-                  </Button>
-                </div>
-                </div>
-
-                {/* Expanded Match Score Details */}
-                {isExpanded && matchScore && (
-                  <div className="px-4 md:px-6 pb-5 bg-muted/20">
-                    <MatchScoreDisplay matchScore={matchScore} />
+                        }}
+                        variant="outline"
+                        size="sm"
+                        className="group/btn hover:bg-blue-500/10 hover:text-blue-600 hover:border-blue-500/50 whitespace-nowrap"
+                      >
+                        <Download className="h-4 w-4 md:mr-2 group-hover/btn:animate-bounce" />
+                        <span className="hidden md:inline">Cover Letter</span>
+                      </Button>
+                    </div>
                   </div>
-                )}
+
+                  {/* Expanded Match Score Details - Integrated smoothly */}
+                  {isExpanded && matchScore && (
+                    <div className="mt-4 pt-4 border-t border-border/50 animate-in slide-in-from-top-2 duration-300">
+                      {/* Compact Score Breakdown */}
+                      <div className="space-y-3 mb-4">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">Skills Match</span>
+                          <div className="flex items-center gap-2">
+                            <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
+                              <div
+                                className="h-full bg-gradient-to-r from-green-500 to-green-600 transition-all duration-500"
+                                style={{ width: `${matchScore.skillsMatch}%` }}
+                              />
+                            </div>
+                            <span className="font-semibold text-green-600 w-10 text-right">{matchScore.skillsMatch}%</span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">Experience Match</span>
+                          <div className="flex items-center gap-2">
+                            <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
+                              <div
+                                className="h-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-500"
+                                style={{ width: `${matchScore.experienceMatch}%` }}
+                              />
+                            </div>
+                            <span className="font-semibold text-blue-600 w-10 text-right">{matchScore.experienceMatch}%</span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">Education Match</span>
+                          <div className="flex items-center gap-2">
+                            <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
+                              <div
+                                className="h-full bg-gradient-to-r from-green-500 to-green-600 transition-all duration-500"
+                                style={{ width: `${matchScore.educationMatch}%` }}
+                              />
+                            </div>
+                            <span className="font-semibold text-green-600 w-10 text-right">{matchScore.educationMatch}%</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Strengths and Gaps in Two Columns */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Key Strengths */}
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 text-sm font-medium text-green-600">
+                            <div className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center">
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              </svg>
+                            </div>
+                            Key Strengths
+                          </div>
+                          <ul className="space-y-1.5 text-sm">
+                            {matchScore.strengths.slice(0, 3).map((strength, idx) => (
+                              <li key={idx} className="flex items-start gap-2 text-muted-foreground">
+                                <span className="text-green-500 mt-1">✓</span>
+                                <span className="flex-1">{strength}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        {/* Areas for Improvement */}
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 text-sm font-medium text-amber-600">
+                            <div className="w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center">
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                              </svg>
+                            </div>
+                            Areas for Improvement
+                          </div>
+                          <ul className="space-y-1.5 text-sm">
+                            {matchScore.gaps.slice(0, 3).map((gap, idx) => (
+                              <li key={idx} className="flex items-start gap-2 text-muted-foreground">
+                                <span className="text-amber-500 mt-1">⚠</span>
+                                <span className="flex-1">{gap}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             );
           })}
