@@ -321,12 +321,11 @@ export default function Dashboard() {
     }
 
     // Check if user has credits available (only if subscription system is active)
-    // TEMPORARILY DISABLED FOR TESTING BACKEND VALIDATION
-    // if (userProfile?.subscriptionTier && !hasCreditsAvailable(userProfile)) {
-    //   setShowUpgradeModal(true);
-    //   toast.error("You've run out of credits! Please upgrade to continue.");
-    //   return;
-    // }
+    if (userProfile?.subscriptionTier && !hasCreditsAvailable(userProfile)) {
+      setShowUpgradeModal(true);
+      toast.error("You've run out of credits! Please upgrade to continue.");
+      return;
+    }
 
     setIsGenerating(true);
     setGenerationStatus("Starting generation...");
@@ -341,18 +340,17 @@ export default function Dashboard() {
       }
 
       // Deduct credit before starting generation (only if subscription system is active)
-      // TEMPORARILY DISABLED FOR TESTING BACKEND VALIDATION
-      // if (user?.id && userProfile?.subscriptionTier) {
-      //   try {
-      //     await deductCredit(user.id, userProfile);
-      //     // Reload profile to show updated credits
-      //     const updatedProfile = await getUserProfile(user.id);
-      //     setUserProfile(updatedProfile.profile);
-      //   } catch (error) {
-      //     console.error("Credit deduction failed:", error);
-      //     // Continue with generation even if credit deduction fails
-      //   }
-      // }
+      if (user?.id && userProfile?.subscriptionTier) {
+        try {
+          await deductCredit(user.id, userProfile);
+          // Reload profile to show updated credits
+          const updatedProfile = await getUserProfile(user.id);
+          setUserProfile(updatedProfile.profile);
+        } catch (error) {
+          console.error("Credit deduction failed:", error);
+          // Continue with generation even if credit deduction fails
+        }
+      }
 
       const { jobId } = await startGeneration(token, fileId, jobDescription);
       setGenerationStatus("AI is tailoring your resume...");
