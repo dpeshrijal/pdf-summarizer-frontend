@@ -232,92 +232,147 @@ export function GenerationHistory({ history }: GenerationHistoryProps) {
                     </div>
                   </div>
 
-                  {/* Expanded Match Score Details - Integrated smoothly */}
+                  {/* Expanded Match Score Details - Matching ATS Score Design */}
                   {isExpanded && matchScore && (
-                    <div className="mt-4 pt-4 border-t border-border/50 animate-in slide-in-from-top-2 duration-300">
-                      {/* Compact Score Breakdown */}
-                      <div className="space-y-3 mb-4">
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-muted-foreground">Skills Match</span>
-                          <div className="flex items-center gap-2">
-                            <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
+                    <div className="mt-4 pt-6 space-y-6 border-t bg-gradient-to-b from-muted/30 to-background">
+                      {/* Summary */}
+                      <div className="text-sm text-foreground/70 leading-relaxed">
+                        {matchScore.summary}
+                      </div>
+
+                      {/* Detailed Breakdown */}
+                      <div className="space-y-4">
+                        <h3 className="text-sm font-semibold text-foreground">Detailed Breakdown</h3>
+                        <div className="grid grid-cols-1 gap-4">
+                          {/* Skills Match */}
+                          <div className="group relative p-4 rounded-xl border border-border/50 hover:border-border transition-all hover:shadow-sm bg-card/50">
+                            <div className="flex items-center justify-between mb-3">
+                              <div className="flex items-center gap-2">
+                                <div className={`w-2 h-2 rounded-full ${getScoreColor(matchScore.skillsMatch).includes('green') ? 'bg-emerald-500/10 text-emerald-600' : getScoreColor(matchScore.skillsMatch).includes('blue') ? 'bg-blue-500/10 text-blue-600' : 'bg-amber-500/10 text-amber-600'} animate-pulse`} />
+                                <span className="text-sm font-medium text-foreground">Skills Match</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className={`text-lg font-bold tabular-nums ${getScoreColor(matchScore.skillsMatch).includes('green') ? 'text-emerald-600' : getScoreColor(matchScore.skillsMatch).includes('blue') ? 'text-blue-600' : 'text-amber-600'}`}>{matchScore.skillsMatch}</span>
+                                <span className="text-xs text-muted-foreground">%</span>
+                              </div>
+                            </div>
+                            <div className="relative h-2.5 bg-muted rounded-full overflow-hidden">
                               <div
-                                className="h-full bg-gradient-to-r from-green-500 to-green-600 transition-all duration-500"
+                                className={`absolute inset-0 bg-gradient-to-r ${getScoreColor(matchScore.skillsMatch)} opacity-20 blur-sm`}
                                 style={{ width: `${matchScore.skillsMatch}%` }}
                               />
-                            </div>
-                            <span className="font-semibold text-green-600 w-10 text-right">{matchScore.skillsMatch}%</span>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-muted-foreground">Experience Match</span>
-                          <div className="flex items-center gap-2">
-                            <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
                               <div
-                                className="h-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-500"
+                                className={`absolute inset-y-0 left-0 bg-gradient-to-r ${getScoreColor(matchScore.skillsMatch)} rounded-full transition-all duration-700 ease-out shadow-sm`}
+                                style={{ width: `${matchScore.skillsMatch}%` }}
+                              >
+                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Experience Match */}
+                          <div className="group relative p-4 rounded-xl border border-border/50 hover:border-border transition-all hover:shadow-sm bg-card/50">
+                            <div className="flex items-center justify-between mb-3">
+                              <div className="flex items-center gap-2">
+                                <div className={`w-2 h-2 rounded-full ${getScoreColor(matchScore.experienceMatch).includes('green') ? 'bg-emerald-500/10 text-emerald-600' : getScoreColor(matchScore.experienceMatch).includes('blue') ? 'bg-blue-500/10 text-blue-600' : 'bg-amber-500/10 text-amber-600'} animate-pulse`} />
+                                <span className="text-sm font-medium text-foreground">Experience Match</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className={`text-lg font-bold tabular-nums ${getScoreColor(matchScore.experienceMatch).includes('green') ? 'text-emerald-600' : getScoreColor(matchScore.experienceMatch).includes('blue') ? 'text-blue-600' : 'text-amber-600'}`}>{matchScore.experienceMatch}</span>
+                                <span className="text-xs text-muted-foreground">%</span>
+                              </div>
+                            </div>
+                            <div className="relative h-2.5 bg-muted rounded-full overflow-hidden">
+                              <div
+                                className={`absolute inset-0 bg-gradient-to-r ${getScoreColor(matchScore.experienceMatch)} opacity-20 blur-sm`}
                                 style={{ width: `${matchScore.experienceMatch}%` }}
                               />
-                            </div>
-                            <span className="font-semibold text-blue-600 w-10 text-right">{matchScore.experienceMatch}%</span>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-muted-foreground">Education Match</span>
-                          <div className="flex items-center gap-2">
-                            <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
                               <div
-                                className="h-full bg-gradient-to-r from-green-500 to-green-600 transition-all duration-500"
+                                className={`absolute inset-y-0 left-0 bg-gradient-to-r ${getScoreColor(matchScore.experienceMatch)} rounded-full transition-all duration-700 ease-out shadow-sm`}
+                                style={{ width: `${matchScore.experienceMatch}%` }}
+                              >
+                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Education Match */}
+                          <div className="group relative p-4 rounded-xl border border-border/50 hover:border-border transition-all hover:shadow-sm bg-card/50">
+                            <div className="flex items-center justify-between mb-3">
+                              <div className="flex items-center gap-2">
+                                <div className={`w-2 h-2 rounded-full ${getScoreColor(matchScore.educationMatch).includes('green') ? 'bg-emerald-500/10 text-emerald-600' : getScoreColor(matchScore.educationMatch).includes('blue') ? 'bg-blue-500/10 text-blue-600' : 'bg-amber-500/10 text-amber-600'} animate-pulse`} />
+                                <span className="text-sm font-medium text-foreground">Education Match</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className={`text-lg font-bold tabular-nums ${getScoreColor(matchScore.educationMatch).includes('green') ? 'text-emerald-600' : getScoreColor(matchScore.educationMatch).includes('blue') ? 'text-blue-600' : 'text-amber-600'}`}>{matchScore.educationMatch}</span>
+                                <span className="text-xs text-muted-foreground">%</span>
+                              </div>
+                            </div>
+                            <div className="relative h-2.5 bg-muted rounded-full overflow-hidden">
+                              <div
+                                className={`absolute inset-0 bg-gradient-to-r ${getScoreColor(matchScore.educationMatch)} opacity-20 blur-sm`}
                                 style={{ width: `${matchScore.educationMatch}%` }}
                               />
+                              <div
+                                className={`absolute inset-y-0 left-0 bg-gradient-to-r ${getScoreColor(matchScore.educationMatch)} rounded-full transition-all duration-700 ease-out shadow-sm`}
+                                style={{ width: `${matchScore.educationMatch}%` }}
+                              >
+                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                              </div>
                             </div>
-                            <span className="font-semibold text-green-600 w-10 text-right">{matchScore.educationMatch}%</span>
                           </div>
                         </div>
                       </div>
 
                       {/* Strengths and Gaps in Two Columns */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Key Strengths */}
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2 text-sm font-medium text-green-600">
-                            <div className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center">
-                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                              </svg>
+                        {matchScore.strengths.length > 0 && (
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-2">
+                              <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center">
+                                <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
+                              </div>
+                              <h3 className="text-sm font-semibold text-foreground">Key Strengths</h3>
                             </div>
-                            Key Strengths
+                            <ul className="space-y-2">
+                              {matchScore.strengths.map((strength, idx) => (
+                                <li key={idx} className="group flex items-start gap-3 p-2.5 rounded-lg hover:bg-green-500/5 transition-colors">
+                                  <div className="w-5 h-5 rounded-full bg-green-500/10 flex items-center justify-center flex-shrink-0 mt-0.5 group-hover:bg-green-500/20 transition-colors">
+                                    <span className="text-[10px] text-green-600 font-bold">✓</span>
+                                  </div>
+                                  <span className="text-sm text-foreground/80 leading-relaxed">{strength}</span>
+                                </li>
+                              ))}
+                            </ul>
                           </div>
-                          <ul className="space-y-1.5 text-sm">
-                            {matchScore.strengths.slice(0, 3).map((strength, idx) => (
-                              <li key={idx} className="flex items-start gap-2 text-muted-foreground">
-                                <span className="text-green-500 mt-1">✓</span>
-                                <span className="flex-1">{strength}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
+                        )}
 
                         {/* Areas for Improvement */}
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2 text-sm font-medium text-amber-600">
-                            <div className="w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center">
-                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                              </svg>
+                        {matchScore.gaps.length > 0 && matchScore.gaps[0] !== "none identified" && matchScore.gaps[0] !== "None identified" && (
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-2">
+                              <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center">
+                                <svg className="w-4 h-4 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                </svg>
+                              </div>
+                              <h3 className="text-sm font-semibold text-foreground">Areas for Improvement</h3>
                             </div>
-                            Areas for Improvement
+                            <ul className="space-y-2">
+                              {matchScore.gaps.map((gap, idx) => (
+                                <li key={idx} className="group flex items-start gap-3 p-2.5 rounded-lg hover:bg-orange-500/5 transition-colors">
+                                  <div className="w-5 h-5 rounded-full bg-orange-500/10 flex items-center justify-center flex-shrink-0 mt-0.5 group-hover:bg-orange-500/20 transition-colors">
+                                    <span className="text-[10px] text-orange-600 font-bold">•</span>
+                                  </div>
+                                  <span className="text-sm text-foreground/70 leading-relaxed">{gap}</span>
+                                </li>
+                              ))}
+                            </ul>
                           </div>
-                          <ul className="space-y-1.5 text-sm">
-                            {matchScore.gaps.slice(0, 3).map((gap, idx) => (
-                              <li key={idx} className="flex items-start gap-2 text-muted-foreground">
-                                <span className="text-amber-500 mt-1">⚠</span>
-                                <span className="flex-1">{gap}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
+                        )}
                       </div>
                     </div>
                   )}
