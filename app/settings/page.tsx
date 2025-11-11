@@ -7,8 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
-import { Loader2, Save, ArrowLeft, FileText, CreditCard, Calendar, CheckCircle2 } from "lucide-react";
+import { Loader2, Save, ArrowLeft, FileText, CreditCard, CheckCircle2 } from "lucide-react";
 import { getUserProfile, saveUserProfile } from "@/lib/api/profileApi";
 import { getRemainingCredits } from "@/lib/api/subscriptionApi";
 import type { UserProfileInput } from "@/lib/types/userProfile";
@@ -66,30 +65,13 @@ export default function SettingsPage() {
     }
   };
 
-  const getTierDisplay = (tier: string = 'free') => {
-    switch (tier) {
-      case 'pro':
-        return { name: 'Pro', color: 'bg-primary' };
-      case 'unlimited':
-        return { name: 'Unlimited', color: 'bg-purple-500' };
-      default:
-        return { name: 'Free', color: 'bg-blue-500' };
-    }
-  };
-
-  const getStatusDisplay = (status: string = 'active') => {
-    switch (status) {
-      case 'active':
-        return { text: 'Active', color: 'text-green-600 bg-green-100 dark:bg-green-900/20' };
-      case 'cancelled':
-        return { text: 'Cancelled', color: 'text-red-600 bg-red-100 dark:bg-red-900/20' };
-      case 'paused':
-        return { text: 'Paused', color: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/20' };
-      case 'past_due':
-        return { text: 'Past Due', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/20' };
-      default:
-        return { text: 'Active', color: 'text-green-600 bg-green-100 dark:bg-green-900/20' };
-    }
+  const formatPurchaseDate = (dateString: string | undefined) => {
+    if (!dateString) return 'Never';
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -146,96 +128,84 @@ export default function SettingsPage() {
       <div className="container max-w-4xl mx-auto p-8 space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Settings</h1>
-          <p className="text-base text-foreground/70 mt-1">Manage your professional profile and subscription</p>
+          <p className="text-base text-foreground/70 mt-1">Manage your professional profile and credits</p>
         </div>
 
-        {/* Subscription Card */}
+        {/* Credits Card */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-foreground">
               <CreditCard className="h-5 w-5" />
-              Subscription
+              Credits
             </CardTitle>
-            <CardDescription className="text-foreground/60">Manage your plan and billing</CardDescription>
+            <CardDescription className="text-foreground/60">Manage your credit balance and purchase history</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Current Plan */}
-            <div>
-              <p className="text-sm font-medium text-foreground/70 mb-2">Current Plan</p>
-              <div className="flex items-center gap-3">
-                <Badge className={`${getTierDisplay(userProfile?.subscriptionTier).color} text-white font-semibold px-3 py-1`}>
-                  {getTierDisplay(userProfile?.subscriptionTier).name}
-                </Badge>
-                <Badge className={`${getStatusDisplay(userProfile?.subscriptionStatus).color} font-medium px-3 py-1`}>
-                  {getStatusDisplay(userProfile?.subscriptionStatus).text}
-                </Badge>
+            {/* Credits Balance */}
+            <div className="relative overflow-hidden rounded-xl border border-primary/20 bg-gradient-to-br from-primary/10 via-background to-blue-600/10 p-6">
+              <div className="relative">
+                <p className="text-sm font-medium text-foreground/70 mb-2">Available Credits</p>
+                <div className="flex items-baseline gap-3">
+                  <div className="text-5xl font-bold text-primary">
+                    {getRemainingCredits(userProfile)}
+                  </div>
+                  <div className="text-sm text-foreground/60">
+                    credits remaining
+                  </div>
+                </div>
+                <p className="text-xs text-foreground/50 mt-2">
+                  Each credit = 1 resume + cover letter generation
+                </p>
               </div>
             </div>
 
-            {/* Credits Remaining */}
-            <div>
-              <p className="text-sm font-medium text-foreground/70 mb-2">Credits Remaining</p>
-              <div className="flex items-center gap-2">
-                <div className="text-3xl font-bold text-primary">
-                  {getRemainingCredits(userProfile) === -1 ? '∞' : getRemainingCredits(userProfile)}
+            {/* Purchase Stats */}
+            {userProfile?.totalCreditsPurchased && userProfile.totalCreditsPurchased > 0 && (
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 rounded-lg border bg-muted/30">
+                  <p className="text-sm font-medium text-foreground/70 mb-1">Total Purchased</p>
+                  <p className="text-2xl font-bold text-foreground">
+                    {userProfile.totalCreditsPurchased}
+                  </p>
+                  <p className="text-xs text-foreground/50 mt-1">lifetime credits</p>
                 </div>
-                <div className="text-sm text-foreground/60">
-                  {getRemainingCredits(userProfile) === -1 ? 'Unlimited' : `/ ${userProfile?.creditsLimit || 3} per month`}
-                </div>
-              </div>
-            </div>
 
-            {/* Billing Cycle */}
-            {userProfile?.billingCycleStart && userProfile?.billingCycleEnd && (
-              <div>
-                <p className="text-sm font-medium text-foreground/70 mb-2 flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  Billing Cycle
-                </p>
-                <p className="text-sm text-foreground/80 font-medium">
-                  {new Date(userProfile.billingCycleStart).toLocaleDateString()} -{" "}
-                  {new Date(userProfile.billingCycleEnd).toLocaleDateString()}
-                </p>
+                <div className="p-4 rounded-lg border bg-muted/30">
+                  <p className="text-sm font-medium text-foreground/70 mb-1">Last Purchase</p>
+                  <p className="text-sm font-semibold text-foreground">
+                    {userProfile.lastPurchaseCredits ? `${userProfile.lastPurchaseCredits} credits` : 'N/A'}
+                  </p>
+                  <p className="text-xs text-foreground/50 mt-1">
+                    {formatPurchaseDate(userProfile.lastPurchaseDate)}
+                  </p>
+                </div>
               </div>
             )}
 
             {/* Actions */}
             <div className="flex gap-3 pt-4">
-              {userProfile?.subscriptionTier === 'free' && (
-                <Link href="/pricing" className="w-full sm:w-auto">
-                  <Button className="w-full">
-                    Upgrade Plan
-                  </Button>
-                </Link>
-              )}
-              {userProfile?.subscriptionTier !== 'free' && (
-                <>
-                  <Link href="/pricing" className="w-full sm:w-auto">
-                    <Button variant="outline" className="w-full">
-                      Change Plan
-                    </Button>
-                  </Link>
-                </>
-              )}
+              <Link href="/pricing" className="w-full sm:w-auto">
+                <Button className="w-full">
+                  Buy More Credits
+                </Button>
+              </Link>
             </div>
 
-            {/* 7-Day Money-Back Guarantee - Brand-aligned Design */}
-            <div className="relative overflow-hidden rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 via-primary/8 to-primary/5 p-5 shadow-sm">
-              {/* Subtle decorative element */}
-              <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full blur-3xl" />
-
+            {/* Credits Never Expire Banner */}
+            <div className="relative overflow-hidden rounded-xl border border-green-500/20 bg-gradient-to-br from-green-500/5 via-green-500/8 to-green-500/5 p-5 shadow-sm">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-green-500/5 rounded-full blur-3xl" />
               <div className="relative flex gap-4">
                 <div className="flex-shrink-0">
-                  <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center shadow-md shadow-primary/25">
-                    <CheckCircle2 className="h-5 w-5 text-primary-foreground" />
+                  <div className="h-10 w-10 rounded-lg bg-green-500 flex items-center justify-center shadow-md shadow-green-500/25">
+                    <CheckCircle2 className="h-5 w-5 text-white" />
                   </div>
                 </div>
                 <div className="flex-1">
                   <h4 className="font-bold text-foreground mb-1.5 text-base">
-                    7-Day Money-Back Guarantee
+                    Credits Never Expire
                   </h4>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Not satisfied? Cancel within 7 days for a full refund, no questions asked.
+                    Buy once, use whenever you need. Your credits are always available for your job search journey.
                   </p>
                 </div>
               </div>
