@@ -6,14 +6,58 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 
 export default function PricingPage() {
   const { user, isSignedIn } = useUser();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+
+  // Auto-trigger checkout after signup
+  useEffect(() => {
+    const checkoutProductId = searchParams.get('checkout');
+
+    if (isSignedIn && checkoutProductId && user) {
+      // User just signed up and needs to complete checkout
+      const triggerCheckout = async () => {
+        try {
+          setLoadingPlan('auto-checkout');
+
+          const response = await fetch("/api/checkout", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              productId: checkoutProductId,
+              email: user.emailAddresses[0]?.emailAddress,
+              name: user.fullName || user.firstName || "Customer",
+            }),
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.error || "Failed to create checkout session");
+          }
+
+          // Redirect to Dodo Payments checkout
+          window.location.href = data.checkoutUrl;
+        } catch (error) {
+          console.error("Auto-checkout error:", error);
+          toast.error("Unable to start checkout. Please try clicking the pack again.");
+          setLoadingPlan(null);
+          // Remove checkout param from URL
+          router.replace('/pricing');
+        }
+      };
+
+      triggerCheckout();
+    }
+  }, [isSignedIn, searchParams, user, router]);
 
   const creditPacks = [
     {
@@ -119,15 +163,14 @@ export default function PricingPage() {
   ];
 
   const handlePlanSelection = async (packName: string, productId: string | null | undefined) => {
-    // Need to be signed in for purchases
-    if (!isSignedIn) {
-      toast.error("Please sign up to purchase credits");
-      router.push("/sign-up");
+    if (!productId) {
+      toast.error("Product configuration error. Please contact support.");
       return;
     }
 
-    if (!productId) {
-      toast.error("Product configuration error. Please contact support.");
+    // If not signed in, redirect to signup with pack intent
+    if (!isSignedIn) {
+      router.push(`/sign-up?redirect_url=${encodeURIComponent(`/pricing?checkout=${productId}`)}`);
       return;
     }
 
@@ -286,7 +329,7 @@ export default function PricingPage() {
                     onClick={() => handlePlanSelection(pack.name, pack.productId)}
                     disabled={loadingPlan !== null}
                   >
-                    {loadingPlan === pack.name ? (
+                    {loadingPlan === pack.name || loadingPlan === 'auto-checkout' ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         Processing...
