@@ -18,19 +18,22 @@ export interface UserProfile {
   customUrlLabel?: string;
   createdAt: string;
   updatedAt: string;
-  // Subscription fields
-  subscriptionTier?: 'free' | 'pro' | 'unlimited';
-  subscriptionStatus?: 'active' | 'cancelled' | 'paused' | 'past_due';
-  subscriptionId?: string;
-  dodoCustomerId?: string;
+  // Credit pack system
   creditsRemaining?: number;
-  creditsLimit?: number;
-  billingCycleStart?: string;
-  billingCycleEnd?: string;
+  totalCreditsPurchased?: number;
+  lastPurchaseProductId?: string;
+  lastPurchaseCredits?: number;
+  lastPurchaseAmount?: number;
+  lastPurchaseDate?: string;
   lastPaymentId?: string;
-  lastPaymentDate?: string;
-  cancelledAt?: string;
-  refundedAt?: string;
+  dodoCustomerId?: string;
+  purchaseHistory?: Array<{
+    productId: string;
+    credits: number;
+    amount: number;
+    paymentId: string;
+    purchaseDate: string;
+  }>;
 }
 
 export interface UserProfileInput {

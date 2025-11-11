@@ -7,7 +7,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { hasCompletedOnboarding, getUserProfile } from "@/lib/api/profileApi";
-import { hasCreditsAvailable, deductCredit, shouldResetBillingCycle, resetMonthlyCredits, updateUserSubscription } from "@/lib/api/subscriptionApi";
+import { hasCreditsAvailable, getRemainingCredits } from "@/lib/api/subscriptionApi";
 import { toast } from "sonner";
 
 // Components
@@ -162,7 +162,7 @@ export default function Dashboard() {
     loadGenerationHistory();
   }, [isSignedIn, isLoaded, getToken]);
 
-  // Load user profile and check billing cycle
+  // Load user profile
   useEffect(() => {
     const loadProfile = async () => {
       if (!isSignedIn || !user?.id || !isLoaded) return;
@@ -170,47 +170,7 @@ export default function Dashboard() {
       try {
         const profileData = await getUserProfile(user.id);
         if (profileData.hasProfile && profileData.profile) {
-          // Auto-migrate: Add subscription fields if missing
-          if (!profileData.profile.subscriptionTier) {
-            console.log("Migrating user to free tier with default credits");
-            try {
-              const now = new Date();
-              const nextMonth = new Date(now);
-              nextMonth.setMonth(nextMonth.getMonth() + 1);
-
-              await updateUserSubscription({
-                userId: user.id,
-                subscriptionTier: 'free',
-                subscriptionStatus: 'active',
-                creditsRemaining: 3,
-                creditsLimit: 3,
-                billingCycleStart: now.toISOString(),
-                billingCycleEnd: nextMonth.toISOString(),
-              });
-
-              // Reload profile to get updated data
-              const updatedProfile = await getUserProfile(user.id);
-              setUserProfile(updatedProfile.profile);
-              console.log("User migrated successfully");
-            } catch (error) {
-              console.error("Migration failed:", error);
-              setUserProfile(profileData.profile);
-            }
-          } else {
-            setUserProfile(profileData.profile);
-
-            // Check if billing cycle needs reset
-            if (shouldResetBillingCycle(profileData.profile)) {
-              try {
-                await resetMonthlyCredits(user.id, profileData.profile);
-                // Reload profile
-                const updatedProfile = await getUserProfile(user.id);
-                setUserProfile(updatedProfile.profile);
-              } catch (error) {
-                console.error("Billing cycle reset failed:", error);
-              }
-            }
-          }
+          setUserProfile(profileData.profile);
         }
       } catch (error) {
         console.error("Error loading profile:", error);
@@ -320,10 +280,10 @@ export default function Dashboard() {
       return;
     }
 
-    // Check if user has credits available (only if subscription system is active)
-    if (userProfile?.subscriptionTier && !hasCreditsAvailable(userProfile)) {
+    // Check if user has credits available
+    if (!hasCreditsAvailable(userProfile)) {
       setShowUpgradeModal(true);
-      toast.error("You've run out of credits! Please upgrade to continue.");
+      toast.error("You've run out of credits! Please purchase more to continue.");
       return;
     }
 
@@ -339,19 +299,7 @@ export default function Dashboard() {
         return;
       }
 
-      // Deduct credit before starting generation (only if subscription system is active)
-      if (user?.id && userProfile?.subscriptionTier) {
-        try {
-          await deductCredit(user.id, userProfile);
-          // Reload profile to show updated credits
-          const updatedProfile = await getUserProfile(user.id);
-          setUserProfile(updatedProfile.profile);
-        } catch (error) {
-          console.error("Credit deduction failed:", error);
-          // Continue with generation even if credit deduction fails
-        }
-      }
-
+      // Start generation (backend will handle credit deduction on completion)
       const { jobId } = await startGeneration(token, fileId, jobDescription);
       setGenerationStatus("AI is tailoring your resume...");
 
@@ -468,10 +416,7 @@ export default function Dashboard() {
                   onClick={() => setShowUpgradeModal(true)}
                 >
                   <span className="text-xs font-medium text-primary">
-                    {userProfile.subscriptionTier === 'unlimited'
-                      ? 'Unlimited'
-                      : `${userProfile.creditsRemaining ?? 3} credits`
-                    }
+                    {userProfile.creditsRemaining ?? 3} credits
                   </span>
                 </div>
               )}
@@ -591,7 +536,6 @@ export default function Dashboard() {
       <UpgradeModal
         open={showUpgradeModal}
         onClose={() => setShowUpgradeModal(false)}
-        currentTier={userProfile?.subscriptionTier || 'free'}
         creditsRemaining={userProfile?.creditsRemaining || 0}
       />
     </div>
