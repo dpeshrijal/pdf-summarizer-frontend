@@ -65,15 +65,6 @@ export default function SettingsPage() {
     }
   };
 
-  const formatPurchaseDate = (dateString: string | undefined) => {
-    if (!dateString) return 'Never';
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -158,29 +149,6 @@ export default function SettingsPage() {
                 </p>
               </div>
             </div>
-
-            {/* Purchase Stats */}
-            {userProfile?.totalCreditsPurchased && userProfile.totalCreditsPurchased > 0 && (
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 rounded-lg border bg-muted/30">
-                  <p className="text-sm font-medium text-foreground/70 mb-1">Total Purchased</p>
-                  <p className="text-2xl font-bold text-foreground">
-                    {userProfile.totalCreditsPurchased}
-                  </p>
-                  <p className="text-xs text-foreground/50 mt-1">lifetime credits</p>
-                </div>
-
-                <div className="p-4 rounded-lg border bg-muted/30">
-                  <p className="text-sm font-medium text-foreground/70 mb-1">Last Purchase</p>
-                  <p className="text-sm font-semibold text-foreground">
-                    {userProfile.lastPurchaseCredits ? `${userProfile.lastPurchaseCredits} credits` : 'N/A'}
-                  </p>
-                  <p className="text-xs text-foreground/50 mt-1">
-                    {formatPurchaseDate(userProfile.lastPurchaseDate)}
-                  </p>
-                </div>
-              </div>
-            )}
 
             {/* Actions */}
             <div className="flex gap-3 pt-4">
