@@ -22,7 +22,7 @@ interface DodoWebhookEvent {
       product_id: string;
       quantity: number;
     }>;
-    amount: number;
+    total_amount: number;
     payment_id: string;
     customer?: {
       email: string;
@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
       // Extract necessary information
       const userId = data.metadata?.userId;
       const productId = data.product_cart?.[0]?.product_id;
-      const amount = data.amount; // Amount in cents
+      const amount = data.total_amount; // Total amount in cents (includes tax)
       const paymentId = data.payment_id;
       const dodoCustomerId = data.customer?.customer_id;
 
