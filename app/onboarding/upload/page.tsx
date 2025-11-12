@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ArrowLeft, Upload, FileText, Loader2, CheckCircle2, Sparkles, AlertCircle } from "lucide-react";
 import { uploadPdfToS3, checkResumeStatus } from "@/lib/utils/dashboardApi";
+import { getUserProfile, saveUserProfile } from "@/lib/api/profileApi";
+import { toast } from "sonner";
 
 export default function OnboardingUpload() {
   const router = useRouter();
@@ -200,7 +202,34 @@ export default function OnboardingUpload() {
               </div>
               <Button
                 size="lg"
-                onClick={() => router.push("/dashboard")}
+                onClick={async () => {
+                  try {
+                    if (user?.id) {
+                      // Get current profile
+                      const profileData = await getUserProfile(user.id);
+
+                      if (profileData.hasProfile && profileData.profile) {
+                        // Update profile to mark onboarding as complete
+                        await saveUserProfile(user.id, {
+                          name: profileData.profile.name,
+                          email: profileData.profile.email,
+                          phone: profileData.profile.phone || "",
+                          location: profileData.profile.location || "",
+                          linkedinUrl: profileData.profile.linkedinUrl || "",
+                          githubUrl: profileData.profile.githubUrl || "",
+                          portfolioUrl: profileData.profile.portfolioUrl || "",
+                          customUrl: profileData.profile.customUrl || "",
+                          customUrlLabel: profileData.profile.customUrlLabel || "",
+                          onboardingComplete: true,
+                        });
+                      }
+                    }
+                    router.push("/dashboard");
+                  } catch (error) {
+                    console.error("Error completing onboarding:", error);
+                    toast.error("Failed to complete onboarding. Please try again.");
+                  }
+                }}
                 className="px-10 py-7 shadow-xl shadow-primary/30 hover:shadow-primary/50 transition-all hover:scale-105"
               >
                 <Sparkles className="w-5 h-5 mr-2" />
@@ -314,24 +343,6 @@ export default function OnboardingUpload() {
                 </ul>
               </div>
             </>
-          )}
-
-          {!uploadComplete && (
-            <div className="flex justify-center pt-4">
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => {
-                  if (user?.id) {
-                    localStorage.setItem(`onboarding_seen_${user.id}`, 'true');
-                  }
-                  router.push("/dashboard");
-                }}
-                className="text-muted-foreground"
-              >
-                Skip for now
-              </Button>
-            </div>
           )}
         </div>
       </div>

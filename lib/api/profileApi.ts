@@ -72,16 +72,16 @@ export async function saveUserProfile(
 }
 
 /**
- * Check if user has completed onboarding (has a profile)
+ * Check if user has completed onboarding
  * @param userId - User ID from Clerk
- * @returns true if user has a profile, false otherwise
+ * @returns true if user has completed onboarding (onboardingComplete flag is true), false otherwise
  */
 export async function hasCompletedOnboarding(
   userId: string
 ): Promise<boolean> {
   try {
     const response = await getUserProfile(userId);
-    return response.hasProfile;
+    return response.hasProfile && response.profile?.onboardingComplete === true;
   } catch (error) {
     console.error("Error checking onboarding status:", error);
     return false;

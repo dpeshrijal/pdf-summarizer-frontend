@@ -1,11 +1,84 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Sparkles, Zap, Shield, User } from "lucide-react";
+import { ArrowRight, Sparkles, Zap, Shield, User, CheckCircle, Loader2 } from "lucide-react";
+import { useUser } from "@clerk/nextjs";
+import { useEffect, useState, Suspense } from "react";
+import { getUserProfile, saveUserProfile } from "@/lib/api/profileApi";
+import { toast } from "sonner";
 
-export default function OnboardingWelcome() {
+function OnboardingWelcomeContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { user, isSignedIn, isLoaded } = useUser();
+  const [isInitializing, setIsInitializing] = useState(true);
+  const paymentSuccess = searchParams.get('payment') === 'success';
+
+  // Initialize profile on mount
+  useEffect(() => {
+    const initializeProfile = async () => {
+      if (!isLoaded || !isSignedIn || !user?.id) {
+        setIsInitializing(false);
+        return;
+      }
+
+      try {
+        const profileData = await getUserProfile(user.id);
+
+        // If user already completed onboarding, redirect to dashboard
+        if (profileData.hasProfile && profileData.profile?.onboardingComplete) {
+          if (paymentSuccess) {
+            toast.success("Payment successful! Your credits have been added.");
+            router.replace('/dashboard?payment=success');
+          } else {
+            router.replace('/dashboard');
+          }
+          return;
+        }
+
+        // If profile doesn't exist or incomplete, create/ensure minimal profile exists
+        if (!profileData.hasProfile) {
+          console.log("Creating initial profile for user:", user.id);
+          await saveUserProfile(user.id, {
+            name: user.fullName || user.firstName || "User",
+            email: user.primaryEmailAddress?.emailAddress || "",
+            phone: "",
+            location: "",
+            linkedinUrl: "",
+            githubUrl: "",
+            portfolioUrl: "",
+            customUrl: "",
+            customUrlLabel: "",
+          });
+        }
+
+        // Show payment success message if applicable
+        if (paymentSuccess) {
+          toast.success("Payment successful! Let's set up your profile to get started.");
+        }
+
+        setIsInitializing(false);
+      } catch (error) {
+        console.error("Error initializing profile:", error);
+        setIsInitializing(false);
+      }
+    };
+
+    initializeProfile();
+  }, [isLoaded, isSignedIn, user?.id, user?.fullName, user?.firstName, user?.primaryEmailAddress, paymentSuccess, router]);
+
+  // Show loading while initializing
+  if (isInitializing) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Loader2 className="w-12 h-12 animate-spin text-primary mx-auto" />
+          <p className="text-muted-foreground">Setting up your account...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-16 md:py-24 relative">
@@ -14,6 +87,21 @@ export default function OnboardingWelcome() {
       <div className="hidden md:block absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse opacity-20" style={{ animationDelay: '1s' }} />
 
       <div className="max-w-4xl mx-auto space-y-12 relative z-10">
+        {/* Payment Success Banner */}
+        {paymentSuccess && (
+          <div className="bg-green-500/10 border-2 border-green-500/30 rounded-2xl p-6 shadow-xl animate-in fade-in slide-in-from-top-4 duration-500">
+            <div className="flex items-center gap-4">
+              <div className="h-12 w-12 rounded-xl bg-green-500/20 flex items-center justify-center flex-shrink-0">
+                <CheckCircle className="h-6 w-6 text-green-500" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-green-700 dark:text-green-400">Payment Successful!</h3>
+                <p className="text-sm text-muted-foreground">Your credits have been added. Let's set up your profile to get started.</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Hero Section */}
         <div className="text-center space-y-6">
           {/* Icon */}
@@ -138,5 +226,20 @@ export default function OnboardingWelcome() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function OnboardingWelcome() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Loader2 className="w-12 h-12 animate-spin text-primary mx-auto" />
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    }>
+      <OnboardingWelcomeContent />
+    </Suspense>
   );
 }

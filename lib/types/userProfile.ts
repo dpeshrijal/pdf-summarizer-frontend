@@ -18,6 +18,8 @@ export interface UserProfile {
   customUrlLabel?: string;
   createdAt: string;
   updatedAt: string;
+  // Onboarding tracking
+  onboardingComplete?: boolean;
   // Credit pack system
   creditsRemaining?: number;
   totalCreditsPurchased?: number;
@@ -46,6 +48,7 @@ export interface UserProfileInput {
   portfolioUrl?: string;
   customUrl?: string;
   customUrlLabel?: string;
+  onboardingComplete?: boolean;
 }
 
 export interface GetUserProfileResponse {
