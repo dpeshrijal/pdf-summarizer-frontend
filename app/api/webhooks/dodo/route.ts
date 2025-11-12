@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
     console.log('Dodo webhook event received:', event.type);
 
     // Handle payment success event
-    if (event.type === 'payment.success') {
+    if (event.type === 'payment.succeeded') {
       const { data } = event;
 
       // Extract necessary information
@@ -145,6 +145,29 @@ export async function POST(req: NextRequest) {
         success: true,
         message: `Added ${credits} credits to user ${userId}`,
       });
+    }
+
+    // Handle failed payments
+    if (event.type === 'payment.failed') {
+      const userId = event.data.metadata?.userId;
+      const paymentId = event.data.payment_id;
+      console.error(`Payment failed for user ${userId}, payment ID: ${paymentId}`);
+      return NextResponse.json({ received: true, status: 'failed' });
+    }
+
+    // Handle cancelled payments
+    if (event.type === 'payment.cancelled') {
+      const userId = event.data.metadata?.userId;
+      const paymentId = event.data.payment_id;
+      console.log(`Payment cancelled for user ${userId}, payment ID: ${paymentId}`);
+      return NextResponse.json({ received: true, status: 'cancelled' });
+    }
+
+    // Handle processing status
+    if (event.type === 'payment.processing') {
+      const userId = event.data.metadata?.userId;
+      console.log(`Payment processing for user ${userId}`);
+      return NextResponse.json({ received: true, status: 'processing' });
     }
 
     // For other event types, just acknowledge receipt
