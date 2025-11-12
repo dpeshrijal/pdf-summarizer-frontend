@@ -64,6 +64,20 @@ export default function Dashboard() {
   const [userProfile, setUserProfile] = useState<any>(null);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
+  // Function to load user profile (can be called multiple times)
+  const loadProfile = async () => {
+    if (!isSignedIn || !user?.id || !isLoaded) return;
+
+    try {
+      const profileData = await getUserProfile(user.id);
+      if (profileData.hasProfile && profileData.profile) {
+        setUserProfile(profileData.profile);
+      }
+    } catch (error) {
+      console.error("Error loading profile:", error);
+    }
+  };
+
   // Redirect to sign-in if not authenticated
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
@@ -162,22 +176,10 @@ export default function Dashboard() {
     loadGenerationHistory();
   }, [isSignedIn, isLoaded, getToken]);
 
-  // Load user profile
+  // Load user profile on mount
   useEffect(() => {
-    const loadProfile = async () => {
-      if (!isSignedIn || !user?.id || !isLoaded) return;
-
-      try {
-        const profileData = await getUserProfile(user.id);
-        if (profileData.hasProfile && profileData.profile) {
-          setUserProfile(profileData.profile);
-        }
-      } catch (error) {
-        console.error("Error loading profile:", error);
-      }
-    };
-
     loadProfile();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSignedIn, user?.id, isLoaded]);
 
   // Handler: Select previous resume
@@ -355,6 +357,9 @@ export default function Dashboard() {
 
             // Refresh generation history to show the new entry
             reloadGenerationHistory();
+
+            // Refresh user profile to update credits in navbar
+            loadProfile();
           } else if (statusData.status === "FAILED") {
             clearInterval(pollInterval);
             setGenerationStatus(
