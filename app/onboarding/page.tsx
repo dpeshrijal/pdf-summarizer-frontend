@@ -14,6 +14,7 @@ function OnboardingWelcomeContent() {
   const { user, isSignedIn, isLoaded } = useUser();
   const [isInitializing, setIsInitializing] = useState(true);
   const paymentSuccess = searchParams.get('payment') === 'success';
+  const productId = searchParams.get('productId');
 
   // Initialize profile on mount
   useEffect(() => {
@@ -53,8 +54,48 @@ function OnboardingWelcomeContent() {
           });
         }
 
-        // Show payment success message if applicable
-        if (paymentSuccess) {
+        // If productId exists in URL, assign credits immediately (fallback for failed webhook)
+        if (paymentSuccess && productId) {
+          console.log("Assigning credits for product:", productId);
+
+          // Product ID to credits mapping
+          const PRODUCT_CREDITS_MAP: Record<string, number> = {
+            [process.env.NEXT_PUBLIC_DODO_STARTER_PRODUCT_ID!]: 20,
+            [process.env.NEXT_PUBLIC_DODO_POPULAR_PRODUCT_ID!]: 50,
+            [process.env.NEXT_PUBLIC_DODO_PRO_PRODUCT_ID!]: 150,
+            [process.env.NEXT_PUBLIC_DODO_ULTIMATE_PRODUCT_ID!]: 500,
+          };
+
+          const credits = PRODUCT_CREDITS_MAP[productId];
+
+          if (credits) {
+            try {
+              // Call backend Lambda to add credits
+              const response = await fetch(process.env.NEXT_PUBLIC_UPDATE_SUBSCRIPTION_API_URL!, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  userId: user.id,
+                  productId,
+                  credits,
+                  amount: 0, // We don't have amount in URL, but it's not critical
+                  paymentId: 'url-fallback',
+                }),
+              });
+
+              if (response.ok) {
+                console.log("Credits assigned successfully via URL fallback");
+                toast.success(`Payment successful! ${credits} credits added to your account.`);
+              } else {
+                console.error("Failed to assign credits via URL fallback");
+                toast.success("Payment successful! Let's set up your profile to get started.");
+              }
+            } catch (error) {
+              console.error("Error assigning credits:", error);
+              toast.success("Payment successful! Let's set up your profile to get started.");
+            }
+          }
+        } else if (paymentSuccess) {
           toast.success("Payment successful! Let's set up your profile to get started.");
         }
 

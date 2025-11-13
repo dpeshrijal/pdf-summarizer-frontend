@@ -35,9 +35,10 @@ export async function POST(req: NextRequest) {
         email,
         name,
       },
-      return_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?payment=success`,
+      return_url: `${process.env.NEXT_PUBLIC_APP_URL}/onboarding?payment=success&productId=${productId}`,
       metadata: {
         userId, // Pass user ID so we can identify them in webhook
+        productId, // Also store productId for webhook
       },
     });
 
