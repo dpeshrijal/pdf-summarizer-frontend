@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Webhook } from 'standardwebhooks';
+import { headers } from 'next/headers';
 
-const webhookSecret = process.env.DODO_WEBHOOK_SECRET!;
+const webhook = new Webhook(process.env.DODO_WEBHOOK_SECRET!);
 
 // Product ID to credits mapping
 // Using NEXT_PUBLIC_ vars here is safe because this is server-side only
@@ -17,6 +18,7 @@ interface DodoWebhookEvent {
   data: {
     metadata?: {
       userId?: string;
+      productId?: string;
     };
     product_cart?: Array<{
       product_id: string;
@@ -31,44 +33,23 @@ interface DodoWebhookEvent {
   };
 }
 
-// Add OPTIONS handler for CORS preflight
-export async function OPTIONS() {
-  return NextResponse.json(
-    {},
-    {
-      status: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, webhook-id, webhook-timestamp, webhook-signature',
-      },
-    }
-  );
-}
-
 export async function POST(req: NextRequest) {
+  const headersList = await headers();
+
   try {
-    // Get webhook headers
-    const payload = await req.text();
-    const headers = {
-      'webhook-id': req.headers.get('webhook-id') || '',
-      'webhook-timestamp': req.headers.get('webhook-timestamp') || '',
-      'webhook-signature': req.headers.get('webhook-signature') || '',
+    // Get raw body for signature verification (following Dodo boilerplate pattern)
+    const rawBody = await req.text();
+    const webhookHeaders = {
+      'webhook-id': headersList.get('webhook-id') || '',
+      'webhook-signature': headersList.get('webhook-signature') || '',
+      'webhook-timestamp': headersList.get('webhook-timestamp') || '',
     };
 
     // Verify webhook signature
-    const wh = new Webhook(webhookSecret);
-    let event: DodoWebhookEvent;
+    await webhook.verify(rawBody, webhookHeaders);
 
-    try {
-      event = wh.verify(payload, headers) as DodoWebhookEvent;
-    } catch (err) {
-      console.error('Webhook signature verification failed:', err);
-      return NextResponse.json(
-        { error: 'Invalid signature' },
-        { status: 401 }
-      );
-    }
+    // Parse the verified payload
+    const event: DodoWebhookEvent = JSON.parse(rawBody);
 
     console.log('Dodo webhook event received:', event.type);
 
@@ -129,10 +110,6 @@ export async function POST(req: NextRequest) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // Forward webhook verification headers to Lambda
-          'webhook-id': headers['webhook-id'],
-          'webhook-timestamp': headers['webhook-timestamp'],
-          'webhook-signature': headers['webhook-signature'],
         },
         body: JSON.stringify({
           userId,
