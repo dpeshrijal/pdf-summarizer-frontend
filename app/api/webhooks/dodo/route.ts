@@ -1,4 +1,3 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { Webhook } from 'standardwebhooks';
 import { headers } from 'next/headers';
 
@@ -33,12 +32,12 @@ interface DodoWebhookEvent {
   };
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(request: Request) {
   const headersList = await headers();
 
   try {
     // Get raw body for signature verification (following Dodo boilerplate pattern)
-    const rawBody = await req.text();
+    const rawBody = await request.text();
     const webhookHeaders = {
       'webhook-id': headersList.get('webhook-id') || '',
       'webhook-signature': headersList.get('webhook-signature') || '',
@@ -68,7 +67,7 @@ export async function POST(req: NextRequest) {
 
       if (!userId) {
         console.error('No userId in webhook metadata');
-        return NextResponse.json(
+        return Response.json(
           { error: 'Missing userId in metadata' },
           { status: 400 }
         );
@@ -76,7 +75,7 @@ export async function POST(req: NextRequest) {
 
       if (!productId) {
         console.error('No productId in payment data');
-        return NextResponse.json(
+        return Response.json(
           { error: 'Missing productId' },
           { status: 400 }
         );
@@ -87,7 +86,7 @@ export async function POST(req: NextRequest) {
 
       if (!credits) {
         console.error('Unknown product ID:', productId);
-        return NextResponse.json(
+        return Response.json(
           { error: 'Unknown product ID' },
           { status: 400 }
         );
@@ -100,7 +99,7 @@ export async function POST(req: NextRequest) {
 
       if (!updateSubscriptionUrl) {
         console.error('Missing UPDATE_SUBSCRIPTION_API_URL');
-        return NextResponse.json(
+        return Response.json(
           { error: 'Configuration error' },
           { status: 500 }
         );
@@ -124,7 +123,7 @@ export async function POST(req: NextRequest) {
       if (!lambdaResponse.ok) {
         const errorText = await lambdaResponse.text();
         console.error('Lambda update failed:', errorText);
-        return NextResponse.json(
+        return Response.json(
           { error: 'Failed to update user credits' },
           { status: 500 }
         );
@@ -133,7 +132,7 @@ export async function POST(req: NextRequest) {
       const lambdaData = await lambdaResponse.json();
       console.log('Successfully updated user credits:', lambdaData);
 
-      return NextResponse.json({
+      return Response.json({
         success: true,
         message: `Added ${credits} credits to user ${userId}`,
       });
@@ -144,7 +143,7 @@ export async function POST(req: NextRequest) {
       const userId = event.data.metadata?.userId;
       const paymentId = event.data.payment_id;
       console.error(`Payment failed for user ${userId}, payment ID: ${paymentId}`);
-      return NextResponse.json({ received: true, status: 'failed' });
+      return Response.json({ received: true, status: 'failed' });
     }
 
     // Handle cancelled payments
@@ -152,23 +151,23 @@ export async function POST(req: NextRequest) {
       const userId = event.data.metadata?.userId;
       const paymentId = event.data.payment_id;
       console.log(`Payment cancelled for user ${userId}, payment ID: ${paymentId}`);
-      return NextResponse.json({ received: true, status: 'cancelled' });
+      return Response.json({ received: true, status: 'cancelled' });
     }
 
     // Handle processing status
     if (event.type === 'payment.processing') {
       const userId = event.data.metadata?.userId;
       console.log(`Payment processing for user ${userId}`);
-      return NextResponse.json({ received: true, status: 'processing' });
+      return Response.json({ received: true, status: 'processing' });
     }
 
     // For other event types, just acknowledge receipt
     console.log('Unhandled event type:', event.type);
-    return NextResponse.json({ received: true });
+    return Response.json({ received: true });
 
   } catch (error) {
     console.error('Webhook processing error:', error);
-    return NextResponse.json(
+    return Response.json(
       { error: 'Internal server error' },
       { status: 500 }
     );
