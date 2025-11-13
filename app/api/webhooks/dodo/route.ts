@@ -31,6 +31,21 @@ interface DodoWebhookEvent {
   };
 }
 
+// Add OPTIONS handler for CORS preflight
+export async function OPTIONS() {
+  return NextResponse.json(
+    {},
+    {
+      status: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, webhook-id, webhook-timestamp, webhook-signature',
+      },
+    }
+  );
+}
+
 export async function POST(req: NextRequest) {
   try {
     // Get webhook headers
