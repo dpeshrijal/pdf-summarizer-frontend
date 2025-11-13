@@ -373,7 +373,7 @@ function PricingContent() {
                 <h3 className="text-2xl font-bold">Try Resumi Free</h3>
               </div>
               <p className="text-muted-foreground">
-                Get 3 free credits to test our AI-powered resume tailoring. No credit card required, no subscription needed.
+                Get 1 free credit to test our AI-powered resume tailoring. No credit card required, no subscription needed.
               </p>
             </div>
             <Button

@@ -271,8 +271,8 @@ export async function POST(req: NextRequest) {
         await updateUserSubscription(userId, {
           subscriptionTier: 'free',
           subscriptionStatus: 'cancelled',
-          creditsRemaining: 3,
-          creditsLimit: 3,
+          creditsRemaining: 1,
+          creditsLimit: 1,
           refundedAt: new Date().toISOString(),
         });
 

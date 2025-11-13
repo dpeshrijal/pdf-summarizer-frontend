@@ -9,9 +9,9 @@
  * @returns true if user has credits available
  */
 export function hasCreditsAvailable(profile: any): boolean {
-  if (!profile) return true; // Allow first 3 free credits
+  if (!profile) return true; // Allow first 1 free credit
 
-  const creditsRemaining = profile.creditsRemaining ?? 3; // Default to 3 free credits
+  const creditsRemaining = profile.creditsRemaining ?? 1; // Default to 1 free credit
   return creditsRemaining > 0;
 }
 
@@ -21,7 +21,7 @@ export function hasCreditsAvailable(profile: any): boolean {
  * @returns number of remaining credits
  */
 export function getRemainingCredits(profile: any): number {
-  if (!profile) return 3; // Default 3 free credits
+  if (!profile) return 1; // Default 1 free credit
 
-  return profile.creditsRemaining ?? 3; // Default to 3 free credits
+  return profile.creditsRemaining ?? 1; // Default to 1 free credit
 }

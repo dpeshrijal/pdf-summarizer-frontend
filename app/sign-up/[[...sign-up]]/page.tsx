@@ -80,7 +80,7 @@ export default function SignUpPage() {
                 <div>
                   <h3 className="font-semibold mb-1">Free Forever Plan</h3>
                   <p className="text-sm text-muted-foreground">
-                    Start with 3 free tailorings per month. No credit card required.
+                    Start with 1 free tailoring. No credit card required.
                   </p>
                 </div>
               </div>

@@ -421,7 +421,7 @@ export default function Dashboard() {
                   onClick={() => setShowUpgradeModal(true)}
                 >
                   <span className="text-xs font-medium text-primary">
-                    {userProfile.creditsRemaining ?? 3} credits
+                    {userProfile.creditsRemaining ?? 1} credits
                   </span>
                 </div>
               )}
